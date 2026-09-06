@@ -102,7 +102,7 @@ Sử dụng hệ thống lưới 8px (Tailwind mặc định):
 
 ### 🔹 Inputs, Forms & Dropzone
 
-- Mọi Input phải có Label rõ ràng, dấu \\\* màu đỏ nếu bắt buộc.
+- Mọi Input phải có Label rõ ràng, dấu \* màu đỏ nếu bắt buộc.
 - Upload Dropzone: Khu vực kéo thả file phải có nét đứt. Khi người dùng kéo file vào, chuyển màu nền sang xanh nhạt bg-blue-50 để phản hồi tương tác.
 
 ### 🔹 Document Card (Thẻ Tài liệu)
@@ -185,7 +185,7 @@ Giao diện (Đặc biệt là các nút hành động) phải Render có điề
 - KHÔNG thiết kế Dark Mode làm mặc định. Đây là ứng dụng đọc tài liệu học thuật, Dark mode ép buộc sẽ gây mỏi mắt.
 - KHÔNG dùng alert() mặc định của trình duyệt. Mọi phản hồi lỗi (Toast/Modal) phải được custom theo Design System.
 - KHÔNG cho phép submit form tải lên tài liệu mà chưa chọn Phân loại (Đề thi/Bài giảng...) và Mã học phần.
-- KHÔNG ẩn hoàn toàn tài liệu khi bị report 1 lần. Chỉ chuyển sang UI TAM_AN_KIEM_TRA khi đủ $\\ge 3$ reports.
+- KHÔNG ẩn hoàn toàn tài liệu khi bị report 1 lần. Chỉ chuyển sang UI TAM_AN_KIEM_TRA khi đủ $\ge 3$ reports.
 
 ## 13. 📝 Developer & AI Agent Notes (Hướng dẫn Coder & AI Prompt)
 
