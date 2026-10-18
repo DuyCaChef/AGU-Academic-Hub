@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Head, Link, router } from '@inertiajs/react';
-import StudentLayout from '@/Layouts/StudentLayout';
-import DocumentCard from '@/Components/domain/DocumentCard';
+import React, { useState, useEffect, useCallback } from "react";
+import { Head, Link, router } from "@inertiajs/react";
+import StudentLayout from "@/Layouts/StudentLayout";
+import DocumentCard from "@/Components/domain/DocumentCard";
 import {
     Search,
     Filter,
@@ -9,19 +9,23 @@ import {
     BookOpen,
     Sparkles,
     FileSearch,
-    X
-} from 'lucide-react';
+    X,
+} from "lucide-react";
 
-export default function Index({ documents = { data: [] }, filters = {}, course = null }) {
-    const [search, setSearch] = useState(filters.search || '');
-    const [category, setCategory] = useState(filters.category || 'ALL');
-    const [sort, setSort] = useState(filters.sort || 'latest');
+export default function Index({
+    documents = { data: [] },
+    filters = {},
+    course = null,
+}) {
+    const [search, setSearch] = useState(filters.search || "");
+    const [category, setCategory] = useState(filters.category || "ALL");
+    const [sort, setSort] = useState(filters.sort || "latest");
     const [isLoading, setIsLoading] = useState(false);
 
     // Debounced Search Handler (300ms)
     useEffect(() => {
         const timer = setTimeout(() => {
-            if (search !== (filters.search || '')) {
+            if (search !== (filters.search || "")) {
                 fetchFilteredData();
             }
         }, 300);
@@ -32,13 +36,13 @@ export default function Index({ documents = { data: [] }, filters = {}, course =
     const fetchFilteredData = useCallback(() => {
         setIsLoading(true);
         router.get(
-            route('courses.index'),
+            route("courses.index"),
             { search, category, sort },
             {
                 preserveState: true,
                 preserveScroll: true,
-                onFinish: () => setIsLoading(false)
-            }
+                onFinish: () => setIsLoading(false),
+            },
         );
     }, [search, category, sort]);
 
@@ -46,15 +50,29 @@ export default function Index({ documents = { data: [] }, filters = {}, course =
         setCategory(newCat);
         setIsLoading(true);
         router.get(
-            route('courses.index'),
+            route("courses.index"),
             { search, category: newCat, sort },
-            { preserveState: true, preserveScroll: true, onFinish: () => setIsLoading(false) }
+            {
+                preserveState: true,
+                preserveScroll: true,
+                onFinish: () => setIsLoading(false),
+            },
         );
     };
 
     return (
-        <StudentLayout title={course ? `Tài liệu - ${course.ten_mon_hoc}` : 'Kho Tài Liệu Học Tập'}>
-            <Head title={course ? course.ten_mon_hoc : 'Kho Tài Liệu Học Thuật AGU'} />
+        <StudentLayout
+            title={
+                course
+                    ? `Tài liệu - ${course.ten_mon_hoc}`
+                    : "Kho Tài Liệu Học Tập"
+            }
+        >
+            <Head
+                title={
+                    course ? course.ten_mon_hoc : "Kho Tài Liệu Học Thuật AGU"
+                }
+            />
 
             {/* Header Section */}
             <div className="bg-surface-default border border-border-default rounded-xl p-6 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -64,7 +82,9 @@ export default function Index({ documents = { data: [] }, filters = {}, course =
                             <BookOpen size={20} />
                         </span>
                         <h1 className="text-2xl font-bold text-text-primary">
-                            {course ? course.ten_mon_hoc : 'Kho Tài Liệu Học Thuật'}
+                            {course
+                                ? course.ten_mon_hoc
+                                : "Kho Tài Liệu Học Thuật"}
                         </h1>
                         {course && (
                             <span className="font-mono text-xs font-bold bg-brand-primary text-white px-2.5 py-1 rounded-full">
@@ -75,12 +95,12 @@ export default function Index({ documents = { data: [] }, filters = {}, course =
                     <p className="text-sm text-text-secondary">
                         {course
                             ? `Tổng hợp slide, đề thi và bài giảng học phần ${course.ten_mon_hoc}.`
-                            : 'Tra cứu & chia sẻ tài liệu học tập chính thức từ sinh viên Đại học An Giang.'}
+                            : "Tra cứu & chia sẻ tài liệu học tập chính thức từ sinh viên Đại học An Giang."}
                     </p>
                 </div>
 
                 <Link
-                    href={route('documents.create')}
+                    href={route("documents.create")}
                     className="inline-flex items-center gap-2 bg-brand-primary hover:bg-blue-800 text-white font-semibold text-sm px-4 py-2.5 rounded-md shadow-xs transition-all shrink-0 justify-center"
                 >
                     <Upload size={18} />
@@ -93,7 +113,10 @@ export default function Index({ documents = { data: [] }, filters = {}, course =
                 <div className="flex flex-col md:flex-row items-center gap-3">
                     {/* Search Input */}
                     <div className="relative flex-1 w-full">
-                        <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-secondary" />
+                        <Search
+                            size={18}
+                            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-secondary"
+                        />
                         <input
                             type="text"
                             value={search}
@@ -104,7 +127,7 @@ export default function Index({ documents = { data: [] }, filters = {}, course =
                         {search && (
                             <button
                                 type="button"
-                                onClick={() => setSearch('')}
+                                onClick={() => setSearch("")}
                                 className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary"
                             >
                                 <X size={16} />
@@ -133,11 +156,11 @@ export default function Index({ documents = { data: [] }, filters = {}, course =
                         <Filter size={14} /> Phân loại:
                     </span>
                     {[
-                        { id: 'ALL', label: 'Tất cả' },
-                        { id: 'DE_THI', label: 'Đề Thi' },
-                        { id: 'BAI_GIANG', label: 'Bài Giảng' },
-                        { id: 'DO_AN', label: 'Đồ Án' },
-                        { id: 'BAI_TAP', label: 'Bài Tập' }
+                        { id: "ALL", label: "Tất cả" },
+                        { id: "DE_THI", label: "Đề Thi" },
+                        { id: "BAI_GIANG", label: "Bài Giảng" },
+                        { id: "DO_AN", label: "Đồ Án" },
+                        { id: "BAI_TAP", label: "Bài Tập" },
                     ].map((tab) => (
                         <button
                             key={tab.id}
@@ -145,8 +168,8 @@ export default function Index({ documents = { data: [] }, filters = {}, course =
                             onClick={() => handleCategoryChange(tab.id)}
                             className={`px-3 py-1 rounded-full text-xs font-semibold shrink-0 transition-colors ${
                                 category === tab.id
-                                    ? 'bg-brand-primary text-white shadow-2xs'
-                                    : 'bg-surface-page text-text-secondary hover:bg-border-default/60'
+                                    ? "bg-brand-primary text-white shadow-2xs"
+                                    : "bg-surface-page text-text-secondary hover:bg-border-default/60"
                             }`}
                         >
                             {tab.label}
@@ -160,7 +183,10 @@ export default function Index({ documents = { data: [] }, filters = {}, course =
                 /* Skeleton Loading State */
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {[1, 2, 3, 4, 5, 6].map((n) => (
-                        <div key={n} className="bg-surface-default border border-border-default rounded-xl p-4 animate-pulse space-y-3">
+                        <div
+                            key={n}
+                            className="bg-surface-default border border-border-default rounded-xl p-4 animate-pulse space-y-3"
+                        >
                             <div className="h-4 bg-border-default/60 rounded w-1/3"></div>
                             <div className="h-5 bg-border-default/60 rounded w-3/4"></div>
                             <div className="h-3 bg-border-default/60 rounded w-1/2"></div>
@@ -185,13 +211,17 @@ export default function Index({ documents = { data: [] }, filters = {}, course =
                         <FileSearch size={32} />
                     </div>
                     <div>
-                        <h3 className="font-bold text-lg text-text-primary">Không tìm thấy tài liệu phù hợp</h3>
+                        <h3 className="font-bold text-lg text-text-primary">
+                            Không tìm thấy tài liệu phù hợp
+                        </h3>
                         <p className="text-sm text-text-secondary max-w-md mx-auto mt-1">
-                            Thử điều chỉnh từ khóa tìm kiếm, thay đổi bộ lọc phân loại hoặc là người đầu tiên tải lên tài liệu cho môn học này!
+                            Thử điều chỉnh từ khóa tìm kiếm, thay đổi bộ lọc
+                            phân loại hoặc là người đầu tiên tải lên tài liệu
+                            cho môn học này!
                         </p>
                     </div>
                     <Link
-                        href={route('documents.create')}
+                        href={route("documents.create")}
                         className="inline-flex items-center gap-2 bg-brand-primary hover:bg-blue-800 text-white font-medium text-sm px-4 py-2 rounded-md shadow-xs transition-all"
                     >
                         <Upload size={16} />
