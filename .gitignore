@@ -16,9 +16,27 @@
 /public/build
 /public/hot
 /public/storage
-/storage/*.key
-/storage/pail
-/vendor
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# --- LARAVEL FRAMEWORK & CACHE ---
+/vendor
+/storage/*.key
+/storage/pail
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/framework/testing/*
+
+# --- BẢO MẬT PII & FILE TẢI LÊN (AGU ACADEMIC HUB SPEC) ---
+# Chặn hoàn toàn việc commit file tài liệu học thuật và ảnh thẻ KYC
+/storage/app/*
+!/storage/app/.gitignore
+!/storage/app/public/
+/storage/app/public/*
+!/storage/app/public/.gitignore
+/storage/app/private/*
+!/storage/app/private/.gitignore
+/storage/app/private/kyc/*
+!/storage/app/private/kyc/.gitignore
