@@ -17,12 +17,20 @@ class Khoa extends Model
     // Chỉ định khóa chính (thay vì mặc định là 'id')
     protected $primaryKey = 'ma_khoa';
 
+    const DELETED_AT = 'ngay_xoa_tam';
+
     protected $fillable = [
         'ky_hieu_khoa',
         'ten_khoa',
     ];
 
-    const DELETED_AT = 'ngay_xoa_tam';
+    /**
+     * Mối quan hệ: Một Khoa có nhiều Chuyên ngành
+     */
+    public function chuyenNganhs(): HasMany
+    {
+        return $this->hasMany(ChuyenNganh::class, 'ma_khoa', 'ma_khoa');
+    }
 
     /**
      * Mối quan hệ: Một Khoa có nhiều Môn học
@@ -30,5 +38,13 @@ class Khoa extends Model
     public function monHocs(): HasMany
     {
         return $this->hasMany(MonHoc::class, 'ma_khoa', 'ma_khoa');
+    }
+
+    /**
+     * Mối quan hệ: Một Khoa có nhiều Người dùng
+     */
+    public function nguoiDungs(): HasMany
+    {
+        return $this->hasMany(NguoiDung::class, 'ma_khoa', 'ma_khoa');
     }
 }

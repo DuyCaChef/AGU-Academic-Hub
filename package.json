@@ -7,6 +7,7 @@
         "dev": "vite"
     },
     "dependencies": {
+        "@headlessui/react": "^2.2.10",
         "@inertiajs/react": "^2.0",
         "lucide-react": "^0.468.0",
         "react": "^18.3.1",

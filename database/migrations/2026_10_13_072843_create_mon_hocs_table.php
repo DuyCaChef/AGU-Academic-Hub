@@ -20,11 +20,23 @@ return new class extends Migration
             $table->text('mo_ta')->nullable()->comment('Mô tả môn học');
             $table->timestamps();
             $table->softDeletes('ngay_xoa_tam');
+
+            $table->index('ten_mon_hoc');
+            $table->fullText(['ma_hoc_phan', 'ten_mon_hoc', 'mo_ta'], 'mon_hocs_search_fulltext');
+        });
+
+        Schema::create('mon_hoc_chuyen_nganh', function (Blueprint $table) {
+            $table->foreignId('ma_mon_hoc')->constrained('mon_hoc', 'ma_mon_hoc')->cascadeOnDelete();
+            $table->foreignId('ma_chuyen_nganh')->constrained('chuyen_nganh', 'ma_chuyen_nganh')->restrictOnDelete();
+            $table->timestamps();
+            $table->primary(['ma_mon_hoc', 'ma_chuyen_nganh']);
+            $table->index(['ma_chuyen_nganh', 'ma_mon_hoc']);
         });
     }
 
     public function down(): void
     {
+        Schema::dropIfExists('mon_hoc_chuyen_nganh');
         Schema::dropIfExists('mon_hoc');
     }
 };

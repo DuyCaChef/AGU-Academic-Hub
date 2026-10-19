@@ -10,15 +10,13 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class KhoaFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    protected $model = Khoa::class;
+
     public function definition(): array
     {
         return [
-            //
+            'ky_hieu_khoa' => strtoupper(fake()->unique()->lexify('???')),
+            'ten_khoa' => 'Khoa ' . fake('vi_VN')->words(2, true),
         ];
     }
 }
