@@ -176,9 +176,8 @@ export default function StudentLayout({ children, title = 'Cổng Học Tập Si
 
                 {/* 🔹 SIDEBAR TRÁI (260px cố định trên Desktop) */}
                 <aside
-                    className={`fixed lg:static top-16 left-0 z-40 h-[calc(100vh-64px)] w-[260px] bg-surface-default border-r border-border-default flex flex-col transition-transform duration-200 ease-in-out ${
-                        isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-                    }`}
+                    className={`fixed lg:static top-16 left-0 z-40 h-[calc(100vh-64px)] w-[260px] bg-surface-default border-r border-border-default flex flex-col transition-transform duration-200 ease-in-out ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+                        }`}
                 >
                     {/* Navigation Menu Chính */}
                     <div className="p-4 border-b border-border-default">
@@ -194,7 +193,7 @@ export default function StudentLayout({ children, title = 'Cổng Học Tập Si
                                 <span>Kho Tài Liệu / Môn Học</span>
                             </Link>
                             <Link
-                                href={route('document-requests.index')}
+                                //  href={route('document-requests.index')}
                                 className="flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-text-primary hover:bg-brand-secondary/10 hover:text-brand-secondary rounded-md transition-colors"
                             >
                                 <HeartHandshake size={18} className="text-brand-secondary" />
@@ -232,9 +231,8 @@ export default function StudentLayout({ children, title = 'Cổng Học Tập Si
                                         </div>
                                         <ChevronDown
                                             size={14}
-                                            className={`text-text-secondary transition-transform duration-150 ${
-                                                expandedFaculty === khoa.ma_khoa ? 'rotate-180' : ''
-                                            }`}
+                                            className={`text-text-secondary transition-transform duration-150 ${expandedFaculty === khoa.ma_khoa ? 'rotate-180' : ''
+                                                }`}
                                         />
                                     </button>
 
