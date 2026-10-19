@@ -2,13 +2,13 @@
 
 namespace Database\Seeders;
 
-use App\Enums\UserRole;
-use App\Enums\UserStatus;
-use App\Models\Course;
-use App\Models\CourseReview;
-use App\Models\DocumentRequest;
-use App\Models\Faculty;
-use App\Models\User;
+use App\Enums\TrangThaiNguoiDung;
+use App\Enums\VaiTroNguoiDung;
+use App\Models\DanhGiaMonHoc;
+use App\Models\Khoa;
+use App\Models\MonHoc;
+use App\Models\NguoiDung;
+use App\Models\YeuCauTaiLieu;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -17,86 +17,96 @@ class CommunitySeeder extends Seeder
     public function run(): void
     {
         // 1. Tạo Khoa CNTT mặc định nếu chưa có
-        $faculty = Faculty::firstOrCreate(
-            ['code' => 'CNTT'],
+        $khoa = Khoa::firstOrCreate(
+            ['ky_hieu_khoa' => 'CNTT'],
             [
-                'name' => 'Khoa Công nghệ Thông tin',
-                'description' => 'Khoa CNTT - Đại học An Giang'
+                'ten_khoa' => 'Khoa Công nghệ Thông tin',
             ]
         );
 
-        // 2. Tạo tài khoản Admin mặc định
-        $admin = User::firstOrCreate(
+        // 2. Tạo môn học mẫu nếu chưa có
+        $monHoc = MonHoc::firstOrCreate(
+            ['ma_hoc_phan' => 'COS101'],
+            [
+                'ma_khoa' => $khoa->ma_khoa,
+                'ten_mon_hoc' => 'Lập trình căn bản',
+                'so_tin_chi' => 3,
+                'mo_ta' => 'Nhập môn lập trình cấu trúc và giải thuật căn bản.',
+            ]
+        );
+
+        // 3. Tạo tài khoản Admin mặc định
+        $admin = NguoiDung::firstOrCreate(
             ['email' => 'admin@agu.edu.vn'],
             [
-                'faculty_id' => $faculty->id,
-                'full_name' => 'Quản trị viên Hệ thống',
-                'password' => Hash::make('Admin@123456'),
-                'role' => UserRole::ADMIN,
-                'status' => UserStatus::ACTIVE,
-                'email_verified_at' => now(),
+                'ma_khoa' => $khoa->ma_khoa,
+                'ho_ten' => 'Quản trị viên Hệ thống',
+                'mat_khau' => Hash::make('Admin@123456'),
+                'vai_tro' => VaiTroNguoiDung::QUAN_TRI_VIEN,
+                'trang_thai' => TrangThaiNguoiDung::DANG_HOAT_DONG,
+                'xac_thuc_email_luc' => now(),
             ]
         );
 
-        // 3. Tạo tài khoản Moderator mặc định
-        $mod = User::firstOrCreate(
+        // 4. Tạo tài khoản Moderator mặc định
+        $mod = NguoiDung::firstOrCreate(
             ['email' => 'mod@agu.edu.vn'],
             [
-                'faculty_id' => $faculty->id,
-                'full_name' => 'Ban Học Tập Moderation',
-                'password' => Hash::make('Mod@123456'),
-                'role' => UserRole::MODERATOR,
-                'status' => UserStatus::ACTIVE,
-                'email_verified_at' => now(),
+                'ma_khoa' => $khoa->ma_khoa,
+                'ho_ten' => 'Ban Học Tập Moderation',
+                'mat_khau' => Hash::make('Mod@123456'),
+                'vai_tro' => VaiTroNguoiDung::KIEM_DUYET_VIEN,
+                'trang_thai' => TrangThaiNguoiDung::DANG_HOAT_DONG,
+                'xac_thuc_email_luc' => now(),
             ]
         );
 
-        // 4. Tạo tài khoản Sinh viên kiểm thử
-        $student = User::firstOrCreate(
+        // 5. Tạo tài khoản Sinh viên kiểm thử
+        $student = NguoiDung::firstOrCreate(
             ['email' => 'duy_tester@student.agu.edu.vn'],
             [
-                'faculty_id' => $faculty->id,
-                'full_name' => 'Khánh Duy Tester',
-                'student_code' => 'DTH215001',
-                'password' => Hash::make('Duy@123456'),
-                'role' => UserRole::STUDENT,
-                'status' => UserStatus::ACTIVE,
-                'email_verified_at' => now(),
+                'ma_khoa' => $khoa->ma_khoa,
+                'ho_ten' => 'Khánh Duy Tester',
+                'mssv' => 'DTH215001',
+                'mat_khau' => Hash::make('Duy@123456'),
+                'vai_tro' => VaiTroNguoiDung::SINH_VIEN,
+                'trang_thai' => TrangThaiNguoiDung::DANG_HOAT_DONG,
+                'xac_thuc_email_luc' => now(),
             ]
         );
 
-        // 5. Tạo 10 Sinh viên ngẫu nhiên bằng Factory
-        $users = User::factory()->count(10)->create();
+        // 6. Tạo 10 Sinh viên ngẫu nhiên bằng Factory
+        NguoiDung::factory()->count(10)->create();
 
-        // 6. Tạo dữ liệu Review và Wishlist mẫu cho các môn học có sẵn
-        $courses = Course::take(5)->get();
-        if ($courses->isNotEmpty()) {
-            foreach ($courses as $course) {
+        // 7. Tạo dữ liệu Review và Wishlist mẫu cho các môn học có sẵn
+        $monHocs = MonHoc::take(5)->get();
+        if ($monHocs->isNotEmpty()) {
+            foreach ($monHocs as $mon) {
                 // Tạo review mẫu (mỗi user 1 review / học kỳ để thỏa mãn unique key)
-                CourseReview::firstOrCreate(
+                DanhGiaMonHoc::firstOrCreate(
                     [
-                        'course_id' => $course->id,
-                        'user_id' => $student->id,
-                        'academic_term' => '2025-2',
+                        'ma_mon_hoc' => $mon->ma_mon_hoc,
+                        'ma_nguoi_dung' => $student->ma_nguoi_dung,
+                        'hoc_ky' => '2025-2',
                     ],
                     [
-                        'difficulty_score' => 4,
-                        'practicality_score' => 5,
-                        'workload_score' => 3,
-                        'content' => 'Môn học rất thực tế, giảng viên nhiệt tình hỗ trợ thực hành.',
-                        'is_anonymous' => true,
+                        'diem_do_kho' => 4,
+                        'diem_thuc_tien' => 5,
+                        'diem_khoi_luong' => 3,
+                        'noi_dung' => 'Môn học rất thực tế, giảng viên nhiệt tình hỗ trợ thực hành.',
+                        'an_danh' => true,
                     ]
                 );
 
-                // Tạo Wishlist mẫu
-                DocumentRequest::create([
-                    'course_id' => $course->id,
-                    'creator_id' => $student->id,
-                    'title' => "Xin đề thi kết thúc học phần môn {$course->name}",
-                    'description' => 'Cần xin file PDF lời giải đề thi cuối kỳ đợt 1 năm học vừa rồi.',
-                    'lecturer_name' => 'Ban Giảng viên Bộ môn',
-                    'category' => 'EXAM',
-                    'bounty_points' => 50,
+                // Tạo Wishlist / Yêu cầu tài liệu mẫu
+                YeuCauTaiLieu::create([
+                    'ma_mon_hoc' => $mon->ma_mon_hoc,
+                    'ma_nguoi_tao' => $student->ma_nguoi_dung,
+                    'tieu_de' => "Xin đề thi kết thúc học phần môn {$mon->ten_mon_hoc}",
+                    'mo_ta' => 'Cần xin file PDF lời giải đề thi cuối kỳ đợt 1 năm học vừa rồi.',
+                    'ten_giang_vien' => 'Ban Giảng viên Bộ môn',
+                    'phan_loai' => 'DE_THI',
+                    'diem_thuong' => 50,
                 ]);
             }
         }
