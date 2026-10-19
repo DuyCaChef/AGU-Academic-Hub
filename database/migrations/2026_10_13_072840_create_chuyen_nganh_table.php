@@ -10,11 +10,11 @@ return new class extends Migration {
         Schema::create('chuyen_nganh', function (Blueprint $table) {
             $table->id('ma_chuyen_nganh');
             $table->foreignId('ma_khoa')
-                  ->constrained('khoa', 'ma_khoa')
-                  ->restrictOnDelete()
-                  ->comment('Khoa trực thuộc');
+                ->constrained('khoa', 'ma_khoa')
+                ->restrictOnDelete()
+                ->comment('Khoa trực thuộc');
             $table->string('ky_hieu_nganh', 30)->unique()->comment('Mã chuyên ngành (VD: DTH, DPM)');
-            $table->string('ten_chuyen_nganh', 255)->comment('Tên đầy đủ chuyên ngành đào tạo');
+            $table->string('ten_chuyen_nganh', 191)->comment('Tên đầy đủ chuyên ngành đào tạo');
             $table->text('mo_ta')->nullable()->comment('Mô tả chuyên ngành');
             $table->timestamps();
             $table->softDeletes('ngay_xoa_tam');

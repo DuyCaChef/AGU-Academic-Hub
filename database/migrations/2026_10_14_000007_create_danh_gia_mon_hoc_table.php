@@ -45,8 +45,8 @@ return new class extends Migration {
 
         Schema::create('tu_cam', function (Blueprint $table) {
             $table->id('ma_tu_cam');
-            $table->string('tu_khoa', 255);
-            $table->string('tu_khoa_chuan_hoa', 255)->unique();
+            $table->string('tu_khoa', 191);
+            $table->string('tu_khoa_chuan_hoa', 191)->unique();
             $table->enum('muc_do', ['THAP', 'TRUNG_BINH', 'CAO', 'NGHIEM_TRONG'])->default('TRUNG_BINH');
             $table->boolean('dang_hoat_dong')->default(true);
             $table->foreignId('nguoi_tao')->nullable()->constrained('nguoi_dung', 'ma_nguoi_dung')->nullOnDelete();
