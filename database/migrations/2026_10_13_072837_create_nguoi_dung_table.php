@@ -10,20 +10,20 @@ return new class extends Migration {
         Schema::create('nguoi_dung', function (Blueprint $table) {
             $table->id('ma_nguoi_dung');
             $table->foreignId('ma_khoa')
-                  ->nullable()
-                  ->constrained('khoa', 'ma_khoa')
-                  ->nullOnDelete()
-                  ->comment('Khoa/Bộ môn trực thuộc');
+                ->nullable()
+                ->constrained('khoa', 'ma_khoa')
+                ->nullOnDelete()
+                ->comment('Khoa/Bộ môn trực thuộc');
             $table->string('ho_ten', 255)->comment('Họ và tên người dùng');
-            $table->string('email', 255)->unique()->comment('Địa chỉ email (@student.agu.edu.vn hoặc @agu.edu.vn)');
+            $table->string('email', 191)->unique()->comment('Địa chỉ email (@student.agu.edu.vn hoặc @agu.edu.vn)');
             $table->string('mssv', 50)->nullable()->unique()->comment('Mã số sinh viên (VD: DTH215001)');
             $table->string('mat_khau')->comment('Mật khẩu mã hóa Bcrypt');
             $table->enum('vai_tro', ['SINH_VIEN', 'CUU_SINH_VIEN', 'KIEM_DUYET_VIEN', 'QUAN_TRI_VIEN'])
-                  ->default('SINH_VIEN')
-                  ->comment('Vai trò phân quyền hệ thống');
+                ->default('SINH_VIEN')
+                ->comment('Vai trò phân quyền hệ thống');
             $table->enum('trang_thai', ['CHUA_XAC_THUC', 'DANG_HOAT_DONG', 'TAM_KHOA'])
-                  ->default('CHUA_XAC_THUC')
-                  ->comment('Trạng thái tài khoản');
+                ->default('CHUA_XAC_THUC')
+                ->comment('Trạng thái tài khoản');
             $table->unsignedInteger('diem_uy_tin')->default(100)->comment('Điểm uy tín khởi tạo');
             $table->string('anh_dai_dien', 500)->nullable()->comment('Đường dẫn ảnh đại diện avatar');
             $table->timestamp('xac_thuc_email_luc')->nullable()->comment('Thời gian xác thực email');
