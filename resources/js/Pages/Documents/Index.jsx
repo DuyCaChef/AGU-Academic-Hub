@@ -95,7 +95,7 @@ export default function Index({
                     <p className="text-sm text-text-secondary">
                         {course
                             ? `Tổng hợp slide, đề thi và bài giảng học phần ${course.ten_mon_hoc}.`
-                            : "Tra cứu & chia sẻ tài liệu học tập chính thức từ sinh viên Đại học An Giang."}
+                            : "Tra cứu & chia sẻ tài liệu học tập chính thức từ sinh viên Trường Đại học An Giang."}
                     </p>
                 </div>
 
@@ -166,11 +166,10 @@ export default function Index({
                             key={tab.id}
                             type="button"
                             onClick={() => handleCategoryChange(tab.id)}
-                            className={`px-3 py-1 rounded-full text-xs font-semibold shrink-0 transition-colors ${
-                                category === tab.id
+                            className={`px-3 py-1 rounded-full text-xs font-semibold shrink-0 transition-colors ${category === tab.id
                                     ? "bg-brand-primary text-white shadow-2xs"
                                     : "bg-surface-page text-text-secondary hover:bg-border-default/60"
-                            }`}
+                                }`}
                         >
                             {tab.label}
                         </button>

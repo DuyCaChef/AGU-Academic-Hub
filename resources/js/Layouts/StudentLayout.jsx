@@ -39,10 +39,8 @@ export default function StudentLayout({ children, title = 'Cổng Học Tập Si
 
     return (
         <div className="min-h-screen bg-surface-page text-text-primary font-sans flex flex-col">
-            {/* ========================================== */}
-            {/* 1. TOPBAR / HEADER CỐ ĐỊNH                   */}
-            {/* ========================================== */}
-            <header className="sticky top-0 z-30 h-16 bg-surface-default border-b border-border-default shadow-xs px-4 lg:px-6 flex items-center justify-between gap-4">
+            {/* hearder cố định */}
+            <header className="sticky top-0 z-30 h-16 bg-blue-500/100 border-b border-border-default shadow-xs px-4 lg:px-6 flex items-center justify-between gap-4">
                 {/* Brand Logo & Mobile Menu Button */}
                 <div className="flex items-center gap-3">
                     <button
@@ -55,33 +53,37 @@ export default function StudentLayout({ children, title = 'Cổng Học Tập Si
                     </button>
 
                     <Link href={route('courses.index')} className="flex items-center gap-2.5">
-                        <div className="w-10 h-10 rounded-xl bg-brand-primary text-white flex items-center justify-center font-bold text-lg shadow-sm">
-                            AGU
+                        <div className="w-10 h-10 flex items-center justify-center shrink-0">
+                            <img
+                                src="/storage/imgs/logo-agu.webp"
+                                alt="Logo Trường Đại học An Giang"
+                                className="w-full h-full object-contain"
+                            />
                         </div>
                         <div className="hidden sm:block">
                             <h1 className="font-bold text-brand-primary leading-tight text-base">Academic Hub</h1>
-                            <p className="text-[11px] text-text-secondary">Đại học An Giang</p>
+                            <p className="font-bold text-[11px] text-white">ĐHQG-HCM - Trường Đại học An Giang</p>
                         </div>
                     </Link>
                 </div>
 
                 {/* Global Search Bar (Mã học phần / Tên môn học) */}
-                <form onSubmit={handleGlobalSearch} className="flex-1 max-w-md hidden md:block">
+                <form onSubmit={handleGlobalSearch} className=" flex-1 max-w-sm hidden md:block">
                     <div className="relative">
-                        <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
+                        <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-white" />
                         <input
                             type="text"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder="Tìm theo mã HP (COS101) hoặc tên môn học..."
-                            className="w-full pl-9 pr-4 py-2 text-sm bg-surface-page border border-border-default rounded-md focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all placeholder:text-text-secondary"
+                            className="w-full pl-9 pr-4 py-2 text-sm bg-surface-page border border-gray-300 rounded-full focus:outline-none focus:border-[#00ff00] focus:ring-1 focus:ring-[#00ff00] transition-all placeholder:text-gray-300"
                         />
                     </div>
                 </form>
 
-                {/* Right Actions & User Stats */}
+                {/* thông tin bên phải header */}
                 <div className="flex items-center gap-3">
-                    {/* CTA Upload Button */}
+                    {/* nút đăng tải tài liệu */}
                     <Link
                         href={route('documents.create')}
                         className="flex items-center gap-2 bg-brand-primary hover:bg-blue-800 text-white font-medium text-sm px-3.5 py-2 rounded-md shadow-xs active:scale-95 transition-all"
@@ -93,7 +95,7 @@ export default function StudentLayout({ children, title = 'Cổng Học Tập Si
                     {/* Điểm Uy Tín (Reputation Badge) */}
                     {user && (
                         <div
-                            className="hidden lg:flex items-center gap-1.5 bg-brand-secondary/10 border border-brand-secondary/20 text-brand-secondary px-2.5 py-1 rounded-full text-xs font-semibold"
+                            className="hidden lg:flex items-center gap-1.5 bg-green-700 text-white px-2.5 py-1 rounded-full text-xs font-semibold"
                             title="Điểm uy tín tích lũy từ đóng góp học thuật"
                         >
                             <Shield size={14} />

@@ -16,7 +16,7 @@ import {
     ShieldCheck,
 } from "lucide-react";
 import StudentLayout from "@/Layouts/StudentLayout";
-import { Description } from '@headlessui/react';
+
 const quickLinks = [
     {
         title: "Tìm môn học",
@@ -43,38 +43,6 @@ const quickLinks = [
         iconColor: "text-blue-800",
     },
 ]
-const sampleDocuments = [
-    {
-        type: "PDF",
-        typeColor: "bg-red-100 text-red-700",
-        course: "COS101 • Nhập môn CNTT",
-        title: "Đề thi cuối kỳ COS101 – Kèm ma trận đề và đáp án chi tiết",
-        date: "12/10/2024",
-        source: "Đã kiểm duyệt",
-        sourceIcon: BadgeCheck,
-        sourceColor: "text-teal-700",
-    },
-    {
-        type: "PPTX",
-        typeColor: "bg-orange-100 text-orange-800",
-        course: "COS102 • Lập trình C/C++",
-        title: "Slide bài giảng Chuẩn cấu trúc dữ liệu mảng và con trỏ",
-        date: "08/10/2024",
-        source: "Giảng viên chia sẻ",
-        sourceIcon: GraduationCap,
-        sourceColor: "text-blue-700",
-    },
-    {
-        type: "DOCX",
-        typeColor: "bg-indigo-100 text-indigo-700",
-        course: "COS201 • CTDL & Giải thuật",
-        title: "Tổng hợp bài tập thực hành cây nhị phân tìm kiếm và mã giả",
-        date: "05/10/2024",
-        source: "Bạn cán sự SV",
-        sourceIcon: Users,
-        sourceColor: "text-gray-500",
-    },
-];
 const gettingStarted = [
     {
         number: "1",
@@ -148,37 +116,14 @@ function StatCard({
         </article>
     );
 }
-// const stats = [
-//     {
-//         label: 'Môn học',
-//         value: '-',
-//         description: 'Khám phá kho môn học',
-//         icon: BookOpen,
-//         href: route('courses.index')
-//     },
-//     // {
-//     //     label: 'Tài liệu đóng góp',
-//     //     value: '-',
-//     //     description: 'Chia sẽ kiến thức với cộng đồng',
-//     //     icon: FileText,
-//     //     href: route('documents.show')
-//     // },
-//     {
-//         label: 'Điểm uy tín',
-//         value: user?.diem_uy_tin ?? '—',
-//         description: 'Danh hiệu và đóng góp',
-//         icon: Award,
-//         href: ''
-//     }
-// ]
 export default function Dashboard() {
-    const { auth } = usePage().props;
+    const { auth, stats = {}, recentDocuments = [] } = usePage().props;
     const user = auth?.user;
 
     const displayName =
         user?.ho_ten || user?.name || "sinh viên";
 
-    const trustScore = user?.diem_uy_tin ?? "—";
+    const trustScore = stats.trustScore ?? user?.diem_uy_tin ?? "—";
     return (
         <StudentLayout title="Tổng quan">
             <Head title="Tổng quan" />
@@ -204,7 +149,7 @@ export default function Dashboard() {
 
                             <p className="mt-3 max-w-2xl text-sm leading-6 text-blue-100 sm:text-base">
                                 Khám phá tài liệu học tập, tìm kiếm môn học
-                                và chia sẻ kiến thức cùng cộng đồng sinh viên
+                                và chia sẻ kiến thức cùng cộng đồng sinh viên Trường
                                 Đại học An Giang.
                             </p>
 
@@ -245,7 +190,7 @@ export default function Dashboard() {
                                         {user?.ma_sinh_vien || "AGU Student"}
                                     </p>
                                     <p className="mt-1 text-xs text-blue-100">
-                                        Đại học An Giang
+                                        Trường Đại học An Giang
                                     </p>
                                 </div>
                             </div>
@@ -258,8 +203,8 @@ export default function Dashboard() {
                     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                         <StatCard
                             label="Môn học"
-                            value="—"
-                            description="Chưa liên kết học kỳ hiện tại"
+                            value={stats.totalCourses ?? 0}
+                            description="Tổng số môn học hiện có trong hệ thống"
                             icon={BookOpen}
                             iconColor="text-blue-800"
                             badge="Kỳ 1 • 2024"
@@ -268,8 +213,8 @@ export default function Dashboard() {
 
                         <StatCard
                             label="Tài liệu đã đóng góp"
-                            value="—"
-                            description="Dữ liệu đang đồng bộ hệ thống"
+                            value={stats.myDocuments ?? 0}
+                            description="Tổng số tài liệu bạn đã đăng tải"
                             icon={FileText}
                             iconColor="text-teal-700"
                             badge="Kho lưu trữ"
@@ -359,47 +304,69 @@ export default function Dashboard() {
                     </SectionTitle>
 
                     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                        {sampleDocuments.map((doc) => {
-                            const SourceIcon = doc.sourceIcon;
+                        {recentDocuments.map((doc) => {
+                            const fileType = (
+                                doc.dinh_dang_tep || "FILE"
+                            ).toUpperCase();
+                            const typeColor =
+                                fileType === "PDF"
+                                    ? "bg-red-100 text-red-700"
+                                    : ["PPT", "PPTX"].includes(fileType)
+                                        ? "bg-orange-100 text-orange-800"
+                                        : ["DOC", "DOCX"].includes(fileType)
+                                            ? "bg-blue-100 text-blue-700"
+                                            : "bg-indigo-100 text-indigo-700";
+
+                            const courseLabel = [
+                                doc.mon_hoc?.ma_hoc_phan,
+                                doc.mon_hoc?.ten_mon_hoc,
+                            ]
+                                .filter(Boolean)
+                                .join(" • ") || "Chưa có thông tin môn học";
+
+                            const createdDate = doc.created_at
+                                ? new Date(doc.created_at).toLocaleDateString("vi-VN")
+                                : "Chưa có ngày đăng";
 
                             return (
                                 <article
-                                    key={doc.course}
+                                    key={doc.ma_tai_lieu}
                                     className="flex flex-col rounded-xl border border-slate-100 bg-white p-5 shadow-sm transition hover:shadow-md"
                                 >
                                     <div className="flex items-center justify-between gap-3">
                                         <span
-                                            className={`rounded px-2 py-1 text-[11px] font-bold ${doc.typeColor}`}
+                                            className={`rounded px-2 py-1 text-[11px] font-bold ${typeColor}`}
                                         >
-                                            {doc.type}
+                                            {fileType}
                                         </span>
 
                                         <span className="max-w-[70%] truncate rounded bg-blue-100 px-2 py-1 text-[11px] font-medium text-blue-800">
-                                            {doc.course}
+                                            {courseLabel}
                                         </span>
                                     </div>
 
                                     <h3 className="mt-4 min-h-[3.5rem] text-base font-bold leading-6 text-slate-900">
-                                        {doc.title}
+                                        {doc.tieu_de}
                                     </h3>
 
                                     <div className="mt-4 flex items-center justify-between gap-2 rounded-xl bg-indigo-50 p-3">
                                         <div className="min-w-0">
                                             <p className="text-xs text-slate-600">
-                                                {doc.date}
+                                                {createdDate}
                                             </p>
 
-                                            <p
-                                                className={`mt-1 flex items-center gap-1 text-[11px] font-medium ${doc.sourceColor}`}
-                                            >
-                                                <SourceIcon size={13} />
-                                                {doc.source}
+                                            <p className="mt-1 flex items-center gap-1 text-[11px] font-medium text-teal-700">
+                                                <ShieldCheck size={13} />
+                                                Đã kiểm duyệt
+                                            </p>
+                                            <p className="mt-1 text-xs text-slate-500">
+                                                Lượt tải: {doc.luot_tai ?? 0}
                                             </p>
                                         </div>
 
                                         <span
-                                            title="Tài liệu minh họa, chưa có tệp tải xuống"
                                             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-slate-400 shadow-sm"
+                                            title="Thông tin tài liệu"
                                         >
                                             <Download size={17} />
                                         </span>
@@ -407,12 +374,20 @@ export default function Dashboard() {
                                 </article>
                             );
                         })}
-                    </div>
+                        <div className="col-span-full rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center">
+                            <FileText
+                                size={32}
+                                className="mx-auto text-slate-400"
+                            />
+                            <p className="mt-3 font-semibold text-slate-700">
+                                Chưa có tài liệu học tập
+                            </p>
+                            <p className="mt-1 text-sm text-slate-500">
+                                Các tài liệu đã được kiểm duyệt sẽ hiển thị tại đây.
+                            </p>
+                        </div>
 
-                    <p className="mt-3 text-xs leading-5 text-slate-500">
-                        Các tài liệu phía trên là dữ liệu minh họa để hoàn thiện
-                        giao diện. Chưa có chức năng tải xuống từ những thẻ này.
-                    </p>
+                    </div>
                 </section>
 
                 {/* 5. Getting started */}
@@ -457,7 +432,7 @@ export default function Dashboard() {
                         ))}
                     </div>
                 </section>
-            </div>
-        </StudentLayout>
+            </div >
+        </StudentLayout >
     );
 }
