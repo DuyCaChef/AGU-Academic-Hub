@@ -16,6 +16,10 @@ return Application::configure(basePath: dirname(__DIR__))
             // Nạp tập tin routes/documents.php với middleware 'web'
             Route::middleware('web')
                 ->group(base_path('routes/documents.php'));
+
+            // Nạp tập tin routes/community.php với middleware 'web'
+            Route::middleware('web')
+                ->group(base_path('routes/community.php'));
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
