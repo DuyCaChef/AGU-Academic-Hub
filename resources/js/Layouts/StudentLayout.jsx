@@ -10,7 +10,7 @@ export default function StudentLayout({
     title = "Cổng Học Tập Sinh Viên",
 }) {
     const { faculties = [] } = usePage().props;
-
+    console.log("Inertia faculties:", faculties);
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] =
         useState(false);
 

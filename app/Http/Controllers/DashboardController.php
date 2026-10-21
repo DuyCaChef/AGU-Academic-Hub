@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\MonHoc;
 use App\Models\TaiLieu;
+use App\Models\Khoa;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -13,11 +14,17 @@ class DashboardController extends Controller
     {
         // lấy user đang login bằng cơ chế xác thực hiện có
         $user = $request->user();
-
+        $faculties = Khoa::with('monHocs')
+            ->get()
+            ->sortBy(function ($faculty) use ($user) {
+                return $faculty->ma_khoa === $user->ma_khoa ? 0 : 1;
+            })
+            ->values();
+        ;
         // tính toán các số liệu thống kê
         $stats = [
-            //đếm tổng môn học
-            'totalCourses' => MonHoc::where(
+            //đếm tổng môn học theo khoa
+            'totalCourses' => Khoa::where(
                 'ma_khoa',
                 $user->ma_khoa
             )->count(),
@@ -47,6 +54,7 @@ class DashboardController extends Controller
         return Inertia::render('Dashboard', [
             'stats' => $stats,
             'recentDocuments' => $recentDocument,
+            'faculties' => $faculties,
         ]);
     }
 }
