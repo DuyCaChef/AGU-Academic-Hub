@@ -62,15 +62,15 @@ export default function StudentHeader({
                 </div>
 
                 {/* Global Search Bar (Mã học phần / Tên môn học) */}
-                <form onSubmit={handleGlobalSearch} className=" flex-1 max-w-sm hidden md:block">
+                <form onSubmit={handleGlobalSearch} className=" flex-1 text-gray-800 max-w-3xl hidden md:block">
                     <div className="relative">
-                        <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-white" />
+                        <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
                         <input
                             type="text"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder="Tìm theo mã HP (COS101) hoặc tên môn học..."
-                            className="w-full pl-9 pr-4 py-2 text-sm bg-surface-page border border-gray-300 rounded-full focus:outline-none focus:border-[#00ff00] focus:ring-1 focus:ring-[#00ff00] transition-all placeholder:text-gray-300"
+                            className="w-full pl-9 pr-4 py-2 text-sm bg-surface-page border border-gray-300 rounded-full focus:outline-none focus:border-[#00ff00] focus:ring-1 focus:ring-[#00ff00] transition-all placeholder:text-gray-500"
                         />
                     </div>
                 </form>
@@ -80,7 +80,7 @@ export default function StudentHeader({
                     {/* nút đăng tải tài liệu */}
                     <Link
                         href={route('documents.create')}
-                        className="flex items-center gap-2 bg-brand-primary hover:bg-blue-800 text-white font-medium text-sm px-3.5 py-2 rounded-md shadow-xs active:scale-95 transition-all"
+                        className="flex items-center gap-2 bg-blue-800 hover:bg-blue-900 text-white font-medium text-sm px-3.5 py-2 rounded-full shadow-xs active:scale-95 transition-all"
                     >
                         <Upload size={16} />
                         <span className="hidden sm:inline">Đăng tài liệu</span>
@@ -113,9 +113,9 @@ export default function StudentHeader({
                             <button
                                 type="button"
                                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                                className="flex items-center gap-2 p-1 rounded-md hover:bg-surface-page focus:outline-none"
+                                className="flex bg-blue-800 items-center gap-2 p-1 rounded-full hover:bg-blue-900 focus:outline-none"
                             >
-                                <div className="w-8 h-8 rounded-full bg-brand-primary/10 text-white font-bold flex items-center justify-center text-sm border border-brand-primary/20">
+                                <div className="w-8 h-8 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-sm border border-brand-primary/20">
                                     {user.ho_ten ? user.ho_ten.charAt(0).toUpperCase() : 'U'}
                                 </div>
                                 <ChevronDown size={14} className="text-white hidden sm:block" />

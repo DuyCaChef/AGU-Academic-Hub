@@ -11,6 +11,9 @@ export default function StudentSidebar({
     isOpen = false,
     onClose = () => { },
 }) {
+    console.log("Sidebar faculties:", faculties);
+    console.log("Số lượng khoa:", faculties.length);
+
     // Lấy URL hiện tại để xác định mục menu đang được chọn
     const page = usePage();
     // danh sách menu
