@@ -26,4 +26,14 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+// Route xem thử GuestLayout
+Route::get('/test-guest-layout', function () {
+    return inertia()->render('TestGuest');
+});
+
+// Route xem thử AdminLayout
+Route::get('/test-admin-layout', function () {
+    return inertia()->render('TestAdmin');
+});
+
 require __DIR__ . '/auth.php';
