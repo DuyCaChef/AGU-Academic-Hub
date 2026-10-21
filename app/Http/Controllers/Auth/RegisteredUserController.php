@@ -32,21 +32,51 @@ class RegisteredUserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|lowercase|email|max:255|unique:'.NguoiDung::class,
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        'full_name' => ['required', 'string', 'max:255'],
+        'student_code' => ['required', 'string', 'max:50', 'unique:users,student_code'],
+        'email' => [
+            'required', 
+            'string', 
+            'lowercase', 
+            'email', 
+            'max:255', 
+            'unique:users,email',
+            function ($attribute, $value, $fail) {
+                $val = strtolower($value);
+                if (!str_ends_with($val, '@student.agu.edu.vn') && !str_ends_with($val, '@agu.edu.vn')) {
+                    $fail('Chỉ chấp nhận Email sinh viên do trường cấp (@student.agu.edu.vn hoặc @agu.edu.vn).');
+                }
+            },
+        ],
+        'password' => ['required', 'confirmed', \Illuminate\Validation\Rules\Password::defaults()],
+    ], [
+        'email.unique' => 'Email này đã được đăng ký tài khoản trong hệ thống.',
+        'student_code.unique' => 'Mã số sinh viên này đã tồn tại trong hệ thống.',
+        'password.confirmed' => 'Mật khẩu xác nhận không trùng khớp.',
+    ]);
+
+    $user = \App\Models\User::create([
+        'full_name' => $request->full_name,
+        'student_code' => strtoupper($request->student_code),
+        'email' => strtolower($request->email),
+        'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+        'role' => \App\Enums\UserRole::STUDENT,
+        'status' => \App\Enums\UserStatus::ACTIVE,
+        'reputation_score' => 100, // Điểm uy tín khởi tạo
+    ]);
+
+    // Tự động tạo ví điểm cho người dùng mới (nếu chưa có trong model hook)
+    if (method_exists($user, 'pointWallet') && !$user->pointWallet) {
+        $user->pointWallet()->create([
+            'available_points' => 100,
+            'held_points' => 0,
         ]);
+    }
 
-        $user = NguoiDung::create([
-            'ho_ten' => $request->name,
-            'email' => $request->email,
-            'mat_khau' => Hash::make($request->password),
-        ]);
+    event(new \Illuminate\Auth\Events\Registered($user));
 
-        event(new Registered($user));
+    \Illuminate\Support\Facades\Auth::login($user);
 
-        Auth::login($user);
-
-        return redirect(route('dashboard', absolute: false));
+    return redirect(route('dashboard', absolute: false));
     }
 }
