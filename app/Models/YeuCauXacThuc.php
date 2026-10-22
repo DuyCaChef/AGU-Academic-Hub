@@ -21,6 +21,7 @@ class YeuCauXacThuc extends Model
         'mssv',
         'nam_tot_nghiep',
         'duong_dan_minh_chung',
+        'loai_tep',        // MIME type của ảnh minh chứng (vd: image/jpeg)
         'loai_minh_chung',
         'trang_thai',
         'nguoi_duyet',
