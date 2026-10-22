@@ -1,46 +1,48 @@
 <?php
 
+use App\Http\Controllers\KycController;
 use Illuminate\Support\Facades\Route;
 
 // Community Route (IAM, Reviews và Bounty)
-// Phân hệ Cộng  đồng sinh viên, Đánh giá môn học, Săn thưởng và Ví điểm
+// Phân hệ Cộng đồng sinh viên, Đánh giá môn học, Săn thưởng và Ví điểm
 
-Route::middleware('auth')->group(function()
-{
-    // 1.Xác thực danh tính và KYC (Sinh viên/Cựu sinh viên)
-    Route::prefix('kyc')->name('kyc.')->group(function(){
+Route::middleware('auth')->group(function () {
+
+    // =========================================================================
+    // 1. XÁC THỰC DANH TÍNH & KYC (SINH VIÊN / CỰU SINH VIÊN)
+    // =========================================================================
+    Route::prefix('kyc')->name('kyc.')->group(function () {
         // Giao diện nhập hồ sơ KYC
-        Route::get('/nop-ho-so', function (){
-            return inertia('Auth/KycSubmit');
-        })->name('submit');
+        Route::get('/nop-ho-so', [KycController::class, 'create'])->name('submit');
 
         // Gửi ảnh thẻ SV / Bằng tốt nghiệp lên server private storage
-        Route::post('/nop-ho-so', function () {
-            // Sẽ kết nối KycController@store ở Tuần 2
-            return back()->with('info', 'Chức năng nộp minh chứng KYC đang được hoàn thiện.');
-        })->name('store');
+        Route::post('/nop-ho-so', [KycController::class, 'store'])->name('store');
 
         // Xem trạng thái hồ sơ xác thực
-        Route::get('/trang-thai',function(){
-            return inertia('Auth/KycStatus');
-        })->name('status');  
+        Route::get('/trang-thai', [KycController::class, 'status'])->name('status');
+
+        // CẤP SIGNED URL XEM ẢNH: Stream ảnh từ private storage khi chữ ký hợp lệ
+        Route::get('/xem-anh/{ma_xac_thuc}', [KycController::class, 'preview'])
+            ->name('preview')
+            ->middleware('signed');
     });
 
-    // Đánh giá môn học (Course reviews and Rating engine)
+    // =========================================================================
+    // 2. ĐÁNH GIÁ MÔN HỌC (COURSE REVIEWS AND RATING ENGINE)
+    // =========================================================================
     // Xem danh sách review theo môn học (tham số ma_hoc_phan, ví dụ: COS305)
-    Route::get('/mon-hoc/{ma_hoc_phan}/danh-gia', function($ma_hoc_phan){
+    Route::get('/mon-hoc/{ma_hoc_phan}/danh-gia', function ($ma_hoc_phan) {
         return inertia('Reviews/CourseReviews', ['ma_hoc_phan' => $ma_hoc_phan]);
     })->name('courses.reviews.index');
 
-    // 2.Gửi bài đánh giá môn học mới
+    // Gửi bài đánh giá môn học mới
     Route::post('/mon-hoc/{ma_hoc_phan}/danh-gia', function ($ma_hoc_phan) {
-        // Sẽ kết nối CourseReviewController@store ở Tuần 2 (áp dụng lọc từ cấm)
         return back()->with('info', 'Chức năng gửi đánh giá đang được hoàn thiện.');
     })->name('courses.reviews.store');
 
-    Route::prefix('danh-gia')->name('reviews.')->group(function(){
+    Route::prefix('danh-gia')->name('reviews.')->group(function () {
         // Chỉnh sửa review của chính mình 
-       Route::put('/{ma_danh_gia}', function ($ma_danh_gia) {
+        Route::put('/{ma_danh_gia}', function ($ma_danh_gia) {
             return back()->with('info', 'Chức năng cập nhật đánh giá đang được hoàn thiện.');
         })->name('update');
 
@@ -60,7 +62,9 @@ Route::middleware('auth')->group(function()
         })->name('report');
     });
 
-    // 3.Yêu cầu tài liệu và săn thưởng (Wishlist và Bounty)
+    // =========================================================================
+    // 3. YÊU CẦU TÀI LIỆU VÀ SĂN THƯỞNG (WISHLIST VÀ BOUNTY)
+    // =========================================================================
     Route::prefix('yeu-cau-tai-lieu')->name('document-requests.')->group(function () {
         // Danh sách các bài đăng tìm tài liệu
         Route::get('/', function () {
@@ -69,7 +73,6 @@ Route::middleware('auth')->group(function()
 
         // Tạo yêu cầu mới (đóng băng điểm thưởng từ vi_diem)
         Route::post('/', function () {
-            // Sẽ kết nối WishlistBountyController@store ở Tuần 2
             return back()->with('info', 'Chức năng tạo yêu cầu đang được hoàn thiện.');
         })->name('store');
 
@@ -94,27 +97,27 @@ Route::middleware('auth')->group(function()
         })->name('destroy');
     });
 
-    // 4.Ví điểm cá nhân và lịch sử biến động (Point wallet)
-    Route::prefix('vi-diem')->name('wallet.')->group(function(){
-        Route::get('/', function(){
+    // =========================================================================
+    // 4. VÍ ĐIỂM CÁ NHÂN VÀ LỊCH SỬ BIẾN ĐỘNG (POINT WALLET)
+    // =========================================================================
+    Route::prefix('vi-diem')->name('wallet.')->group(function () {
+        Route::get('/', function () {
             return inertia('Wallet/Index');
         })->name('index');
     });
 
-    // 5.Quản trị KYC và tài khoản (Kiểm duyệt viên và quản trị viên)
+    // =========================================================================
+    // 5. QUẢN TRỊ KYC VÀ TÀI KHOẢN (KIỂM DUYỆT VIÊN VÀ QUẢN TRỊ VIÊN)
+    // =========================================================================
     Route::prefix('quan-tri')->name('admin.')->group(function () {
-        // Hàng đợi duyệt minh chứng thẻ SV
-        Route::get('/duyet-kyc', function () {
-            return inertia('Admin/Kyc/Index');
-        })->name('kyc.index');
+        // Hàng đợi duyệt minh chứng thẻ SV / Bằng tốt nghiệp
+        Route::get('/duyet-kyc', [KycController::class, 'adminQueue'])->name('kyc.index');
 
-        Route::put('/duyet-kyc/{ma_xac_thuc}/duyet', function ($ma_xac_thuc) {
-            return back()->with('success', 'Đã duyệt hồ sơ KYC thành công.');
-        })->name('kyc.approve');
+        // Phê duyệt hồ sơ KYC
+        Route::put('/duyet-kyc/{ma_xac_thuc}/duyet', [KycController::class, 'approve'])->name('kyc.approve');
 
-        Route::put('/duyet-kyc/{ma_xac_thuc}/tu-choi', function ($ma_xac_thuc) {
-            return back()->with('warning', 'Đã từ chối hồ sơ KYC.');
-        })->name('kyc.reject');
+        // Từ chối hồ sơ KYC kèm lý do
+        Route::put('/duyet-kyc/{ma_xac_thuc}/tu-choi', [KycController::class, 'reject'])->name('kyc.reject');
 
         // Quản lý danh sách người dùng & Cập nhật trạng thái (Khóa/Mở)
         Route::get('/nguoi-dung', function () {
