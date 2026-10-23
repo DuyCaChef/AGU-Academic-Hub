@@ -1,23 +1,39 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, usePage, router } from '@inertiajs/react';
 import {
     Upload,
     Search,
     Menu,
     X,
+    Mail,
     Bell,
+    ShieldCheck,
     Shield,
     ChevronDown,
     LogOut,
     User
 } from 'lucide-react';
 
+
 export default function StudentHeader({
 }) {
+
+
+    // ham xử lý hiển thị role
+    const roleLabels = {
+        SINH_VIEN: "Sinh viên",
+        GIANG_VIEN: "Giảng viên",
+        QUAN_TRI: "Quản trị viên",
+    };
+
+    const getRoleLabel = (role) => {
+        return roleLabels[role] ?? role;
+    };
+
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-    const [expandedFaculty, setExpandedFaculty] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+    const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
     const { auth } = usePage().props;
     const user = auth?.user;
     // Xử lý tìm kiếm toàn cục (Global Search)
@@ -26,15 +42,92 @@ export default function StudentHeader({
         if (!searchQuery.trim()) return;
         router.get(route('courses.index'), { search: searchQuery }, { preserveState: true });
     };
+    const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+    const lastScrollY = useRef(0);
 
-    const toggleFaculty = (maKhoa) => {
-        setExpandedFaculty(expandedFaculty === maKhoa ? null : maKhoa);
-    };
+    useEffect(() => {
+        const handleScroll = () => {
+            const currentScrollY = window.scrollY;
+            const previousScrollY = lastScrollY.current;
+            const scrollDifference = currentScrollY - previousScrollY;
+
+            // Luôn hiện header khi ở gần đầu trang
+            if (currentScrollY < 80) {
+                setIsHeaderVisible(true);
+            } else if (scrollDifference > 5) {
+                // Cuộn xuống: ẩn header
+                setIsHeaderVisible(false);
+            } else if (scrollDifference < -5) {
+                // Cuộn lên: hiện header
+                setIsHeaderVisible(true);
+            }
+
+            lastScrollY.current = currentScrollY;
+        };
+
+        window.addEventListener("scroll", handleScroll, { passive: true });
+
+        return () => {
+            window.removeEventListener("scroll", handleScroll);
+        };
+    }, []);
+    useEffect(() => {
+        if (!isUserMenuOpen) return;
+
+        const handlePointerDown = (event) => {
+            const menu = document.getElementById("user-profile-menu");
+
+            if (menu && !menu.contains(event.target)) {
+                setIsUserMenuOpen(false);
+            }
+        };
+
+        const handleKeyDown = (event) => {
+            if (event.key === "Escape") {
+                setIsUserMenuOpen(false);
+            }
+        };
+
+        document.addEventListener("pointerdown", handlePointerDown);
+        document.addEventListener("keydown", handleKeyDown);
+
+        return () => {
+            document.removeEventListener("pointerdown", handlePointerDown);
+            document.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [isUserMenuOpen]);
+    useEffect(() => {
+        if (!isProfileModalOpen) return;
+
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+
+        const handleKeyDown = (event) => {
+            if (event.key === "Escape") {
+                setIsProfileModalOpen(false);
+            }
+        };
+
+        document.addEventListener("keydown", handleKeyDown);
+
+        return () => {
+            document.body.style.overflow = previousOverflow;
+            document.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [isProfileModalOpen]);
+
+
+
 
     return (
         <div className="bg-surface-page text-text-primary font-sans flex flex-col">
             {/* hearder cố định */}
-            <header className="sticky top-0 z-30 h-16 bg-[#005BAA] border-b border-border-default shadow-sm px-4 lg:px-6 flex items-center justify-between gap-4">
+            <header className={`
+            fixed top-0 left-0 right-0 z-99999 h-16 bg-[#005BAA] 
+            shadow-sm px-4 lg:px-6 flex items-center justify-between gap-4
+            transition-transform duration-300 ease-in-out
+            ${isHeaderVisible ? 'translate-y-0' : '-translate-y-full'}
+            `}>
                 {/* Brand Logo & Mobile Menu Button */}
                 <div className="flex items-center gap-3">
                     <button
@@ -109,54 +202,170 @@ export default function StudentHeader({
 
                     {/* User Profile Menu */}
                     {user ? (
-                        <div className="relative">
+                        <div className="relative" id="user-profile-menu">
+                            {/* Avt va nut mo menu */}
                             <button
                                 type="button"
-                                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                                className="flex bg-blue-800 items-center gap-2 p-1 rounded-full hover:bg-blue-900 focus:outline-none"
-                            >
-                                <div className="w-8 h-8 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-sm border border-brand-primary/20">
+                                onClick={() => setIsUserMenuOpen((prev) => !prev)}
+                                aria-expanded={isUserMenuOpen}
+                                aria-haspopup="menu"
+                                aria-label="Mở profile"
+                                className="flex items-center gap-2 rounded-full bg-blue-800 p-1 hover:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-white/50">
+                                <div className="flex w-8 h-8 items-center justify-center rounded-full border border-brand-primary/20 bg-blue-600 text-sm font-bold text-white">
                                     {user.ho_ten ? user.ho_ten.charAt(0).toUpperCase() : 'U'}
                                 </div>
-                                <ChevronDown size={14} className="text-white hidden sm:block" />
+                                <ChevronDown size={14} className={`mr-1 hidden text-white transition-transform duration-200 sm:block ${isUserMenuOpen ? "rotate-180" : ""}`} />
                             </button>
 
                             {/* Dropdown Profile */}
                             {isUserMenuOpen && (
-                                <div className="absolute right-0 mt-2 w-56 bg-surface-default rounded-xl shadow-lg border border-border-default py-2 z-50">
-                                    <div className="px-4 py-2 border-b border-border-default">
-                                        <p className="font-semibold text-sm truncate">{user.ho_ten}</p>
-                                        <p className="text-xs text-text-secondary truncate">{user.email}</p>
-                                        <span className="inline-block mt-1 text-[10px] font-mono px-2 py-0.5 bg-brand-primary/10 text-brand-primary rounded-md uppercase font-semibold">
-                                            {user.vai_tro}
-                                        </span>
+                                <div
+                                    role="menu"
+                                    className='absolute right-0 top-full z-50 mt-2 w-64 overflow-hidden rounded-xl border 
+                                    border-border-default bg-surface-default py-2 shadow-xl
+                                    '
+                                >
+                                    {/* thong tin tai khoan */}
+                                    <div className="px-4 py-3 border-b border-border-default">
+                                        <p className="font-semibold text-sm truncate">{user.ho_ten || "Người dùng"} </p>
+                                        <p className="text-xs text-text-secondary truncate">{user.email || "Chưa có email"}</p>
+                                        {user.vai_tro && (
+                                            <span className="inline-block mt-1 text-[10px] font-mono px-2 py-0.5 bg-brand-primary/10 text-brand-primary rounded-md uppercase font-semibold">
+                                                {getRoleLabel(user.vai_tro)}
+                                            </span>
+                                        )}
                                     </div>
-                                    <Link
-                                        href={route('auth.me')}
-                                        className="flex items-center gap-2 px-4 py-2 text-sm text-text-secondary hover:bg-surface-page hover:text-brand-primary"
-                                    >
-                                        <User size={16} /> Hồ sơ cá nhân
-                                    </Link>
+
+                                    {/* Ho so ca nhan */}
                                     <button
                                         type="button"
-                                        onClick={() => router.post(route('auth.logout'))}
-                                        className="w-full text-left flex items-center gap-2 px-4 py-2 text-sm text-semantic-danger hover:bg-semantic-danger/5"
+                                        role='menuitem'
+                                        onClick={() => {
+                                            setIsUserMenuOpen(false);
+                                            setIsProfileModalOpen(true);
+                                        }}
+                                        className='flex w-full items-center gap-3 px-4 py-3
+                                        text-left text-sm text-text-secondary 
+                                        transition-colors hover:bg-surface-page 
+                                        hover:text-brand-primary
+                                        '
                                     >
-                                        <LogOut size={16} /> Đăng xuất
+                                        <User size={16} /> Hồ sơ cá nhân
                                     </button>
+
+                                    {/* Đăng xuất */}
+                                    <div className='border-t border-border-default pt-2'>
+                                        <button
+                                            type="button"
+                                            role='menuitem'
+                                            onClick={() => {
+                                                setIsUserMenuOpen(false);
+                                                router.post(route('auth.logout'));
+                                            }}
+                                            className="w-full text-left flex items-center gap-3 px-4 py-2.5 text-sm transition-colors text-semantic-danger hover:bg-semantic-danger/5"
+                                        >
+                                            <LogOut size={16} /> Đăng xuất
+                                        </button>
+                                    </div>
                                 </div>
                             )}
                         </div>
                     ) : (
                         <Link
                             href={route('auth.login')}
-                            className="text-sm font-medium text-brand-primary hover:underline"
+                            className="text-sm font-medium text-white rounded-lg px-3 py-2 hover:bg-white/10 transition:colors"
                         >
                             Đăng nhập
                         </Link>
                     )}
                 </div>
             </header>
+            {/* profile modal */}
+            {isProfileModalOpen && user && (
+                <div
+                    className='fixed inset-0 z-[100] flex items-center justify-center
+                            overflow-y-auto bg-black/50 p-4 backdrop-blur-sm
+                            '
+                    onMouseDown={(Event) => {
+                        if (Event.target === Event.currentTarget) {
+                            setIsProfileModalOpen(false)
+                        }
+                    }}
+                >
+                    <section
+                        role='dialog'
+                        aria-modal="true"
+                        aria-labelledby='profile-title'
+                        className='my-auto max-w-lg rounded-2xl border border-border-default bg-surface-default shadow-2xl'
+                    >
+                        {/* header modal */}
+                        <div className='flex items-center justify-between border-b border-border-default px-6 py-4'>
+                            <div>
+                                <h2 id='profile-title' className='text-lg font-bold'>Hồ sơ cá nhân</h2>
+                                <p className='mt-1 text-sm text-text-secondary'> Thông tin tài khoản AGU Hub</p>
+                            </div>
+                            <button
+                                type='button'
+                                onClick={() => setIsProfileModalOpen(false)}
+                                aria-label='Đóng modal'
+                                className='rounded-lg p-2 text-text-secondary transition-colors
+                                    hover:bg-surface-page hover:text-text-primary'
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+                        {/* noi dung ho so */}
+                        <div className='space-y-5 p-6'>
+                            <div className='flex items-center gap-4'>
+                                <div className='flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-blue-800 text-xl font-bold text-white'>
+                                    {user.ho_ten?.charAt(0)?.toUpperCase() || 'U'}
+                                </div>
+                                <div className='min-w-0'>
+                                    <p className='truncate text-base font-semibold text-text-primary'>{user.ho_ten || 'Chưa cập nhật'}</p>
+                                    <p className='break-all text-sm text-text-secondary'> {user.email || 'Chưa cập nhật'}</p>
+                                </div>
+                            </div>
+                            <div className='space-y-3'>
+                                <div className='rounded-lg bg-surface-page p-3'>
+                                    <p className='text-xs text-text-secondary'>
+                                        Họ và Tên
+                                    </p>
+                                    <p className='mt-1 text-sm font-medium'>
+                                        {user.ho_ten || 'Chưa cập nhật'}
+                                    </p>
+                                </div>
+                                <div className='rounded-lg bg-surface-page p-3'>
+                                    <p className='text-xs text-text-secondary'>
+                                        Mã số sinh viên
+                                    </p>
+                                    <p className='mt-1 text-sm font-medium'>
+                                        {user.mssv || 'Chưa cập nhật'}
+                                    </p>
+                                </div>
+                                <div className="rounded-lg bg-surface-page p-3">
+                                    <p className="text-xs text-text-secondary">
+                                        Vai trò
+                                    </p>
+                                    <p className="mt-1 text-sm font-medium">
+                                        {getRoleLabel(user.vai_tro)}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex justify-end border-t border-border-default
+                px-6 py-4">
+                            <button
+                                type="button"
+                                onClick={() => setIsProfileModalOpen(false)}
+                                className="rounded-lg bg-brand-primary px-4 py-2
+                        text-sm font-medium text-white hover:opacity-90"
+                            >
+                                Đóng
+                            </button>
+                        </div>
+                    </section>
+                </div>
+            )}
         </div>
     );
 }

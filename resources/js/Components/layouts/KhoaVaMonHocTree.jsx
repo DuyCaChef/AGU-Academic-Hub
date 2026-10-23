@@ -42,20 +42,20 @@ export default function FacultyCourseTree({ faculities = [] }) {
                         </button>
                         {expandedFaculty === khoa.ma_khoa && (
                             <div className="ml-4 mt-2 space-y-1">
-                                {khoa.mon_hoc?.length > 0 ? (
-                                    khoa.mon_hoc.map(mon => (
+                                {khoa.mon_hocs?.length > 0 ? (
+                                    khoa.mon_hocs.map(mon => (
                                         <Link key={mon.ma_mon_hoc}
                                             href={route("courses.show",
                                                 mon.ma_mon_hoc,
                                             )
                                             }
-                                            className="block rouded-lg p-2 text-sm hover:bg-gray-100"
+                                            className="block rounded-lg p-2 text-sm hover:bg-gray-100"
                                         >
                                             <span className="block">
                                                 {mon.ten_mon_hoc}
                                             </span>
                                             <span className="text-xs text-gray-500">
-                                                {mon.ma_mon_hoc}
+                                                {mon.ma_hoc_phan}
                                             </span>
                                         </Link>
                                     ))

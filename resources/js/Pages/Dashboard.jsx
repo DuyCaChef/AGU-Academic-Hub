@@ -132,7 +132,7 @@ export default function Dashboard() {
                 {/* 1. Welcome banner */}
                 <section className="relative isolate overflow-hidden rounded-2xl bg-[#005BAA] p-6 text-white shadow-md sm:p-8">
                     {/* Decorative background */}
-                    <div className="pointer-events-none absolute -right-8 top-1/2 -z-10 h-56 w-56 -translate-y-1/2 rotate-45 border-[3px] border-white/10 sm:right-12 sm:h-48 sm:w-48">
+                    <div className="pointer-events-none absolute -right-8 top-1/2 -z-10 h-56 w-56 -translate-y-1/2 rotate-45 border-[3px] border-white/10 sm:right-19 sm:h-48 sm:w-48">
                         <div className="absolute inset-5 border-2 border-white/10" />
                     </div>
 
