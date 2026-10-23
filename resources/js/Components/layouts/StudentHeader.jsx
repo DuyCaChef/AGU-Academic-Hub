@@ -116,6 +116,19 @@ export default function StudentHeader({
         };
     }, [isProfileModalOpen]);
 
+    // xu ly logout
+    const handleLogout = () => {
+        setIsUserMenuOpen(false);
+
+        router.post(route('logout'), {}, {
+            onStart: () => {
+                console.log('Đang đăng xuất...');
+            },
+            onError: (errors) => {
+                console.error('Đăng xuất thất bại:', errors);
+            },
+        });
+    };
 
 
 
@@ -258,10 +271,7 @@ export default function StudentHeader({
                                         <button
                                             type="button"
                                             role='menuitem'
-                                            onClick={() => {
-                                                setIsUserMenuOpen(false);
-                                                router.post(route('auth.logout'));
-                                            }}
+                                            onClick={handleLogout}
                                             className="w-full text-left flex items-center gap-3 px-4 py-2.5 text-sm transition-colors text-semantic-danger hover:bg-semantic-danger/5"
                                         >
                                             <LogOut size={16} /> Đăng xuất

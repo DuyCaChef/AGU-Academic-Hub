@@ -28,14 +28,17 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email'],
-            function ($attribute, $value, $fail) {
-               $val = strtolower($value);
-               if(!str_ends_with($val, '@agu.edu.vn') && !str_ends_with($val, '@student.agu.edu.vn'))
-               {
-                $fail('Vui lòng sử dụng Email do Đại học An Giang cấp (@student.agu.edu.vn hoặc @agu.edu.vn).');         
-               }
-            },
+            'email' => [
+                'required',
+                'string',
+                'email',
+                function ($attribute, $value, $fail) {
+                    $val = strtolower($value);
+                    if (!str_ends_with($val, '@agu.edu.vn') && !str_ends_with($val, '@student.agu.edu.vn')) {
+                        $fail('Vui lòng sử dụng Email do Đại học An Giang cấp (@student.agu.edu.vn hoặc @agu.edu.vn).');
+                    }
+                },
+            ],
             'password' => ['required', 'string'],
         ];
     }

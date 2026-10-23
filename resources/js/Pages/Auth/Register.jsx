@@ -17,11 +17,11 @@ import {
 export default function Register() {
     // 1. Quản lý trạng thái form qua hook useForm của Inertia
     const { data, setData, post, processing, errors, reset } = useForm({
-        full_name: '',
+        ho_ten: '',
         email: '',
-        student_code: '',
-        password: '',
-        password_confirmation: '',
+        mssv: '',
+        mat_khau: '',
+        mat_khau_confirmation: '',
         terms: false,
     });
 
@@ -59,7 +59,7 @@ export default function Register() {
     const handleSubmit = (e) => {
         e.preventDefault();
         post(route('register'), {
-            onFinish: () => reset('password', 'password_confirmation'),
+            onFinish: () => reset('mat_khau', 'mat_khau_confirmation'),
         });
     };
 
@@ -94,11 +94,11 @@ export default function Register() {
                             <User className="w-4 h-4" />
                         </div>
                         <input
-                            id="full_name"
+                            id="ho_ten"
                             type="text"
-                            name="full_name"
-                            value={data.full_name}
-                            onChange={(e) => setData('full_name', e.target.value)}
+                            name="ho_ten"
+                            value={data.ho_ten}
+                            onChange={(e) => setData('ho_ten', e.target.value)}
                             placeholder="Ví dụ: Nguyễn Văn An"
                             autoComplete="name"
                             autoFocus
@@ -163,7 +163,7 @@ export default function Register() {
                 {/* 3. Mã số sinh viên (Tự động điền theo email) */}
                 <div>
                     <label
-                        htmlFor="student_code"
+                        htmlFor="mssv"
                         className="block text-xs font-semibold uppercase tracking-wider text-text-secondary mb-1.5"
                     >
                         Mã số sinh viên (MSSV) <span className="text-semantic-danger">*</span>
@@ -173,11 +173,11 @@ export default function Register() {
                             <BadgeCheck className="w-4 h-4" />
                         </div>
                         <input
-                            id="student_code"
+                            id="mssv"
                             type="text"
-                            name="student_code"
-                            value={data.student_code}
-                            onChange={(e) => setData('student_code', e.target.value.toUpperCase())}
+                            name="mssv"
+                            value={data.mssv}
+                            onChange={(e) => setData('mssv', e.target.value.toUpperCase())}
                             placeholder="DTH215001"
                             required
                             className={`w-full pl-10 pr-3.5 py-2.5 bg-surface-default border rounded-lg text-sm text-text-primary placeholder:text-slate-400 focus:outline-none transition-colors uppercase font-mono ${errors.student_code || errors.mssv
@@ -197,7 +197,7 @@ export default function Register() {
                 {/* 4. Mật khẩu */}
                 <div>
                     <label
-                        htmlFor="password"
+                        htmlFor="mat_khau"
                         className="block text-xs font-semibold uppercase tracking-wider text-text-secondary mb-1.5"
                     >
                         Mật khẩu (Tối thiểu 8 ký tự) <span className="text-semantic-danger">*</span>
@@ -207,15 +207,15 @@ export default function Register() {
                             <Lock className="w-4 h-4" />
                         </div>
                         <input
-                            id="password"
+                            id="mat_khau"
                             type={showPassword ? 'text' : 'password'}
-                            name="password"
-                            value={data.password}
-                            onChange={(e) => setData('password', e.target.value)}
+                            name="mat_khau"
+                            value={data.mat_khau}
+                            onChange={(e) => setData('mat_khau', e.target.value)}
                             placeholder="••••••••"
                             autoComplete="new-password"
                             required
-                            className={`w-full pl-10 pr-10 py-2.5 bg-surface-default border rounded-lg text-sm text-text-primary placeholder:text-slate-400 focus:outline-none transition-colors ${errors.password
+                            className={`w-full pl-10 pr-10 py-2.5 bg-surface-default border rounded-lg text-sm text-text-primary placeholder:text-slate-400 focus:outline-none transition-colors ${errors.mat_khau
                                 ? 'border-semantic-danger focus:ring-1 focus:ring-semantic-danger'
                                 : 'border-border-default focus:border-brand-primary focus:ring-1 focus:ring-brand-primary'
                                 }`}
@@ -229,10 +229,10 @@ export default function Register() {
                             {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         </button>
                     </div>
-                    {errors.password && (
+                    {errors.mat_khau && (
                         <p className="mt-1.5 text-xs text-semantic-danger flex items-center gap-1">
                             <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                            {errors.password}
+                            {errors.mat_khau}
                         </p>
                     )}
                 </div>
@@ -240,7 +240,7 @@ export default function Register() {
                 {/* 5. Xác nhận lại Mật khẩu */}
                 <div>
                     <label
-                        htmlFor="password_confirmation"
+                        htmlFor="mat_khau_xac_nhan"
                         className="block text-xs font-semibold uppercase tracking-wider text-text-secondary mb-1.5"
                     >
                         Xác nhận lại mật khẩu <span className="text-semantic-danger">*</span>
@@ -250,12 +250,13 @@ export default function Register() {
                             <Lock className="w-4 h-4" />
                         </div>
                         <input
-                            id="password_confirmation"
+                            id="mat_khau_confirmation"
                             type={showConfirmPassword ? 'text' : 'password'}
-                            name="password_confirmation"
-                            value={data.password_confirmation}
-                            onChange={(e) => setData('password_confirmation', e.target.value)}
-                            placeholder="••••••••"
+                            name="mat_khau_confirmation"
+                            value={data.mat_khau_confirmation}
+                            onChange={(e) =>
+                                setData('mat_khau_confirmation', e.target.value)
+                            }
                             autoComplete="new-password"
                             required
                             className={`w-full pl-10 pr-10 py-2.5 bg-surface-default border rounded-lg text-sm text-text-primary placeholder:text-slate-400 focus:outline-none transition-colors ${errors.password_confirmation
