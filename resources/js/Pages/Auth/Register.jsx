@@ -321,8 +321,8 @@ export default function Register() {
                 </button>
             </form>
 
-            {/* Chuyển hướng sang Login */}
-            <div className="mt-6 pt-5 border-t border-border-default text-center">
+            {/* Chuyển hướng sang Login & Cựu sinh viên */}
+            <div className="mt-6 pt-5 border-t border-border-default text-center space-y-2">
                 <p className="text-xs text-text-secondary">
                     Đã có tài khoản AGU?{' '}
                     <Link
@@ -330,6 +330,15 @@ export default function Register() {
                         className="font-semibold text-brand-primary hover:text-blue-800 transition-colors"
                     >
                         Đăng nhập ngay →
+                    </Link>
+                </p>
+                <p className="text-xs text-text-secondary">
+                    Bạn là cựu sinh viên AGU?{' '}
+                    <Link
+                        href={route('alumni.register')}
+                        className="font-semibold text-brand-secondary hover:underline transition-colors"
+                    >
+                        Nộp hồ sơ đăng ký Cựu sinh viên (KYC) →
                     </Link>
                 </p>
             </div>

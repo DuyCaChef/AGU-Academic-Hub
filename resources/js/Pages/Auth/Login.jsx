@@ -32,15 +32,6 @@ export default function Login({ status, canResetPassword }) {
         });
     };
 
-    // Kiểm tra định dạng email AGU tức thì ở Client
-    const isAguEmail = (email) => {
-        if (!email) return true;
-        const val = email.trim().toLowerCase();
-        return val.endsWith('@agu.edu.vn') || val.endsWith('@student.agu.edu.vn');
-    };
-
-    const hasInvalidDomain = data.email.length > 5 && data.email.includes('@') && !isAguEmail(data.email);
-
     return (
         <GuestLayout title="Đăng nhập tài khoản">
             <Head title="Đăng nhập" />
@@ -54,7 +45,7 @@ export default function Login({ status, canResetPassword }) {
                     Cổng Đăng Nhập
                 </h1>
                 <p className="text-sm text-text-secondary mt-1">
-                    Sử dụng tài khoản Email do Đại học An Giang cấp
+                    Cổng truy cập dành cho Sinh viên & Cựu sinh viên AGU
                 </p>
             </div>
 
@@ -67,13 +58,13 @@ export default function Login({ status, canResetPassword }) {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-                {/* 1. Ô nhập Email */}
+                {/* 1. Ô nhập Email hoặc MSSV */}
                 <div>
                     <label
                         htmlFor="email"
                         className="block text-xs font-semibold uppercase tracking-wider text-text-secondary mb-1.5"
                     >
-                        Email định danh AGU <span className="text-semantic-danger">*</span>
+                        Email định danh AGU hoặc MSSV <span className="text-semantic-danger">*</span>
                     </label>
                     <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -81,28 +72,20 @@ export default function Login({ status, canResetPassword }) {
                         </div>
                         <input
                             id="email"
-                            type="email"
+                            type="text"
                             name="email"
                             value={data.email}
                             onChange={(e) => setData('email', e.target.value)}
-                            placeholder="mssv@student.agu.edu.vn hoặc cb@agu.edu.vn"
+                            placeholder="mssv@student.agu.edu.vn hoặc MSSV (VD: DTH215001)"
                             autoComplete="username"
                             autoFocus
                             required
-                            className={`w-full pl-10 pr-3.5 py-2.5 bg-surface-default border rounded-lg text-sm text-text-primary placeholder:text-slate-400 focus:outline-none transition-colors ${errors.email || hasInvalidDomain
+                            className={`w-full pl-10 pr-3.5 py-2.5 bg-surface-default border rounded-lg text-sm text-text-primary placeholder:text-slate-400 focus:outline-none transition-colors ${errors.email
                                     ? 'border-semantic-danger focus:ring-1 focus:ring-semantic-danger focus:border-semantic-danger'
                                     : 'border-border-default focus:border-brand-primary focus:ring-1 focus:ring-brand-primary'
                                 }`}
                         />
                     </div>
-
-                    {/* Cảnh báo Client khi gõ sai đuôi email */}
-                    {hasInvalidDomain && (
-                        <p className="mt-1.5 text-xs text-semantic-danger flex items-center gap-1">
-                            <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                            Vui lòng nhập email có đuôi @student.agu.edu.vn hoặc @agu.edu.vn
-                        </p>
-                    )}
 
                     {/* Lỗi trả về từ Backend Laravel */}
                     {errors.email && (
@@ -191,7 +174,7 @@ export default function Login({ status, canResetPassword }) {
                 {/* 4. Nút bấm Đăng nhập (có Loading Spinner chống double-click) */}
                 <button
                     type="submit"
-                    disabled={processing || hasInvalidDomain}
+                    disabled={processing || !data.email || !data.password}
                     className="w-full mt-2 py-2.5 px-4 rounded-lg bg-brand-primary hover:bg-blue-800 text-white font-medium text-sm shadow-sm transition-all duration-150 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
                 >
                     {processing ? (
@@ -208,17 +191,23 @@ export default function Login({ status, canResetPassword }) {
                 </button>
             </form>
 
-            {/* Phần chuyển tiếp sang Form Đăng ký */}
-            <div className="mt-6 pt-5 border-t border-border-default text-center">
-                <p className="text-xs text-text-secondary">
-                    Chưa có tài khoản sinh viên?{' '}
-                    <Link
-                        href={route('register')}
-                        className="font-semibold text-brand-primary hover:text-blue-800 transition-colors"
-                    >
-                        Đăng ký tài khoản mới →
-                    </Link>
-                </p>
+            {/* Hướng dẫn đăng nhập cho Sinh viên & Liên kết nộp KYC Cựu sinh viên */}
+            <div className="mt-6 pt-5 border-t border-border-default space-y-3">
+                <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-xs text-text-secondary leading-relaxed">
+                    💡 <strong className="text-text-primary">Dành cho Sinh viên:</strong> Đăng nhập lần đầu bằng Email định danh (<code className="font-mono text-brand-primary">@student.agu.edu.vn</code>) hoặc MSSV và <strong>mật khẩu mặc định</strong> được nhà trường cấp. Hệ thống sẽ yêu cầu bạn đổi mật khẩu mới để kích hoạt tài khoản.
+                </div>
+
+                <div className="text-center pt-1">
+                    <p className="text-xs text-text-secondary">
+                        Bạn là cựu sinh viên AGU?{' '}
+                        <Link
+                            href={route('alumni.register')}
+                            className="font-semibold text-brand-secondary hover:underline transition-colors"
+                        >
+                            Nộp hồ sơ đăng ký Cựu sinh viên (KYC) →
+                        </Link>
+                    </p>
+                </div>
             </div>
         </GuestLayout>
     );

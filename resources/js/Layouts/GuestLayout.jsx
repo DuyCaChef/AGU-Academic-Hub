@@ -12,7 +12,7 @@ import { AlertTriangle, CheckCircle2, ExternalLink } from 'lucide-react';
  * - Sử dụng màu nhận diện AGU: brand-primary (#005baa), brand-secondary (#00a896).
  * - Sử dụng Icon Lucide đồng bộ cho giao diện chuyên nghiệp.
  */
-export default function GuestLayout({ children, title = 'Cổng thông tin' }) {
+export default function GuestLayout({ children, title = 'Cổng thông tin', maxWidth = 'max-w-md' }) {
     // Lấy thông báo flash được Laravel gửi kèm trong phiên làm việc
     const { flash } = usePage().props;
 
@@ -92,7 +92,7 @@ export default function GuestLayout({ children, title = 'Cổng thông tin' }) {
 
             {/* 3. Vùng trung tâm chứa Form */}
             <main className="flex-1 flex flex-col justify-center items-center px-4 sm:px-6 py-10">
-                <div className="w-full max-w-md">
+                <div className={`w-full ${maxWidth}`}>
                     {/* Hộp Card bọc nội dung Form (chuẩn rounded-xl 12px theo Design Guidelines) */}
                     <div className="bg-surface-default px-6 py-8 sm:px-8 border border-border-default rounded-xl shadow-lg shadow-slate-200/50">
                         {children}

@@ -34,7 +34,7 @@ class EnsurePasswordChanged
             $user->vai_tro->value === 'SINH_VIEN'
         ) {
             // Cho phép truy cập route đổi mật khẩu và logout
-            if ($request->routeIs('password.change', 'password.change.update', 'logout')) {
+            if ($request->routeIs('password.change', 'password.change.update', 'logout', 'auth.logout')) {
                 return $next($request);
             }
 

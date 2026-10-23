@@ -12,10 +12,10 @@ use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
-    Route::get('register', [RegisteredUserController::class, 'create'])
-        ->name('register');
-
-    Route::post('register', [RegisteredUserController::class, 'store']);
+    // Sinh viên không tự đăng ký. Tài khoản được cấp từ dữ liệu thô nhà trường.
+    // Đối với cựu sinh viên, đăng ký nộp hồ sơ KYC qua route 'alumni.register' trong routes/kyc.php
+    // Route::get('register', [RegisteredUserController::class, 'create'])->name('register');
+    // Route::post('register', [RegisteredUserController::class, 'store']);
 
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
         ->name('login');
@@ -36,6 +36,13 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
+    // Đổi mật khẩu bắt buộc cho sinh viên lần đầu đăng nhập
+    Route::get('first-time-password', [\App\Http\Controllers\Auth\FirstTimePasswordController::class, 'showChangeForm'])
+        ->name('password.change');
+
+    Route::post('first-time-password', [\App\Http\Controllers\Auth\FirstTimePasswordController::class, 'updatePassword'])
+        ->name('password.change.update');
+
     Route::get('verify-email', EmailVerificationPromptController::class)
         ->name('verification.notice');
 

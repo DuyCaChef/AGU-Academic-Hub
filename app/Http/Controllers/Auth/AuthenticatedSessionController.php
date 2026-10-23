@@ -33,6 +33,16 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        $user = Auth::user();
+        if (
+            $user &&
+            $user->vai_tro === \App\Enums\VaiTroNguoiDung::SINH_VIEN &&
+            $user->trang_thai === \App\Enums\TrangThaiNguoiDung::CHUA_XAC_THUC
+        ) {
+            return redirect()->route('password.change')
+                ->with('warning', 'Đây là lần đầu đăng nhập. Bạn bắt buộc phải đổi mật khẩu để kích hoạt tài khoản.');
+        }
+
         return redirect()->intended(route('dashboard', absolute: false));
     }
 
