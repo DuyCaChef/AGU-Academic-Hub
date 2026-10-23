@@ -22,7 +22,7 @@ class KhoaController extends Controller
             })
             ->values();
 
-        return Inertia::render('DanhSachKhoa', [
+        return Inertia::render('Dashboard', [
             'faculties' => $faculties,
         ]);
     }

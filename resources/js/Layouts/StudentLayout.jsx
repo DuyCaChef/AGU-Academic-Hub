@@ -30,7 +30,7 @@ export default function StudentLayout({
             />
 
             {/* Sidebar và nội dung trang */}
-            <div className="flex flex-1 min-h-0 overflow-hidden">
+            <div className="pt-16 flex flex-1 min-h-0 overflow-hidden">
                 <StudentSidebar
                     faculties={faculties}
                     isOpen={isMobileSidebarOpen}
