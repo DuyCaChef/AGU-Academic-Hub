@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CourseReviewController;
 use App\Http\Controllers\KycController;
 use Illuminate\Support\Facades\Route;
 
@@ -31,35 +32,29 @@ Route::middleware('auth')->group(function () {
     // 2. ĐÁNH GIÁ MÔN HỌC (COURSE REVIEWS AND RATING ENGINE)
     // =========================================================================
     // Xem danh sách review theo môn học (tham số ma_hoc_phan, ví dụ: COS305)
-    Route::get('/mon-hoc/{ma_hoc_phan}/danh-gia', function ($ma_hoc_phan) {
-        return inertia('Reviews/CourseReviews', ['ma_hoc_phan' => $ma_hoc_phan]);
-    })->name('courses.reviews.index');
+    Route::get('/mon-hoc/{ma_hoc_phan}/danh-gia', [CourseReviewController::class, 'index'])
+        ->name('courses.reviews.index');
 
     // Gửi bài đánh giá môn học mới
-    Route::post('/mon-hoc/{ma_hoc_phan}/danh-gia', function ($ma_hoc_phan) {
-        return back()->with('info', 'Chức năng gửi đánh giá đang được hoàn thiện.');
-    })->name('courses.reviews.store');
+    Route::post('/mon-hoc/{ma_hoc_phan}/danh-gia', [CourseReviewController::class, 'store'])
+        ->name('courses.reviews.store');
 
     Route::prefix('danh-gia')->name('reviews.')->group(function () {
-        // Chỉnh sửa review của chính mình 
-        Route::put('/{ma_danh_gia}', function ($ma_danh_gia) {
-            return back()->with('info', 'Chức năng cập nhật đánh giá đang được hoàn thiện.');
-        })->name('update');
+        // Chỉnh sửa review của chính mình
+        Route::put('/{ma_danh_gia}', [CourseReviewController::class, 'update'])
+            ->name('update');
 
         // Xóa mềm review
-        Route::delete('/{ma_danh_gia}', function ($ma_danh_gia) {
-            return back()->with('info', 'Chức năng xóa đánh giá đang được hoàn thiện.');
-        })->name('destroy');
+        Route::delete('/{ma_danh_gia}', [CourseReviewController::class, 'destroy'])
+            ->name('destroy');
 
         // Đánh giá review hữu ích
-        Route::post('/{ma_danh_gia}/huu-ich', function ($ma_danh_gia) {
-            return back()->with('success', 'Đã ghi nhận phản hồi hữu ích.');
-        })->name('helpful');
+        Route::post('/{ma_danh_gia}/huu-ich', [CourseReviewController::class, 'helpful'])
+            ->name('helpful');
 
         // Báo cáo review vi phạm tiêu chuẩn cộng đồng
-        Route::post('/{ma_danh_gia}/bao-cao', function ($ma_danh_gia) {
-            return back()->with('success', 'Báo cáo vi phạm đã được gửi tới kiểm duyệt viên.');
-        })->name('report');
+        Route::post('/{ma_danh_gia}/bao-cao', [CourseReviewController::class, 'report'])
+            ->name('report');
     });
 
     // =========================================================================
@@ -128,4 +123,5 @@ Route::middleware('auth')->group(function () {
             return back()->with('success', 'Đã cập nhật trạng thái người dùng.');
         })->name('users.status');
     });
+
 });
