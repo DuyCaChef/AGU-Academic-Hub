@@ -18,10 +18,10 @@ use Illuminate\Support\Facades\Route;
 
 // ─── LUỒNG A: Form đăng ký cựu sinh viên (public — không cần đăng nhập) ──────
 Route::middleware('guest')->group(function () {
-    Route::get('/alumni/register', [KycController::class, 'showRegistrationForm'])
+    Route::get('/alumni/register', [KycController::class, 'hienThiFormDangKy'])
         ->name('alumni.register');
 
-    Route::post('/alumni/register', [KycController::class, 'storeAlumniRegistration'])
+    Route::post('/alumni/register', [KycController::class, 'luuDangKyCuuSinhVien'])
         ->name('alumni.register.store');
 });
 
@@ -29,19 +29,19 @@ Route::middleware('guest')->group(function () {
 Route::middleware(['auth'])->prefix('admin/kyc')->name('kyc.')->group(function () {
 
     // Danh sách hồ sơ chờ duyệt
-    Route::get('/', [KycController::class, 'adminQueue'])
+    Route::get('/', [KycController::class, 'hangDoiKyc'])
         ->name('queue');
 
-    // Preview ảnh minh chứng — route phải có middleware 'signed' để validate Signed URL
-    Route::get('{id}/preview', [KycController::class, 'preview'])
+    // Xem trước ảnh minh chứng — route phải có middleware 'signed' để validate Signed URL
+    Route::get('{id}/preview', [KycController::class, 'xemTruocMinhChung'])
         ->middleware('signed')
         ->name('preview');
 
     // Phê duyệt hồ sơ
-    Route::post('{id}/approve', [KycController::class, 'approve'])
+    Route::post('{id}/approve', [KycController::class, 'pheDuyetHoSo'])
         ->name('approve');
 
     // Từ chối hồ sơ (kèm lý do trong request body)
-    Route::post('{id}/reject', [KycController::class, 'reject'])
+    Route::post('{id}/reject', [KycController::class, 'tuChoiHoSo'])
         ->name('reject');
 });

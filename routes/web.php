@@ -28,7 +28,7 @@ Route::middleware('auth')->group(function () {
 });
 
 //logout
-Route::post('/logout', [AuthController::class, 'logout'])
+Route::post('/logout', [AuthController::class, 'dangXuat'])
     ->middleware('auth')
     ->name('auth.logout');
 

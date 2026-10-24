@@ -15,11 +15,13 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        \Illuminate\Support\Facades\DB::statement(
-            'ALTER TABLE vi_diem
-             ADD CONSTRAINT vi_diem_available_nonnegative CHECK (diem_kha_dung >= 0),
-             ADD CONSTRAINT vi_diem_held_nonnegative CHECK (diem_tam_giu >= 0)'
-        );
+        if (\Illuminate\Support\Facades\DB::getDriverName() !== 'sqlite') {
+            \Illuminate\Support\Facades\DB::statement(
+                'ALTER TABLE vi_diem
+                 ADD CONSTRAINT vi_diem_available_nonnegative CHECK (diem_kha_dung >= 0),
+                 ADD CONSTRAINT vi_diem_held_nonnegative CHECK (diem_tam_giu >= 0)'
+            );
+        }
 
         Schema::create('yeu_cau_tai_lieu', function (Blueprint $table) {
             $table->id('ma_yeu_cau');

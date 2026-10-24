@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CourseReviewController;
 use App\Http\Controllers\KycController;
+use App\Http\Controllers\WishlistBountyController;
 use Illuminate\Support\Facades\Route;
 
 // Community Route (IAM, Reviews và Bounty)
@@ -22,8 +23,8 @@ Route::middleware('auth')->group(function () {
         // Xem trạng thái hồ sơ xác thực
         Route::get('/trang-thai', [KycController::class, 'status'])->name('status');
 
-        // CẤP SIGNED URL XEM ẢNH: Stream ảnh từ private storage khi chữ ký hợp lệ
-        Route::get('/xem-anh/{ma_xac_thuc}', [KycController::class, 'preview'])
+        // CấP SIGNED URL XEM ẢNH: Stream ảnh từ private storage khi chữ ký hợp lệ
+        Route::get('/xem-anh/{ma_xac_thuc}', [KycController::class, 'xemTruocMinhChung'])
             ->name('preview')
             ->middleware('signed');
     });
@@ -49,11 +50,11 @@ Route::middleware('auth')->group(function () {
             ->name('destroy');
 
         // Đánh giá review hữu ích
-        Route::post('/{ma_danh_gia}/huu-ich', [CourseReviewController::class, 'helpful'])
+        Route::post('/{ma_danh_gia}/huu-ich', [CourseReviewController::class, 'binhChonHuuIch'])
             ->name('helpful');
 
         // Báo cáo review vi phạm tiêu chuẩn cộng đồng
-        Route::post('/{ma_danh_gia}/bao-cao', [CourseReviewController::class, 'report'])
+        Route::post('/{ma_danh_gia}/bao-cao', [CourseReviewController::class, 'baoCaoViPham'])
             ->name('report');
     });
 
@@ -62,34 +63,21 @@ Route::middleware('auth')->group(function () {
     // =========================================================================
     Route::prefix('yeu-cau-tai-lieu')->name('document-requests.')->group(function () {
         // Danh sách các bài đăng tìm tài liệu
-        Route::get('/', function () {
-            return inertia('Wishlist/Index');
-        })->name('index');
-
+        Route::get('/', [WishlistBountyController::class, 'index'])->name('index');
         // Tạo yêu cầu mới (đóng băng điểm thưởng từ vi_diem)
-        Route::post('/', function () {
-            return back()->with('info', 'Chức năng tạo yêu cầu đang được hoàn thiện.');
-        })->name('store');
+        Route::post('/', [WishlistBountyController::class, 'store'])->name('store');
 
         // Chi tiết yêu cầu & các bài nộp phản hồi
-        Route::get('/{ma_yeu_cau}', function ($ma_yeu_cau) {
-            return inertia('Wishlist/Show', ['ma_yeu_cau' => $ma_yeu_cau]);
-        })->name('show');
+       Route::get('/{ma_yeu_cau}', [WishlistBountyController::class, 'show'])->name('show');
 
-        // Đóng góp tài liệu phản hồi yêu cầu để nhận Bounty
-        Route::post('/{ma_yeu_cau}/dong-gop', function ($ma_yeu_cau) {
-            return back()->with('info', 'Chức năng đóng góp tài liệu đang được hoàn thiện.');
-        })->name('fulfill');
+       // Đóng góp tài liệu phản hồi yêu cầu để nhận Bounty
+        Route::post('/{ma_yeu_cau}/dong-gop', [WishlistBountyController::class, 'fulfill'])->name('fulfill');
 
         // Người tạo yêu cầu xác nhận tài liệu hợp lệ -> Giải ngân Bounty Points
-        Route::post('/{ma_yeu_cau}/xac-nhan', function ($ma_yeu_cau) {
-            return back()->with('success', 'Xác nhận thành công! Điểm thưởng đã được giải ngân.');
-        })->name('confirm');
+        Route::post('/{ma_yeu_cau}/xac-nhan', [WishlistBountyController::class, 'confirm'])->name('confirm');
 
         // Hủy yêu cầu -> Hoàn lại điểm đóng băng vào ví
-        Route::delete('/{ma_yeu_cau}', function ($ma_yeu_cau) {
-            return back()->with('success', 'Đã hủy yêu cầu và hoàn điểm vào ví.');
-        })->name('destroy');
+        Route::delete('/{ma_yeu_cau}', [WishlistBountyController::class, 'destroy'])->name('destroy');
     });
 
     // =========================================================================
@@ -106,13 +94,13 @@ Route::middleware('auth')->group(function () {
     // =========================================================================
     Route::prefix('quan-tri')->name('admin.')->group(function () {
         // Hàng đợi duyệt minh chứng thẻ SV / Bằng tốt nghiệp
-        Route::get('/duyet-kyc', [KycController::class, 'adminQueue'])->name('kyc.index');
+        Route::get('/duyet-kyc', [KycController::class, 'hangDoiKyc'])->name('kyc.index');
 
         // Phê duyệt hồ sơ KYC
-        Route::put('/duyet-kyc/{ma_xac_thuc}/duyet', [KycController::class, 'approve'])->name('kyc.approve');
+        Route::put('/duyet-kyc/{ma_xac_thuc}/duyet', [KycController::class, 'pheDuyetHoSo'])->name('kyc.approve');
 
         // Từ chối hồ sơ KYC kèm lý do
-        Route::put('/duyet-kyc/{ma_xac_thuc}/tu-choi', [KycController::class, 'reject'])->name('kyc.reject');
+        Route::put('/duyet-kyc/{ma_xac_thuc}/tu-choi', [KycController::class, 'tuChoiHoSo'])->name('kyc.reject');
 
         // Quản lý danh sách người dùng & Cập nhật trạng thái (Khóa/Mở)
         Route::get('/nguoi-dung', function () {

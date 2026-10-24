@@ -85,7 +85,7 @@ class CourseReviewController extends Controller
 
         // LỚP BẢO VỆ 2: Kiểm tra từ cấm tại controller trước khi persist
         // (FormRequest là lớp 1; controller là lớp 2 — tránh bypass qua API trực tiếp)
-        $violations = $this->profanityFilter->getViolations(
+        $violations = $this->profanityFilter->layDanhSachViPham(
             (string) $request->input('nhan_xet')
         );
         if (!empty($violations)) {
@@ -134,7 +134,7 @@ class CourseReviewController extends Controller
         ]);
 
         // Kiểm tra từ cấm cho nội dung chỉnh sửa
-        $violations = $this->profanityFilter->getViolations($validated['nhan_xet']);
+        $violations = $this->profanityFilter->layDanhSachViPham($validated['nhan_xet']);
         if (!empty($violations)) {
             $badWords = implode(', ', array_map(fn($w) => "\"{$w}\"", $violations));
             return back()->withErrors([
@@ -162,8 +162,8 @@ class CourseReviewController extends Controller
 
         // Quyền xóa: Tác giả bài viết, Quản trị viên hoặc Kiểm duyệt viên
         $isAuthor = ($danhGia->ma_nguoi_danh_gia === $userId);
-        $isAdminOrMod = (method_exists($user, 'isAdmin') && $user->isAdmin())
-            || (method_exists($user, 'isModerator') && $user->isModerator())
+        $isAdminOrMod = (method_exists($user, 'laQuanTriVien') && $user->laQuanTriVien())
+            || (method_exists($user, 'laKiemDuyetVien') && $user->laKiemDuyetVien())
             || in_array($user->vai_tro, [VaiTroNguoiDung::QUAN_TRI_VIEN, VaiTroNguoiDung::KIEM_DUYET_VIEN]);
 
         if (!$isAuthor && !$isAdminOrMod) {
@@ -176,7 +176,7 @@ class CourseReviewController extends Controller
     }
 
     // Tương tác bình chọn hữu ích (POST /danh-gia/{ma_danh_gia}/huu-ich).
-    public function helpful(Request $request, int $ma_danh_gia): RedirectResponse
+    public function binhChonHuuIch(Request $request, int $ma_danh_gia): RedirectResponse
     {
         $danhGia = DanhGiaMonHoc::findOrFail($ma_danh_gia);
         $user = $request->user();
@@ -210,7 +210,7 @@ class CourseReviewController extends Controller
     }
 
     // Báo cáo đánh giá vi phạm chuẩn mực (POST /danh-gia/{ma_danh_gia}/bao-cao).
-    public function report(Request $request, int $ma_danh_gia): RedirectResponse
+    public function baoCaoViPham(Request $request, int $ma_danh_gia): RedirectResponse
     {
         $request->validate([
             'ly_do' => ['required', 'string', 'min:5', 'max:500'],

@@ -35,12 +35,12 @@ class CourseReviewResource extends JsonResource
             'co_quyen_chinh_sua'  => $isAuthor,
 
             // ẨN DANH 2 LỚP: Tuyệt đối không để lộ ma_nguoi_danh_gia ra ngoài
-            'tac_gia'             => $this->resolveTacGiaPayload($isAuthor),
+            'tac_gia'             => $this->xayDungThongTinTacGia($isAuthor),
         ];
     }
 
-    // Tách logic hiển thị tác giả tùy thuộc vào cờ la_an_danh
-    private function resolveTacGiaPayload(bool $isAuthor): array
+    // Xây dựng thông tin hiển thị tác giả tuỳ thuộc vào cờ la_an_danh
+    private function xayDungThongTinTacGia(bool $isAuthor): array
     {
         // 1. Trường hợp người dùng chọn ẨN DANH
         if ($this->la_an_danh) {

@@ -34,13 +34,13 @@ class LoginRequest extends FormRequest
     }
 
     /**
-     * Attempt to authenticate the request's credentials.
+     * Xác thực thông tin đăng nhập của yêu cầu.
      *
      * @throws ValidationException
      */
-    public function authenticate(): void
+    public function xacThucDangNhap(): void
     {
-        $this->ensureIsNotRateLimited();
+        $this->kiemTraGioiHanTocDo();
 
         $loginInput = trim($this->input('email'));
         $password = (string) $this->input('password');
@@ -91,7 +91,7 @@ class LoginRequest extends FormRequest
 
         // 3. Nếu không tìm thấy hoặc mật khẩu không khớp
         if (!$user || !\Illuminate\Support\Facades\Hash::check($password, $user->mat_khau)) {
-            \Illuminate\Support\Facades\RateLimiter::hit($this->throttleKey());
+            \Illuminate\Support\Facades\RateLimiter::hit($this->layKhoaGioiHan());
 
             throw ValidationException::withMessages([
                 'email' => 'Thông tin đăng nhập hoặc mật khẩu không chính xác.',
@@ -103,7 +103,7 @@ class LoginRequest extends FormRequest
             $user->vai_tro === \App\Enums\VaiTroNguoiDung::CUU_SINH_VIEN &&
             $user->trang_thai === \App\Enums\TrangThaiNguoiDung::CHUA_XAC_THUC
         ) {
-            \Illuminate\Support\Facades\RateLimiter::hit($this->throttleKey());
+            \Illuminate\Support\Facades\RateLimiter::hit($this->layKhoaGioiHan());
 
             throw ValidationException::withMessages([
                 'email' => 'Hồ sơ minh chứng cựu sinh viên của bạn đang chờ Quản trị viên đối soát và kích hoạt. Vui lòng quay lại sau.',
@@ -112,7 +112,7 @@ class LoginRequest extends FormRequest
 
         // 5. Kiểm tra tài khoản bị tạm khóa
         if ($user->trang_thai === \App\Enums\TrangThaiNguoiDung::TAM_KHOA) {
-            \Illuminate\Support\Facades\RateLimiter::hit($this->throttleKey());
+            \Illuminate\Support\Facades\RateLimiter::hit($this->layKhoaGioiHan());
 
             throw ValidationException::withMessages([
                 'email' => 'Tài khoản của bạn hiện đang bị tạm khóa. Vui lòng liên hệ ban quản trị để được hỗ trợ.',
@@ -122,23 +122,23 @@ class LoginRequest extends FormRequest
         // Đăng nhập người dùng vào phiên
         \Illuminate\Support\Facades\Auth::login($user, $this->boolean('remember'));
 
-        \Illuminate\Support\Facades\RateLimiter::clear($this->throttleKey());
+        \Illuminate\Support\Facades\RateLimiter::clear($this->layKhoaGioiHan());
     }
 
     /**
-     * Ensure the login request is not rate limited.
+     * Kiểm tra yêu cầu đăng nhập có vượt giới hạn tốc độ không.
      *
      * @throws ValidationException
      */
-    public function ensureIsNotRateLimited(): void
+    public function kiemTraGioiHanTocDo(): void
     {
-        if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
+        if (! RateLimiter::tooManyAttempts($this->layKhoaGioiHan(), 5)) {
             return;
         }
 
         event(new Lockout($this));
 
-        $seconds = RateLimiter::availableIn($this->throttleKey());
+        $seconds = RateLimiter::availableIn($this->layKhoaGioiHan());
 
         throw ValidationException::withMessages([
             'email' => trans('auth.throttle', [
@@ -149,9 +149,9 @@ class LoginRequest extends FormRequest
     }
 
     /**
-     * Get the rate limiting throttle key for the request.
+     * Lấy khóa giới hạn tốc độ cho yêu cầu.
      */
-    public function throttleKey(): string
+    public function layKhoaGioiHan(): string
     {
         return Str::transliterate(Str::lower($this->string('email')).'|'.$this->ip());
     }

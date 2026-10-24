@@ -4,7 +4,7 @@ use App\Http\Controllers\CourseController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\DocumentModerationController;
 use App\Http\Controllers\DocumentReportController;
-use App\Http\Controllers\KhoaController;
+use App\Http\Controllers\FacultyController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -24,10 +24,10 @@ use Illuminate\Support\Facades\Route;
 // --- Danh mục Khoa / Bộ môn ---
 Route::prefix('faculties')->name('faculties.')->group(function () {
     // Lấy danh sách tất cả các Khoa/Bộ môn
-    Route::get('/', [KhoaController::class, 'index'])->name('index');
+    Route::get('/', [FacultyController::class, 'index'])->name('index');
 
     // Lấy danh sách môn học thuộc một Khoa cụ thể
-    Route::get('/{id}/courses', [KhoaController::class, 'courses'])->name('courses');
+    Route::get('/{id}/courses', [FacultyController::class, 'layDanhSachMonHoc'])->name('courses');
 });
 
 // --- Danh mục Môn học ---

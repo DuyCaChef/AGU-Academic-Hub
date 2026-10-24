@@ -27,12 +27,14 @@ return new class extends Migration {
         });
 
         // Ràng buộc CHECK điểm từ 1 đến 5 sao
-        \Illuminate\Support\Facades\DB::statement(
-            'ALTER TABLE danh_gia_mon_hoc
-             ADD CONSTRAINT danh_gia_mon_hoc_difficulty_range CHECK (diem_do_kho BETWEEN 1 AND 5),
-             ADD CONSTRAINT danh_gia_mon_hoc_practicality_range CHECK (diem_thuc_tien BETWEEN 1 AND 5),
-             ADD CONSTRAINT danh_gia_mon_hoc_workload_range CHECK (diem_khoi_luong BETWEEN 1 AND 5)'
-        );
+        if (\Illuminate\Support\Facades\DB::getDriverName() !== 'sqlite') {
+            \Illuminate\Support\Facades\DB::statement(
+                'ALTER TABLE danh_gia_mon_hoc
+                 ADD CONSTRAINT danh_gia_mon_hoc_difficulty_range CHECK (diem_do_kho BETWEEN 1 AND 5),
+                 ADD CONSTRAINT danh_gia_mon_hoc_practicality_range CHECK (diem_thuc_tien BETWEEN 1 AND 5),
+                 ADD CONSTRAINT danh_gia_mon_hoc_workload_range CHECK (diem_khoi_luong BETWEEN 1 AND 5)'
+            );
+        }
 
         Schema::create('binh_chon_danh_gia', function (Blueprint $table) {
             $table->id('ma_binh_chon');

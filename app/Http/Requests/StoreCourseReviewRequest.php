@@ -19,7 +19,7 @@ class StoreCourseReviewRequest extends FormRequest{
             VaiTroNguoiDung::CUU_SINH_VIEN
         ]);
 
-        return $isRoleValid && $user->isActive();
+        return $isRoleValid && $user->dangHoatDong();
     }
 
     public function rules(): array{
@@ -79,7 +79,7 @@ class StoreCourseReviewRequest extends FormRequest{
             // 2. Quét từ ngữ thô tục qua ProfanityFilterService
             $filterService = app(ProfanityFilterService::class);
             $nhanXet = (string) $this->input('nhan_xet');
-            $violations = $filterService->getViolations($nhanXet);
+            $violations = $filterService->layDanhSachViPham($nhanXet);
 
             if (!empty($violations)) {
                 $badWordsList = implode(', ', array_map(fn($w) => "\"{$w}\"", $violations));

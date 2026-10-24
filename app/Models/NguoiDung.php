@@ -114,18 +114,18 @@ class NguoiDung extends Authenticatable
         return $this->hasMany(YeuCauXacThuc::class, 'ma_nguoi_dung', 'ma_nguoi_dung');
     }
 
-    // --- Role Helpers ---
-    public function isAdmin(): bool
+    // --- Trợ giúp phân quyền ---
+    public function laQuanTriVien(): bool
     {
         return $this->vai_tro === VaiTroNguoiDung::QUAN_TRI_VIEN;
     }
 
-    public function isModerator(): bool
+    public function laKiemDuyetVien(): bool
     {
         return $this->vai_tro === VaiTroNguoiDung::KIEM_DUYET_VIEN;
     }
 
-    public function isActive(): bool
+    public function dangHoatDong(): bool
     {
         return $this->trang_thai === TrangThaiNguoiDung::DANG_HOAT_DONG;
     }

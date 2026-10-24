@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\BaoCaoViPham;
 use Illuminate\Http\Request;
 
-class BaoCaoViPhamController extends Controller
+class ViolationReportController extends Controller
 {
     /**
      * Display a listing of the resource.

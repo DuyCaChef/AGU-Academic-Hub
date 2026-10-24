@@ -12,8 +12,8 @@ enum TrangThaiYeuCauTaiLieu: string
     public function label(): string
     {
         return match ($this) {
-            self::MO => 'Đang mở',
-            self::DA_HOAN_THANH => 'Đã hoàn thành',
+            self::MO => 'Đang mở tìm kiếm',
+            self::DA_HOAN_THANH => 'Đã giải quyết',
             self::DONG => 'Đã đóng',
             self::DA_HUY => 'Đã hủy',
         };

@@ -1,5 +1,5 @@
 import { Link, usePage } from "@inertiajs/react";
-import KhoaVaMonHocTree from "./KhoaVaMonHocTree";
+import FacultyCourseTree from "./FacultyCourseTree";
 import {
     LayoutDashboard,
     BookOpen,
@@ -86,7 +86,7 @@ export default function StudentSidebar({
                 </div>
                 {/* danh sach khoa va mon hoc */}
                 <div className="flex-1 overflow-y-auto p-4">
-                    <KhoaVaMonHocTree
+                    <FacultyCourseTree
                         faculities={faculties}
                     />
                 </div>

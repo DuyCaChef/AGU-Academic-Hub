@@ -6,7 +6,7 @@ use App\Models\MonHoc;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 
-class KhoaController extends Controller
+class FacultyController extends Controller
 {
     // hien thi danh sach khoa va mon hoc
     public function index(Request $request)
@@ -29,7 +29,7 @@ class KhoaController extends Controller
     /**
      * Lấy danh sách môn học thuộc một khoa.
      */
-    public function courses($id)
+    public function layDanhSachMonHoc($id)
     {
         $courses = MonHoc::query()
             ->where('ma_khoa', $id)

@@ -29,7 +29,7 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-        $request->authenticate();
+        $request->xacThucDangNhap();
 
         $request->session()->regenerate();
 
@@ -60,7 +60,7 @@ class AuthenticatedSessionController extends Controller
         return redirect('/');
     }
 
-    public function logout(Request $request)
+    public function dangXuat(Request $request)
     {
         Auth::guard('web')->logout();
 
