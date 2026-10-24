@@ -21,7 +21,9 @@ return new class extends Migration {
             $table->softDeletes('ngay_xoa_tam');
 
             $table->index('ten_mon_hoc');
-            $table->fullText(['ma_hoc_phan', 'ten_mon_hoc', 'mo_ta'], 'mon_hocs_search_fulltext');
+            if (\Illuminate\Support\Facades\DB::getDriverName() !== 'sqlite') {
+                $table->fullText(['ma_hoc_phan', 'ten_mon_hoc', 'mo_ta'], 'mon_hocs_search_fulltext');
+            }
         });
 
         Schema::create('mon_hoc_chuyen_nganh', function (Blueprint $table) {

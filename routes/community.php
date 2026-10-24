@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CourseReviewController;
 use App\Http\Controllers\KycController;
+use App\Http\Controllers\WishlistBountyController;
 use Illuminate\Support\Facades\Route;
 
 // Community Route (IAM, Reviews và Bounty)
@@ -62,34 +63,21 @@ Route::middleware('auth')->group(function () {
     // =========================================================================
     Route::prefix('yeu-cau-tai-lieu')->name('document-requests.')->group(function () {
         // Danh sách các bài đăng tìm tài liệu
-        Route::get('/', function () {
-            return inertia('Wishlist/Index');
-        })->name('index');
-
+        Route::get('/', [WishlistBountyController::class, 'index'])->name('index');
         // Tạo yêu cầu mới (đóng băng điểm thưởng từ vi_diem)
-        Route::post('/', function () {
-            return back()->with('info', 'Chức năng tạo yêu cầu đang được hoàn thiện.');
-        })->name('store');
+        Route::post('/', [WishlistBountyController::class, 'store'])->name('store');
 
         // Chi tiết yêu cầu & các bài nộp phản hồi
-        Route::get('/{ma_yeu_cau}', function ($ma_yeu_cau) {
-            return inertia('Wishlist/Show', ['ma_yeu_cau' => $ma_yeu_cau]);
-        })->name('show');
+       Route::get('/{ma_yeu_cau}', [WishlistBountyController::class, 'show'])->name('show');
 
-        // Đóng góp tài liệu phản hồi yêu cầu để nhận Bounty
-        Route::post('/{ma_yeu_cau}/dong-gop', function ($ma_yeu_cau) {
-            return back()->with('info', 'Chức năng đóng góp tài liệu đang được hoàn thiện.');
-        })->name('fulfill');
+       // Đóng góp tài liệu phản hồi yêu cầu để nhận Bounty
+        Route::post('/{ma_yeu_cau}/dong-gop', [WishlistBountyController::class, 'fulfill'])->name('fulfill');
 
         // Người tạo yêu cầu xác nhận tài liệu hợp lệ -> Giải ngân Bounty Points
-        Route::post('/{ma_yeu_cau}/xac-nhan', function ($ma_yeu_cau) {
-            return back()->with('success', 'Xác nhận thành công! Điểm thưởng đã được giải ngân.');
-        })->name('confirm');
+        Route::post('/{ma_yeu_cau}/xac-nhan', [WishlistBountyController::class, 'confirm'])->name('confirm');
 
         // Hủy yêu cầu -> Hoàn lại điểm đóng băng vào ví
-        Route::delete('/{ma_yeu_cau}', function ($ma_yeu_cau) {
-            return back()->with('success', 'Đã hủy yêu cầu và hoàn điểm vào ví.');
-        })->name('destroy');
+        Route::delete('/{ma_yeu_cau}', [WishlistBountyController::class, 'destroy'])->name('destroy');
     });
 
     // =========================================================================
