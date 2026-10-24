@@ -37,10 +37,10 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function () {
     // Đổi mật khẩu bắt buộc cho sinh viên lần đầu đăng nhập
-    Route::get('first-time-password', [\App\Http\Controllers\Auth\FirstTimePasswordController::class, 'showChangeForm'])
+    Route::get('first-time-password', [\App\Http\Controllers\Auth\FirstTimePasswordController::class, 'hienThiFormDoiMatKhau'])
         ->name('password.change');
 
-    Route::post('first-time-password', [\App\Http\Controllers\Auth\FirstTimePasswordController::class, 'updatePassword'])
+    Route::post('first-time-password', [\App\Http\Controllers\Auth\FirstTimePasswordController::class, 'capNhatMatKhau'])
         ->name('password.change.update');
 
     Route::get('verify-email', EmailVerificationPromptController::class)

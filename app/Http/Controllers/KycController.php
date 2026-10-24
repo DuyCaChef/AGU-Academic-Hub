@@ -28,7 +28,7 @@ class KycController extends Controller
     /**
      * Màn hình nộp hồ sơ đăng ký tài khoản cho Cựu sinh viên.
      */
-    public function showRegistrationForm(): Response
+    public function hienThiFormDangKy(): Response
     {
         return Inertia::render('Auth/AlumniRegister', [
             'danh_sach_khoa' => Khoa::select('ma_khoa', 'ten_khoa', 'ky_hieu_khoa')->get(),
@@ -38,7 +38,7 @@ class KycController extends Controller
     /**
      * Lưu thông tin đăng ký cựu sinh viên và lưu ảnh vào private storage.
      */
-    public function storeAlumniRegistration(KycCuuSinhVienRequest $request): RedirectResponse
+    public function luuDangKyCuuSinhVien(KycCuuSinhVienRequest $request): RedirectResponse
     {
         $validated = $request->validated();
         $file = $request->file('anh_minh_chung');
@@ -96,7 +96,7 @@ class KycController extends Controller
     /**
      * Hàng đợi duyệt KYC cho Admin/Moderator (Cấp Signed URL 30 phút).
      */
-    public function adminQueue(Request $request): Response
+    public function hangDoiKyc(Request $request): Response
     {
         $danhSach = YeuCauXacThuc::with(['nguoiDung:ma_nguoi_dung,ho_ten,email,mssv,nam_tot_nghiep'])
             ->where('trang_thai', TrangThaiXacThuc::CHO_DUYET)
@@ -130,11 +130,11 @@ class KycController extends Controller
      * Stream file nhị phân khi Signed URL hợp lệ.
      * Chỉ Admin hoặc Moderator mới được xem — middleware 'signed' kiểm tra chữ ký URL.
      */
-    public function preview(Request $request, int $id): BinaryFileResponse
+    public function xemTruocMinhChung(Request $request, int $id): BinaryFileResponse
     {
-        $viewer = $request->user();
+        $nguoiXem = $request->user();
 
-        if (!$viewer->isAdmin() && !$viewer->isModerator()) {
+        if (!$nguoiXem->laQuanTriVien() && !$nguoiXem->laKiemDuyetVien()) {
             abort(403, 'Bạn không có thẩm quyền truy cập tệp minh chứng cá nhân này.');
         }
 
@@ -158,7 +158,7 @@ class KycController extends Controller
     /**
      * Phê duyệt hồ sơ: Chuyển tài khoản sang ACTIVE.
      */
-    public function approve(Request $request, int $id): RedirectResponse
+    public function pheDuyetHoSo(Request $request, int $id): RedirectResponse
     {
         $kyc = YeuCauXacThuc::with('nguoiDung')->findOrFail($id);
 
@@ -187,7 +187,7 @@ class KycController extends Controller
     /**
      * Từ chối hồ sơ kèm lý do.
      */
-    public function reject(Request $request, int $id): RedirectResponse
+    public function tuChoiHoSo(Request $request, int $id): RedirectResponse
     {
         $request->validate([
             'ly_do_tu_choi' => ['required', 'string', 'min:6', 'max:500'],

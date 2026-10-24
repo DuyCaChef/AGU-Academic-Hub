@@ -21,13 +21,13 @@ class ProfanityFilterService
     /**
      * Kiểm tra xem chuỗi văn bản có chứa từ cấm hay không.
      */
-    public function hasProfanity(?string $text): bool
+    public function coTuCam(?string $vanBan): bool
     {
-        if (empty($text)) {
+        if (empty($vanBan)) {
             return false;
         }
 
-        return count($this->getViolations($text)) > 0;
+        return count($this->layDanhSachViPham($vanBan)) > 0;
     }
 
     /**
@@ -35,48 +35,48 @@ class ProfanityFilterService
      *
      * @return array<string>
      */
-    public function getViolations(?string $text): array
+    public function layDanhSachViPham(?string $vanBan): array
     {
-        if (empty($text)) {
+        if (empty($vanBan)) {
             return [];
         }
 
-        $patterns = $this->getCompiledPatterns();
-        $normalizedText = $this->normalizeText($text);
-        $violations = [];
+        $patterns = $this->layMauBienDich();
+        $vanBanChuanHoa = $this->chuanHoaVanBan($vanBan);
+        $danhSachViPham = [];
 
-        foreach ($patterns as $word => $pattern) {
-            if (preg_match($pattern, $normalizedText) || preg_match($pattern, mb_strtolower($text, 'UTF-8'))) {
-                $violations[] = $word;
+        foreach ($patterns as $tu => $pattern) {
+            if (preg_match($pattern, $vanBanChuanHoa) || preg_match($pattern, mb_strtolower($vanBan, 'UTF-8'))) {
+                $danhSachViPham[] = $tu;
             }
         }
 
-        return array_unique($violations);
+        return array_unique($danhSachViPham);
     }
 
     /**
      * Che từ cấm trong chuỗi bằng ký tự thay thế (mặc định: ***).
      */
-    public function clean(?string $text, string $replacement = '***'): string
+    public function locNoiDung(?string $vanBan, string $kyTuThayThe = '***'): string
     {
-        if (empty($text)) {
+        if (empty($vanBan)) {
             return '';
         }
 
-        $patterns = $this->getCompiledPatterns();
-        $cleanedText = $text;
+        $patterns = $this->layMauBienDich();
+        $vanBanSach = $vanBan;
 
         foreach ($patterns as $pattern) {
-            $cleanedText = preg_replace($pattern, $replacement, $cleanedText);
+            $vanBanSach = preg_replace($pattern, $kyTuThayThe, $vanBanSach);
         }
 
-        return $cleanedText;
+        return $vanBanSach;
     }
 
     /**
      * Xóa cache từ cấm khi Admin cập nhật danh sách.
      */
-    public function clearCache(): void
+    public function xoaCache(): void
     {
         Cache::forget(self::CACHE_KEY);
     }
@@ -84,55 +84,55 @@ class ProfanityFilterService
     /**
      * Biên dịch Regex Pattern từ CSDL hoặc danh sách mặc định.
      */
-    private function getCompiledPatterns(): array
+    private function layMauBienDich(): array
     {
         return Cache::remember(self::CACHE_KEY, now()->addMinutes(self::CACHE_TTL_MINUTES), function () {
-            $words = [];
+            $tuNgu = [];
 
             // Linh hoạt kiểm tra tên bảng từ cấm trong CSDL (tu_cam hoặc prohibited_words)
-            $tableName = Schema::hasTable('tu_cam') ? 'tu_cam' : (Schema::hasTable('prohibited_words') ? 'prohibited_words' : null);
+            $tenBang = Schema::hasTable('tu_cam') ? 'tu_cam' : (Schema::hasTable('prohibited_words') ? 'prohibited_words' : null);
 
-            if ($tableName) {
+            if ($tenBang) {
                 // Ưu tiên đọc cột tu_ngu hoặc word
-                $column = Schema::hasColumn($tableName, 'tu_ngu') ? 'tu_ngu' : 'word';
-                $dbWords = DB::table($tableName)
-                    ->pluck($column)
+                $cot = Schema::hasColumn($tenBang, 'tu_ngu') ? 'tu_ngu' : 'word';
+                $tuNguTuCSDL = DB::table($tenBang)
+                    ->pluck($cot)
                     ->map(fn($w) => trim((string)$w))
                     ->filter()
                     ->toArray();
-                $words = array_merge($words, $dbWords);
+                $tuNgu = array_merge($tuNgu, $tuNguTuCSDL);
             }
 
-            if (empty($words)) {
-                $words = $this->defaultWords;
+            if (empty($tuNgu)) {
+                $tuNgu = $this->defaultWords;
             }
 
-            $compiled = [];
-            foreach (array_unique($words) as $rawWord) {
-                $word = mb_strtolower(trim($rawWord), 'UTF-8');
-                if ($word === '') {
+            $bienDich = [];
+            foreach (array_unique($tuNgu) as $tuTho) {
+                $tu = mb_strtolower(trim($tuTho), 'UTF-8');
+                if ($tu === '') {
                     continue;
                 }
 
                 // Hỗ trợ bắt từ ngữ bị chèn khoảng trắng/dấu ngắt: đ.m, đ_m, d m
-                $chars = preg_split('//u', preg_quote($word, '/'), -1, PREG_SPLIT_NO_EMPTY);
-                $escapedPattern = implode('[\\s\\.\\_\\-\\~\\*]*', $chars);
+                $kyTu = preg_split('//u', preg_quote($tu, '/'), -1, PREG_SPLIT_NO_EMPTY);
+                $mauThoat = implode('[\\s\\.\\_\\-\\~\\*]*', $kyTu);
 
-                $compiled[$word] = '/(?<=^|[\\s\\.\\,\\;\\!\\?\\(\\)\\[\\]\\-_\\/\\\\])' . $escapedPattern . '(?=$|[\\s\\.\\,\\;\\!\\?\\(\\)\\[\\]\\-_\\/\\\\])/ui';
+                $bienDich[$tu] = '/(?<=^|[\\s\\.\\,\\;\\!\\?\\(\\)\\[\\]\\-_\\/\\\\])' . $mauThoat . '(?=$|[\\s\\.\\,\\;\\!\\?\\(\\)\\[\\]\\-_\\/\\\\])/ui';
             }
 
-            return $compiled;
+            return $bienDich;
         });
     }
 
     /**
      * Chuẩn hóa Leetspeak lách luật sang ký tự thông thường.
      */
-    private function normalizeText(string $text): string
+    private function chuanHoaVanBan(string $vanBan): string
     {
-        $normalized = mb_strtolower($text, 'UTF-8');
+        $chuanHoa = mb_strtolower($vanBan, 'UTF-8');
 
-        $leetspeakMap = [
+        $bangLeetspeak = [
             '0' => 'o',
             '1' => 'i',
             '3' => 'e',
@@ -141,6 +141,6 @@ class ProfanityFilterService
             '!' => 'i',
         ];
 
-        return strtr($normalized, $leetspeakMap);
+        return strtr($chuanHoa, $bangLeetspeak);
     }
 }

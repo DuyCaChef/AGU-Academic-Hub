@@ -18,7 +18,7 @@ class FirstTimePasswordController extends Controller
     /**
      * Hiển thị giao diện bắt buộc đổi mật khẩu lần đầu cho sinh viên.
      */
-    public function showChangeForm(): Response|RedirectResponse
+    public function hienThiFormDoiMatKhau(): Response|RedirectResponse
     {
         $user = Auth::user();
 
@@ -39,7 +39,7 @@ class FirstTimePasswordController extends Controller
     /**
      * Cập nhật mật khẩu mới và kích hoạt tài khoản sinh viên.
      */
-    public function updatePassword(Request $request): RedirectResponse
+    public function capNhatMatKhau(Request $request): RedirectResponse
     {
         $request->validate([
             'password' => ['required', 'confirmed', Password::defaults()],
@@ -59,7 +59,7 @@ class FirstTimePasswordController extends Controller
         // 2. Đánh dấu bản ghi trong bảng dữ liệu thô sinh viên đã kích hoạt
         $rawStudent = DanhSachSinhVienRaw::where('mssv', $user->mssv)->first();
         if ($rawStudent) {
-            $rawStudent->markAsActivated();
+            $rawStudent->danhDauKichHoat();
         }
 
         return redirect()->route('dashboard')->with(

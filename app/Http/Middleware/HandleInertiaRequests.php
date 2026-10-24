@@ -53,10 +53,10 @@ class HandleInertiaRequests extends Middleware {
                     'trang_thai' => $user->trang_thai?->value, 
                     'ten_trang_thai' => $user->trang_thai?->label(),
 
-                    // Các cờ phân quyền nhanh (Helper Flags)
-                    'la_quan_tri' => $user->isAdmin(),
-                    'la_kiem_duyet' => $user->isModerator(),
-                    'dang_hoat_dong' => $user->isActive(),
+                    // Cờ phân quyền nhanh (Helper Flags)
+                    'la_quan_tri' => $user->laQuanTriVien(),
+                    'la_kiem_duyet' => $user->laKiemDuyetVien(),
+                    'dang_hoat_dong' => $user->dangHoatDong(),
 
                     // Thông tin Khoa đào tạo
                     'khoa' => $user->khoa ? [

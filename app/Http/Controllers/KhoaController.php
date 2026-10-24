@@ -29,7 +29,7 @@ class KhoaController extends Controller
     /**
      * Lấy danh sách môn học thuộc một khoa.
      */
-    public function courses($id)
+    public function layDanhSachMonHoc($id)
     {
         $courses = MonHoc::query()
             ->where('ma_khoa', $id)

@@ -27,7 +27,7 @@ Route::prefix('faculties')->name('faculties.')->group(function () {
     Route::get('/', [KhoaController::class, 'index'])->name('index');
 
     // Lấy danh sách môn học thuộc một Khoa cụ thể
-    Route::get('/{id}/courses', [KhoaController::class, 'courses'])->name('courses');
+    Route::get('/{id}/courses', [KhoaController::class, 'layDanhSachMonHoc'])->name('courses');
 });
 
 // --- Danh mục Môn học ---

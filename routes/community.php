@@ -22,8 +22,8 @@ Route::middleware('auth')->group(function () {
         // Xem trạng thái hồ sơ xác thực
         Route::get('/trang-thai', [KycController::class, 'status'])->name('status');
 
-        // CẤP SIGNED URL XEM ẢNH: Stream ảnh từ private storage khi chữ ký hợp lệ
-        Route::get('/xem-anh/{ma_xac_thuc}', [KycController::class, 'preview'])
+        // CấP SIGNED URL XEM ẢNH: Stream ảnh từ private storage khi chữ ký hợp lệ
+        Route::get('/xem-anh/{ma_xac_thuc}', [KycController::class, 'xemTruocMinhChung'])
             ->name('preview')
             ->middleware('signed');
     });
@@ -49,11 +49,11 @@ Route::middleware('auth')->group(function () {
             ->name('destroy');
 
         // Đánh giá review hữu ích
-        Route::post('/{ma_danh_gia}/huu-ich', [CourseReviewController::class, 'helpful'])
+        Route::post('/{ma_danh_gia}/huu-ich', [CourseReviewController::class, 'binhChonHuuIch'])
             ->name('helpful');
 
         // Báo cáo review vi phạm tiêu chuẩn cộng đồng
-        Route::post('/{ma_danh_gia}/bao-cao', [CourseReviewController::class, 'report'])
+        Route::post('/{ma_danh_gia}/bao-cao', [CourseReviewController::class, 'baoCaoViPham'])
             ->name('report');
     });
 
@@ -106,13 +106,13 @@ Route::middleware('auth')->group(function () {
     // =========================================================================
     Route::prefix('quan-tri')->name('admin.')->group(function () {
         // Hàng đợi duyệt minh chứng thẻ SV / Bằng tốt nghiệp
-        Route::get('/duyet-kyc', [KycController::class, 'adminQueue'])->name('kyc.index');
+        Route::get('/duyet-kyc', [KycController::class, 'hangDoiKyc'])->name('kyc.index');
 
         // Phê duyệt hồ sơ KYC
-        Route::put('/duyet-kyc/{ma_xac_thuc}/duyet', [KycController::class, 'approve'])->name('kyc.approve');
+        Route::put('/duyet-kyc/{ma_xac_thuc}/duyet', [KycController::class, 'pheDuyetHoSo'])->name('kyc.approve');
 
         // Từ chối hồ sơ KYC kèm lý do
-        Route::put('/duyet-kyc/{ma_xac_thuc}/tu-choi', [KycController::class, 'reject'])->name('kyc.reject');
+        Route::put('/duyet-kyc/{ma_xac_thuc}/tu-choi', [KycController::class, 'tuChoiHoSo'])->name('kyc.reject');
 
         // Quản lý danh sách người dùng & Cập nhật trạng thái (Khóa/Mở)
         Route::get('/nguoi-dung', function () {

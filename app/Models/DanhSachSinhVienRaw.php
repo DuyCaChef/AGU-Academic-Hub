@@ -44,7 +44,7 @@ class DanhSachSinhVienRaw extends Model
     /**
      * Tìm bản ghi theo MSSV (không phân biệt hoa thường).
      */
-    public static function findByMssv(string $mssv): ?self
+    public static function timTheoMssv(string $mssv): ?self
     {
         return static::where('mssv', strtoupper(trim($mssv)))->first();
     }
@@ -60,7 +60,7 @@ class DanhSachSinhVienRaw extends Model
     /**
      * Đánh dấu đã kích hoạt và ghi thời gian.
      */
-    public function markAsActivated(): bool
+    public function danhDauKichHoat(): bool
     {
         return $this->update([
             'da_kich_hoat' => true,
