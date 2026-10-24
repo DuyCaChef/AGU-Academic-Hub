@@ -6,7 +6,7 @@ use App\Models\MonHoc;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 
-class KhoaController extends Controller
+class FacultyController extends Controller
 {
     // hien thi danh sach khoa va mon hoc
     public function index(Request $request)

@@ -6,7 +6,7 @@ use App\Enums\LoaiXacThuc;
 use App\Enums\TrangThaiNguoiDung;
 use App\Enums\TrangThaiXacThuc;
 use App\Enums\VaiTroNguoiDung;
-use App\Http\Requests\KycCuuSinhVienRequest;
+use App\Http\Requests\AlumniKycRequest;
 use App\Models\Khoa;
 use App\Models\NguoiDung;
 use App\Models\YeuCauXacThuc;
@@ -38,7 +38,7 @@ class KycController extends Controller
     /**
      * Lưu thông tin đăng ký cựu sinh viên và lưu ảnh vào private storage.
      */
-    public function luuDangKyCuuSinhVien(KycCuuSinhVienRequest $request): RedirectResponse
+    public function luuDangKyCuuSinhVien(AlumniKycRequest $request): RedirectResponse
     {
         $validated = $request->validated();
         $file = $request->file('anh_minh_chung');
