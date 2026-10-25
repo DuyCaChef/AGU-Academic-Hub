@@ -32,7 +32,7 @@ class DanhSachSinhVienRawSeeder extends Seeder
                 'mssv'               => 'DTH215002',
                 'ho_ten'             => 'Phạm Thị Thảo',
                 'email_sv'           => 'dth215002@student.agu.edu.vn',
-                'mat_khau_mac_dinh'  => $defaultPassword,
+                'mat_khau_mac_dinh'  => $defaultPassword,  // Mat khau da doi: Password@123456
                 'ma_khoa'            => 'CNTT',
                 'da_kich_hoat'       => false,
                 'kich_hoat_luc'      => null,

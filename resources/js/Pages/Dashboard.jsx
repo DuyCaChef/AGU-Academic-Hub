@@ -14,6 +14,7 @@ import {
     Compass,
     Users,
     ShieldCheck,
+    Coins,
 } from "lucide-react";
 import StudentLayout from "@/Layouts/StudentLayout";
 
@@ -25,6 +26,15 @@ const quickLinks = [
         icon: Search,
         href: "courses.index",
         iconColor: "text-blue-800",
+    },
+    {
+        title: "Săn thưởng tài liệu",
+        description:
+            "Treo thưởng tìm tài liệu còn thiếu hoặc đóng góp tài liệu để nhận Bounty điểm ví.",
+        icon: Coins,
+        href: "document-requests.index",
+        iconColor: "text-amber-600",
+        badge: "Bounty",
     },
     {
         title: "Duyệt danh sách khoa",
@@ -42,7 +52,7 @@ const quickLinks = [
         href: "documents.create",
         iconColor: "text-blue-800",
     },
-]
+];
 const gettingStarted = [
     {
         number: "1",
@@ -163,6 +173,14 @@ export default function Dashboard() {
                                 </Link>
 
                                 <Link
+                                    href={route("document-requests.index")}
+                                    className="inline-flex items-center gap-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 px-4 py-3 text-sm font-bold shadow-xs transition active:scale-95"
+                                >
+                                    <Coins size={17} />
+                                    Săn thưởng tài liệu
+                                </Link>
+
+                                <Link
                                     href={route("documents.create")}
                                     className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-4 py-3 text-sm font-semibold text-white ring-1 ring-inset ring-white/10 transition hover:bg-white/20"
                                 >
@@ -187,13 +205,30 @@ export default function Dashboard() {
                                         Hồ sơ sinh viên
                                     </p>
                                     <p className="mt-1 font-bold leading-5 text-white">
-                                        {user?.ma_sinh_vien || "AGU Student"}
+                                        {user?.mssv || user?.ma_sinh_vien || "AGU Student"}
                                     </p>
                                     <p className="mt-1 text-xs text-blue-100">
                                         Trường Đại học An Giang
                                     </p>
                                 </div>
                             </div>
+
+                            {/* Ví điểm Bounty shortcut */}
+                            {user?.vi_diem && (
+                                <Link
+                                    href={route("document-requests.index")}
+                                    className="mt-3 flex items-center justify-between rounded-xl bg-white/15 hover:bg-white/25 px-3 py-2 transition text-xs font-semibold"
+                                    title="Xem thị trường săn thưởng và ví điểm"
+                                >
+                                    <span className="flex items-center gap-1.5 text-blue-100">
+                                        <Coins size={14} className="text-amber-300" />
+                                        Ví khả dụng:
+                                    </span>
+                                    <span className="font-bold text-amber-300 text-xs">
+                                        {user.vi_diem.diem_kha_dung || 0} pts &rarr;
+                                    </span>
+                                </Link>
+                            )}
                         </div>
                     </div>
                 </section>
@@ -244,7 +279,7 @@ export default function Dashboard() {
                         trên nền tảng.
                     </p>
 
-                    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                         {quickLinks.map((item) => {
                             const Icon = item.icon;
 
@@ -263,9 +298,16 @@ export default function Dashboard() {
 
                                     <div className="min-w-0 flex-1">
                                         <div className="flex items-center justify-between gap-2">
-                                            <h3 className="font-bold text-slate-900">
-                                                {item.title}
-                                            </h3>
+                                            <div className="flex items-center gap-1.5 flex-wrap">
+                                                <h3 className="font-bold text-slate-900">
+                                                    {item.title}
+                                                </h3>
+                                                {item.badge && (
+                                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+                                                        {item.badge}
+                                                    </span>
+                                                )}
+                                            </div>
                                             <ArrowRight
                                                 size={17}
                                                 className="shrink-0 text-slate-400 transition group-hover:translate-x-1 group-hover:text-blue-700"

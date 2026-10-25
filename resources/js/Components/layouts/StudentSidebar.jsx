@@ -5,6 +5,7 @@ import {
     BookOpen,
     GraduationCap,
     CloudUpload,
+    Coins,
 } from "lucide-react";
 export default function StudentSidebar({
     faculties = [],
@@ -20,22 +21,28 @@ export default function StudentSidebar({
     const menuItems = [
         {
             label: "Tổng quan",
-            href: "/dashboard",
+            href: "/trang-chu",
             icon: LayoutDashboard,
         },
         {
             label: "Kho môn học",
-            href: "/kho-tai-lieu",
+            href: "/mon-hoc",
             icon: BookOpen,
         },
         {
+            label: "Săn thưởng tài liệu",
+            href: "/yeu-cau-tai-lieu",
+            icon: Coins,
+            badge: "Bounty",
+        },
+        {
             label: "Danh sách khoa",
-            href: "/danh-sach-khoa",
+            href: "/khoa",
             icon: GraduationCap,
         },
         {
             label: "Đăng tài liệu",
-            href: "/tai-lieu/tao",
+            href: "/tai-lieu/dang-tai",
             icon: CloudUpload,
         },
     ];
@@ -64,7 +71,7 @@ export default function StudentSidebar({
                     {menuItems.map((item) => {
                         const Icon = item.icon;
                         const isActive =
-                            page.url === item.href || (item.href !== "/dashboard" && page.url.startsWith(item.href));
+                            page.url === item.href || (item.href !== "/trang-chu" && page.url.startsWith(item.href));
                         return (
                             <Link
                                 key={item.href}
@@ -79,9 +86,14 @@ export default function StudentSidebar({
                                 `}
                             >
                                 <Icon size={18} strokeWidth={2} />
-                                <span>{item.label}</span>
+                                <span className="flex-1">{item.label}</span>
+                                {item.badge && (
+                                    <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+                                        {item.badge}
+                                    </span>
+                                )}
                             </Link>
-                        )
+                        );
                     })}
                 </div>
                 {/* danh sach khoa va mon hoc */}

@@ -11,7 +11,8 @@ import {
     Shield,
     ChevronDown,
     LogOut,
-    User
+    User,
+    Coins,
 } from 'lucide-react';
 
 
@@ -192,6 +193,16 @@ export default function StudentHeader({
                         <span className="hidden sm:inline">Đăng tài liệu</span>
                     </Link>
 
+                    {/* nút Săn thưởng tài liệu */}
+                    <Link
+                        href={typeof route === 'function' && route().has('document-requests.index') ? route('document-requests.index') : '/yeu-cau-tai-lieu'}
+                        className="flex items-center gap-1.5 bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs sm:text-sm px-3.5 py-2 rounded-full shadow-xs active:scale-95 transition-all"
+                        title="Thị trường yêu cầu & săn thưởng Bounty"
+                    >
+                        <Coins size={15} />
+                        <span className="hidden sm:inline">Săn thưởng</span>
+                    </Link>
+
                     {/* Điểm Uy Tín (Reputation Badge) */}
                     {user && (
                         <div
@@ -265,6 +276,23 @@ export default function StudentHeader({
                                     >
                                         <User size={16} /> Hồ sơ cá nhân
                                     </button>
+
+                                    {/* Săn thưởng tài liệu */}
+                                    <Link
+                                        href={typeof route === 'function' && route().has('document-requests.index') ? route('document-requests.index') : '/yeu-cau-tai-lieu'}
+                                        role='menuitem'
+                                        onClick={() => setIsUserMenuOpen(false)}
+                                        className='flex w-full items-center justify-between px-4 py-2.5 text-left text-sm text-text-secondary transition-colors hover:bg-surface-page hover:text-brand-primary'
+                                    >
+                                        <span className="flex items-center gap-3">
+                                            <Coins size={16} className="text-amber-500" /> Săn thưởng Bounty
+                                        </span>
+                                        {user.vi_diem && (
+                                            <span className="text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+                                                {user.vi_diem.diem_kha_dung || 0} pts
+                                            </span>
+                                        )}
+                                    </Link>
 
                                     {/* Đăng xuất */}
                                     <div className='border-t border-border-default pt-2'>
