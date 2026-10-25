@@ -21,14 +21,59 @@ class DanhGiaMonHoc extends Model
     protected $fillable = [
         'ma_mon_hoc',
         'ma_nguoi_dung',
+        'ma_nguoi_danh_gia',
         'hoc_ky',
         'diem_do_kho',
         'diem_thuc_tien',
         'diem_khoi_luong',
+        'diem_ap_luc_bai_tap',
         'noi_dung',
+        'nhan_xet',
         'an_danh',
+        'la_an_danh',
         'trang_thai',
     ];
+
+    // Accessors & Mutators hỗ trợ tương thích ngược giữa các tên trường
+    public function getDiemApLucBaiTapAttribute(): ?int
+    {
+        return $this->attributes['diem_khoi_luong'] ?? null;
+    }
+
+    public function setDiemApLucBaiTapAttribute($value): void
+    {
+        $this->attributes['diem_khoi_luong'] = $value;
+    }
+
+    public function getMaNguoiDanhGiaAttribute(): ?int
+    {
+        return $this->attributes['ma_nguoi_dung'] ?? null;
+    }
+
+    public function setMaNguoiDanhGiaAttribute($value): void
+    {
+        $this->attributes['ma_nguoi_dung'] = $value;
+    }
+
+    public function getNhanXetAttribute(): ?string
+    {
+        return $this->attributes['noi_dung'] ?? null;
+    }
+
+    public function setNhanXetAttribute($value): void
+    {
+        $this->attributes['noi_dung'] = $value;
+    }
+
+    public function getLaAnDanhAttribute(): ?bool
+    {
+        return isset($this->attributes['an_danh']) ? (bool) $this->attributes['an_danh'] : null;
+    }
+
+    public function setLaAnDanhAttribute($value): void
+    {
+        $this->attributes['an_danh'] = $value;
+    }
 
     protected function casts(): array
     {

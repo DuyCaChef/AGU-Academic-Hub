@@ -31,9 +31,12 @@ class StoreCourseReviewRequest extends FormRequest{
             ],
             'diem_do_kho'         => ['required', 'integer', 'min:1', 'max:5'],
             'diem_thuc_tien'      => ['required', 'integer', 'min:1', 'max:5'],
-            'diem_ap_luc_bai_tap' => ['required', 'integer', 'min:1', 'max:5'],
-            'nhan_xet'            => ['required', 'string', 'min:10', 'max:2000'],
-            'la_an_danh'          => ['boolean'],
+            'diem_khoi_luong'     => ['nullable', 'integer', 'min:1', 'max:5'],
+            'diem_ap_luc_bai_tap' => ['nullable', 'integer', 'min:1', 'max:5'],
+            'noi_dung'            => ['nullable', 'string', 'min:10', 'max:2000'],
+            'nhan_xet'            => ['nullable', 'string', 'min:10', 'max:2000'],
+            'la_an_danh'          => ['nullable', 'boolean'],
+            'an_danh'             => ['nullable', 'boolean'],
         ];
     }
 
@@ -41,17 +44,25 @@ class StoreCourseReviewRequest extends FormRequest{
         return [
             'hoc_ky.required'              => 'Vui lòng chọn học kỳ tham gia môn học.',
             'hoc_ky.regex'                 => 'Định dạng học kỳ không hợp lệ. Chuẩn mẫu: 2025-1 hoặc 2026-2.',
-            'diem_do_kho.between'          => 'Điểm độ khó phải nằm trong khoảng từ 1 đến 5 sao.',
-            'diem_thuc_tien.between'       => 'Điểm thực tiễn phải nằm trong khoảng từ 1 đến 5 sao.',
-            'diem_ap_luc_bai_tap.between'  => 'Điểm áp lực bài tập phải nằm trong khoảng từ 1 đến 5 sao.',
-            'nhan_xet.required'            => 'Nội dung chia sẻ kinh nghiệm không được để trống.',
+            'diem_do_kho.required'         => 'Vui lòng đánh giá điểm độ khó.',
+            'diem_do_kho.min'              => 'Điểm độ khó phải nằm trong khoảng từ 1 đến 5 sao.',
+            'diem_do_kho.max'              => 'Điểm độ khó phải nằm trong khoảng từ 1 đến 5 sao.',
+            'diem_thuc_tien.required'      => 'Vui lòng đánh giá điểm thực tiễn.',
+            'diem_thuc_tien.min'           => 'Điểm thực tiễn phải nằm trong khoảng từ 1 đến 5 sao.',
+            'diem_thuc_tien.max'           => 'Điểm thực tiễn phải nằm trong khoảng từ 1 đến 5 sao.',
+            'diem_khoi_luong.min'          => 'Điểm khối lượng phải nằm trong khoảng từ 1 đến 5 sao.',
+            'diem_khoi_luong.max'          => 'Điểm khối lượng phải nằm trong khoảng từ 1 đến 5 sao.',
+            'diem_ap_luc_bai_tap.min'      => 'Điểm áp lực bài tập phải nằm trong khoảng từ 1 đến 5 sao.',
+            'diem_ap_luc_bai_tap.max'      => 'Điểm áp lực bài tập phải nằm trong khoảng từ 1 đến 5 sao.',
             'nhan_xet.min'                 => 'Nội dung đánh giá cần tối thiểu 10 ký tự.',
             'nhan_xet.max'                 => 'Nội dung đánh giá không được vượt quá 2000 ký tự.',
+            'noi_dung.min'                 => 'Nội dung đánh giá cần tối thiểu 10 ký tự.',
+            'noi_dung.max'                 => 'Nội dung đánh giá không được vượt quá 2000 ký tự.',
         ];
     }
 
     // Hậu kiểm: Chống spam 1 SV/1 môn/1 học kỳ & Quét từ cấm.
-   public function withValidator(Validator $validator): void
+    public function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $validator) {
             $user = $this->user();
@@ -63,9 +74,24 @@ class StoreCourseReviewRequest extends FormRequest{
                 return;
             }
 
+            // Kiểm tra điểm khối lượng / áp lực bài tập
+            $workload = $this->input('diem_khoi_luong') ?? $this->input('diem_ap_luc_bai_tap');
+            if ($workload === null || !in_array((int)$workload, [1, 2, 3, 4, 5])) {
+                $validator->errors()->add('diem_ap_luc_bai_tap', 'Vui lòng đánh giá điểm khối lượng học tập (1-5 sao).');
+            }
+
+            // Kiểm tra nội dung nhận xét
+            $nhanXet = trim((string) ($this->input('nhan_xet') ?? $this->input('noi_dung')));
+            if (empty($nhanXet)) {
+                $validator->errors()->add('nhan_xet', 'Nội dung chia sẻ kinh nghiệm không được để trống.');
+            } elseif (mb_strlen($nhanXet) < 10) {
+                $validator->errors()->add('nhan_xet', 'Nội dung đánh giá cần tối thiểu 10 ký tự.');
+            }
+
             // 1. Chống spam: Mỗi sinh viên chỉ được review 1 môn trong 1 học kỳ cụ thể
-            $daDanhGia = DanhGiaMonHoc::where('ma_mon_hoc', $monHoc->ma_mon_hoc)
-                ->where('ma_nguoi_danh_gia', $user->ma_nguoi_dung)
+            $userId = $user->ma_nguoi_dung ?? $user->getKey();
+            $daDanhGia = DanhGiaMonHoc::where('ma_mon_hoc', $monHoc->ma_mon_hoc ?? $monHoc->getKey())
+                ->where('ma_nguoi_dung', $userId)
                 ->where('hoc_ky', $this->input('hoc_ky'))
                 ->exists();
 
@@ -77,16 +103,17 @@ class StoreCourseReviewRequest extends FormRequest{
             }
 
             // 2. Quét từ ngữ thô tục qua ProfanityFilterService
-            $filterService = app(ProfanityFilterService::class);
-            $nhanXet = (string) $this->input('nhan_xet');
-            $violations = $filterService->layDanhSachViPham($nhanXet);
+            if (!empty($nhanXet)) {
+                $filterService = app(ProfanityFilterService::class);
+                $violations = $filterService->layDanhSachViPham($nhanXet);
 
-            if (!empty($violations)) {
-                $badWordsList = implode(', ', array_map(fn($w) => "\"{$w}\"", $violations));
-                $validator->errors()->add(
-                    'nhan_xet',
-                    "Nội dung nhận xét chứa từ ngữ không phù hợp chuẩn mực: {$badWordsList}. Vui lòng chỉnh sửa trước khi gửi."
-                );
+                if (!empty($violations)) {
+                    $badWordsList = implode(', ', array_map(fn($w) => "\"{$w}\"", $violations));
+                    $validator->errors()->add(
+                        'nhan_xet',
+                        "Nội dung nhận xét chứa từ ngữ không phù hợp chuẩn mực: {$badWordsList}. Vui lòng chỉnh sửa trước khi gửi."
+                    );
+                }
             }
         });
     }

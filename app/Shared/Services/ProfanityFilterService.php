@@ -14,8 +14,10 @@ class ProfanityFilterService
 
     // Danh sách từ cấm dự phòng
     private array $defaultWords = [
-        'đm', 'đcm', 'dcm', 'vcl', 'vkl', 'clgt', 'địt', 'đụ', 'lồn', 'buồi', 
-        'cặc', 'chó chết', 'ngu vcl', 'mẹ kiếp', 'đĩ', 'thằng chó', 'con mẹ', 'cc', 'cl'
+        'đm', 'đcm', 'dcm', 'dm', 'đkm', 'dkm', 'vcl', 'vkl', 'clgt', 'địt', 'đụ', 'lồn', 'buồi', 
+        'cặc', 'chó chết', 'ngu vcl', 'mẹ kiếp', 'đĩ', 'thằng chó', 'con mẹ', 'cc', 'cl',
+        'chó', 'súc vật', 'lừa đảo', 'khốn nạn', 'thằng ngu', 'mẹ mày', 'bố mày', 'cút', 'đậu má',
+        'vãi cặc', 'lồn má', 'má nó'
     ];
 
     /**
@@ -93,14 +95,28 @@ class ProfanityFilterService
             $tenBang = Schema::hasTable('tu_cam') ? 'tu_cam' : (Schema::hasTable('prohibited_words') ? 'prohibited_words' : null);
 
             if ($tenBang) {
-                // Ưu tiên đọc cột tu_ngu hoặc word
-                $cot = Schema::hasColumn($tenBang, 'tu_ngu') ? 'tu_ngu' : 'word';
-                $tuNguTuCSDL = DB::table($tenBang)
-                    ->pluck($cot)
-                    ->map(fn($w) => trim((string)$w))
-                    ->filter()
-                    ->toArray();
-                $tuNgu = array_merge($tuNgu, $tuNguTuCSDL);
+                // Hỗ trợ tên cột tu_khoa, tu_ngu, hoặc word
+                $cot = null;
+                if (Schema::hasColumn($tenBang, 'tu_khoa')) {
+                    $cot = 'tu_khoa';
+                } elseif (Schema::hasColumn($tenBang, 'tu_ngu')) {
+                    $cot = 'tu_ngu';
+                } elseif (Schema::hasColumn($tenBang, 'word')) {
+                    $cot = 'word';
+                }
+
+                if ($cot) {
+                    $query = DB::table($tenBang);
+                    if (Schema::hasColumn($tenBang, 'dang_hoat_dong')) {
+                        $query->where('dang_hoat_dong', true);
+                    }
+                    $tuNguTuCSDL = $query
+                        ->pluck($cot)
+                        ->map(fn($w) => trim((string)$w))
+                        ->filter()
+                        ->toArray();
+                    $tuNgu = array_merge($tuNgu, $tuNguTuCSDL);
+                }
             }
 
             if (empty($tuNgu)) {
@@ -117,8 +133,7 @@ class ProfanityFilterService
                 // Hỗ trợ bắt từ ngữ bị chèn khoảng trắng/dấu ngắt: đ.m, đ_m, d m
                 $kyTu = preg_split('//u', preg_quote($tu, '/'), -1, PREG_SPLIT_NO_EMPTY);
                 $mauThoat = implode('[\\s\\.\\_\\-\\~\\*]*', $kyTu);
-
-                $bienDich[$tu] = '/(?<=^|[\\s\\.\\,\\;\\!\\?\\(\\)\\[\\]\\-_\\/\\\\])' . $mauThoat . '(?=$|[\\s\\.\\,\\;\\!\\?\\(\\)\\[\\]\\-_\\/\\\\])/ui';
+                $bienDich[$tu] = '/(?<=^|[^\p{L}\p{N}])' . $mauThoat . '(?=$|[^\p{L}\p{N}])/ui';
             }
 
             return $bienDich;
