@@ -13,9 +13,8 @@ use Illuminate\Validation\ValidationException;
 
 class ReputationService
 {
-    /**
-     * Khóa dòng ví điểm trong CSDL để chống Race Condition.
-     */
+
+    // Khóa dòng ví điểm trong CSDL để chống Race Condition.
     public function khoaViDiem(int $maNguoiDung): ViDiem
     {
         return ViDiem::where('ma_nguoi_dung', $maNguoiDung)
@@ -26,10 +25,8 @@ class ReputationService
             );
     }
 
-    /**
-     * Đóng băng điểm thưởng khi sinh viên tạo yêu cầu tìm tài liệu.
-     * Số dư khả dụng trừ đi, điểm tạm giữ tăng lên tương ứng.
-     */
+    // Đóng băng điểm thưởng khi sinh viên tạo yêu cầu tìm tài liệu.
+    //Số dư khả dụng trừ đi, điểm tạm giữ tăng lên tương ứng.
     public function dongBangDiemBounty(NguoiDung $nguoiTao, int $diemThuong, ?string $khoaChongLap = null): GiaoDichDiem
     {
         if ($diemThuong <= 0) {
