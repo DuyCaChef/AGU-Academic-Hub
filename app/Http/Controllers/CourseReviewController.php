@@ -33,12 +33,14 @@ class CourseReviewController extends Controller
                 COUNT(*) as tong_so_danh_gia,
                 AVG(diem_do_kho) as avg_do_kho,
                 AVG(diem_thuc_tien) as avg_thuc_tien,
-                AVG(diem_ap_luc_bai_tap) as avg_ap_luc
+                AVG(diem_khoi_luong) as avg_khoi_luong,
+                AVG(diem_khoi_luong) as avg_ap_luc
             ')
             ->first();
 
         // Truy vấn danh sách đánh giá, eager load người dùng và khoa để tránh n+1 query
         $reviewsQuery = DanhGiaMonHoc::with(['nguoiDung.khoa'])
+            ->withCount('binhChons')
             ->where('ma_mon_hoc', $monHoc->ma_mon_hoc ?? $monHoc->getKey())
             ->orderBy('ma_danh_gia', 'desc');
 
@@ -51,8 +53,9 @@ class CourseReviewController extends Controller
             'tong_so_danh_gia' => (int) ($stats->tong_so_danh_gia ?? 0),
             'avg_do_kho'       => round((float) ($stats->avg_do_kho ?? 0), 1),
             'avg_thuc_tien'    => round((float) ($stats->avg_thuc_tien ?? 0), 1),
-            'avg_ap_luc'       => round((float) ($stats->avg_ap_luc ?? 0), 1),
-            'diem_tong_quan'   => round(((float) ($stats->avg_do_kho ?? 0) + (float) ($stats->avg_thuc_tien ?? 0) + (float) ($stats->avg_ap_luc ?? 0)) / 3, 1),
+            'avg_ap_luc'       => round((float) ($stats->avg_khoi_luong ?? $stats->avg_ap_luc ?? 0), 1),
+            'avg_khoi_luong'   => round((float) ($stats->avg_khoi_luong ?? $stats->avg_ap_luc ?? 0), 1),
+            'diem_tong_quan'   => round(((float) ($stats->avg_do_kho ?? 0) + (float) ($stats->avg_thuc_tien ?? 0) + (float) ($stats->avg_khoi_luong ?? $stats->avg_ap_luc ?? 0)) / 3, 1),
         ];
 
         if ($request->wantsJson()) {
@@ -85,26 +88,30 @@ class CourseReviewController extends Controller
 
         // LỚP BẢO VỆ 2: Kiểm tra từ cấm tại controller trước khi persist
         // (FormRequest là lớp 1; controller là lớp 2 — tránh bypass qua API trực tiếp)
-        $violations = $this->profanityFilter->layDanhSachViPham(
-            (string) $request->input('nhan_xet')
-        );
+        $noiDung = trim((string) ($request->input('noi_dung') ?? $request->input('nhan_xet')));
+        $violations = $this->profanityFilter->layDanhSachViPham($noiDung);
         if (!empty($violations)) {
             $badWords = implode(', ', array_map(fn($w) => "\"{$w}\"", $violations));
             return back()->withErrors([
                 'nhan_xet' => "Nội dung nhận xét chứa từ ngữ không phù hợp chuẩn mực: {$badWords}.",
+                'noi_dung' => "Nội dung nhận xét chứa từ ngữ không phù hợp chuẩn mực: {$badWords}.",
             ]);
         }
 
-        // LỚP 1: Lưu trữ ma_nguoi_danh_gia thực tế vào CSDL phục vụ quản trị và hậu kiểm
+        $workloadScore = (int) ($request->input('diem_khoi_luong') ?? $request->input('diem_ap_luc_bai_tap'));
+        $isAnonymous = (bool) ($request->input('an_danh') ?? $request->input('la_an_danh', true));
+
+        // LỚP 1: Lưu trữ ma_nguoi_dung thực tế vào CSDL phục vụ quản trị và hậu kiểm
         DanhGiaMonHoc::create([
             'ma_mon_hoc'          => $monHoc->ma_mon_hoc ?? $monHoc->getKey(),
-            'ma_nguoi_danh_gia'   => $userId,
+            'ma_nguoi_dung'       => $userId,
             'hoc_ky'              => $request->input('hoc_ky'),
             'diem_do_kho'         => (int) $request->input('diem_do_kho'),
             'diem_thuc_tien'      => (int) $request->input('diem_thuc_tien'),
-            'diem_ap_luc_bai_tap' => (int) $request->input('diem_ap_luc_bai_tap'),
-            'nhan_xet'            => trim((string) $request->input('nhan_xet')),
-            'la_an_danh'          => (bool) $request->input('la_an_danh', true),
+            'diem_khoi_luong'     => $workloadScore,
+            'noi_dung'            => $noiDung,
+            'an_danh'             => $isAnonymous,
+            'trang_thai'          => 'DA_DUYET',
         ]);
 
         return back()->with('success', 'Đánh giá môn học của bạn đã được đăng tải thành công.');
@@ -118,36 +125,53 @@ class CourseReviewController extends Controller
         $userId = $user->ma_nguoi_dung ?? $user->getKey();
 
         // Phân quyền: Chỉ chính tác giả mới được quyền sửa
-        if ($danhGia->ma_nguoi_danh_gia !== $userId) {
+        if ($danhGia->ma_nguoi_dung !== $userId && $danhGia->ma_nguoi_danh_gia !== $userId) {
             abort(403, 'Bạn không có quyền chỉnh sửa bài đánh giá này.');
         }
 
         $validated = $request->validate([
             'diem_do_kho'         => ['required', 'integer', 'min:1', 'max:5'],
             'diem_thuc_tien'      => ['required', 'integer', 'min:1', 'max:5'],
-            'diem_ap_luc_bai_tap' => ['required', 'integer', 'min:1', 'max:5'],
-            'nhan_xet'            => ['required', 'string', 'min:10', 'max:2000'],
-            'la_an_danh'          => ['boolean'],
+            'diem_khoi_luong'     => ['nullable', 'integer', 'min:1', 'max:5'],
+            'diem_ap_luc_bai_tap' => ['nullable', 'integer', 'min:1', 'max:5'],
+            'noi_dung'            => ['nullable', 'string', 'min:10', 'max:2000'],
+            'nhan_xet'            => ['nullable', 'string', 'min:10', 'max:2000'],
+            'an_danh'             => ['nullable', 'boolean'],
+            'la_an_danh'          => ['nullable', 'boolean'],
         ], [
             'nhan_xet.required'   => 'Nội dung nhận xét không được để trống.',
             'nhan_xet.min'        => 'Nội dung nhận xét cần tối thiểu 10 ký tự.',
+            'noi_dung.required'   => 'Nội dung nhận xét không được để trống.',
+            'noi_dung.min'        => 'Nội dung nhận xét cần tối thiểu 10 ký tự.',
         ]);
 
-        // Kiểm tra từ cấm cho nội dung chỉnh sửa
-        $violations = $this->profanityFilter->layDanhSachViPham($validated['nhan_xet']);
-        if (!empty($violations)) {
-            $badWords = implode(', ', array_map(fn($w) => "\"{$w}\"", $violations));
+        $noiDung = trim((string) ($validated['noi_dung'] ?? $validated['nhan_xet'] ?? $danhGia->noi_dung));
+        if (mb_strlen($noiDung) < 10) {
             return back()->withErrors([
-                'nhan_xet' => "Nội dung nhận xét chứa từ ngữ không phù hợp chuẩn mực: {$badWords}."
+                'nhan_xet' => 'Nội dung nhận xét cần tối thiểu 10 ký tự.',
+                'noi_dung' => 'Nội dung nhận xét cần tối thiểu 10 ký tự.',
             ]);
         }
 
+        // Kiểm tra từ cấm cho nội dung chỉnh sửa
+        $violations = $this->profanityFilter->layDanhSachViPham($noiDung);
+        if (!empty($violations)) {
+            $badWords = implode(', ', array_map(fn($w) => "\"{$w}\"", $violations));
+            return back()->withErrors([
+                'nhan_xet' => "Nội dung nhận xét chứa từ ngữ không phù hợp chuẩn mực: {$badWords}.",
+                'noi_dung' => "Nội dung nhận xét chứa từ ngữ không phù hợp chuẩn mực: {$badWords}."
+            ]);
+        }
+
+        $workloadScore = $validated['diem_khoi_luong'] ?? $validated['diem_ap_luc_bai_tap'] ?? $danhGia->diem_khoi_luong;
+        $isAnonymous = $validated['an_danh'] ?? $validated['la_an_danh'] ?? $danhGia->an_danh;
+
         $danhGia->update([
-            'diem_do_kho'         => $validated['diem_do_kho'],
-            'diem_thuc_tien'      => $validated['diem_thuc_tien'],
-            'diem_ap_luc_bai_tap' => $validated['diem_ap_luc_bai_tap'],
-            'nhan_xet'            => trim($validated['nhan_xet']),
-            'la_an_danh'          => $validated['la_an_danh'] ?? $danhGia->la_an_danh,
+            'diem_do_kho'     => $validated['diem_do_kho'],
+            'diem_thuc_tien'  => $validated['diem_thuc_tien'],
+            'diem_khoi_luong' => $workloadScore,
+            'noi_dung'        => $noiDung,
+            'an_danh'         => $isAnonymous,
         ]);
 
         return back()->with('success', 'Đã cập nhật bài đánh giá thành công.');
@@ -161,7 +185,7 @@ class CourseReviewController extends Controller
         $userId = $user->ma_nguoi_dung ?? $user->getKey();
 
         // Quyền xóa: Tác giả bài viết, Quản trị viên hoặc Kiểm duyệt viên
-        $isAuthor = ($danhGia->ma_nguoi_danh_gia === $userId);
+        $isAuthor = ($danhGia->ma_nguoi_dung === $userId || $danhGia->ma_nguoi_danh_gia === $userId);
         $isAdminOrMod = (method_exists($user, 'laQuanTriVien') && $user->laQuanTriVien())
             || (method_exists($user, 'laKiemDuyetVien') && $user->laKiemDuyetVien())
             || in_array($user->vai_tro, [VaiTroNguoiDung::QUAN_TRI_VIEN, VaiTroNguoiDung::KIEM_DUYET_VIEN]);
@@ -183,28 +207,24 @@ class CourseReviewController extends Controller
         $userId = $user->ma_nguoi_dung ?? $user->getKey();
 
         // Không cho phép tự vote cho bài của chính mình
-        if ($danhGia->ma_nguoi_danh_gia === $userId) {
+        if ($danhGia->ma_nguoi_dung === $userId || $danhGia->ma_nguoi_danh_gia === $userId) {
             return back()->with('warning', 'Bạn không thể tự bình chọn đánh giá của chính mình.');
         }
 
-        // Kiểm tra xem bảng tuong_tac_danh_gia / course_review_votes có tồn tại trong CSDL không
-        if (DB::getSchemaBuilder()->hasTable('tuong_tac_danh_gia')) {
-            $daVote = DB::table('tuong_tac_danh_gia')
-                ->where('ma_danh_gia', $danhGia->ma_danh_gia ?? $danhGia->getKey())
-                ->where('ma_nguoi_dung', $userId)
-                ->first();
+        $daVote = \App\Models\BinhChonDanhGia::where('ma_danh_gia', $danhGia->ma_danh_gia)
+            ->where('ma_nguoi_dung', $userId)
+            ->first();
 
-            if ($daVote) {
-                DB::table('tuong_tac_danh_gia')->where('id', $daVote->id)->delete();
-                return back()->with('info', 'Đã bỏ bình chọn hữu ích.');
-            }
-
-            DB::table('tuong_tac_danh_gia')->insert([
-                'ma_danh_gia'   => $danhGia->ma_danh_gia ?? $danhGia->getKey(),
-                'ma_nguoi_dung' => $userId,
-                'created_at'    => now(),
-            ]);
+        if ($daVote) {
+            $daVote->delete();
+            return back()->with('info', 'Đã bỏ bình chọn hữu ích.');
         }
+
+        \App\Models\BinhChonDanhGia::create([
+            'ma_danh_gia'   => $danhGia->ma_danh_gia,
+            'ma_nguoi_dung' => $userId,
+            'huu_ich'       => true,
+        ]);
 
         return back()->with('success', 'Đã ghi nhận đánh giá hữu ích.');
     }
@@ -213,25 +233,31 @@ class CourseReviewController extends Controller
     public function baoCaoViPham(Request $request, int $ma_danh_gia): RedirectResponse
     {
         $request->validate([
-            'ly_do' => ['required', 'string', 'min:5', 'max:500'],
+            'ly_do'   => ['required', 'string'],
+            'chi_tiet'=> ['nullable', 'string', 'max:500'],
         ], [
             'ly_do.required' => 'Vui lòng cung cấp lý do báo cáo vi phạm.',
-            'ly_do.min'      => 'Lý do báo cáo cần tối thiểu 5 ký tự.',
         ]);
 
         $danhGia = DanhGiaMonHoc::findOrFail($ma_danh_gia);
         $user = $request->user();
         $reporterId = $user->ma_nguoi_dung ?? $user->getKey();
 
-        // Lưu vào bảng báo cáo nếu có
-        if (DB::getSchemaBuilder()->hasTable('bao_cao_vi_pham')) {
-            DB::table('bao_cao_vi_pham')->insert([
-                'ma_danh_gia'      => $danhGia->ma_danh_gia ?? $danhGia->getKey(),
+        $lyDo = in_array($request->input('ly_do'), ['NGON_TU_KICH_DONG', 'BOI_NHO', 'QUAY_ROI', 'SPAM', 'KHAC'])
+            ? $request->input('ly_do')
+            : 'KHAC';
+
+        \App\Models\BaoCaoDanhGia::updateOrCreate(
+            [
+                'ma_danh_gia'      => $danhGia->ma_danh_gia,
                 'ma_nguoi_bao_cao' => $reporterId,
-                'ly_do'            => $request->input('ly_do'),
-                'created_at'       => now(),
-            ]);
-        }
+            ],
+            [
+                'ly_do'            => $lyDo,
+                'chi_tiet'         => $request->input('chi_tiet') ?? $request->input('ly_do'),
+                'trang_thai'       => 'CHO_XU_LY',
+            ]
+        );
 
         return back()->with('success', 'Báo cáo vi phạm đã được gửi tới Ban Kiểm duyệt.');
     }
