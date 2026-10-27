@@ -98,6 +98,11 @@ class KycController extends Controller
      */
     public function hangDoiKyc(Request $request): Response
     {
+        $user = $request->user();
+        if (!$user->laQuanTriVien() && !$user->laKiemDuyetVien()) {
+            abort(403, 'Bạn không có thẩm quyền truy cập hàng đợi duyệt KYC.');
+        }
+
         $danhSach = YeuCauXacThuc::with(['nguoiDung:ma_nguoi_dung,ho_ten,email,mssv,nam_tot_nghiep'])
             ->where('trang_thai', TrangThaiXacThuc::CHO_DUYET)
             ->orderBy('ma_yeu_cau_xac_thuc', 'asc')
@@ -116,7 +121,7 @@ class KycController extends Controller
                     'url_xem_anh'     => URL::temporarySignedRoute(
                         'kyc.preview',
                         now()->addMinutes(30),
-                        ['id' => $item->ma_yeu_cau_xac_thuc]
+                        ['ma_xac_thuc' => $item->ma_yeu_cau_xac_thuc]
                     ),
                 ];
             });
@@ -130,7 +135,7 @@ class KycController extends Controller
      * Stream file nhị phân khi Signed URL hợp lệ.
      * Chỉ Admin hoặc Moderator mới được xem — middleware 'signed' kiểm tra chữ ký URL.
      */
-    public function xemTruocMinhChung(Request $request, int $id): BinaryFileResponse
+    public function xemTruocMinhChung(Request $request, int $ma_xac_thuc): BinaryFileResponse
     {
         $nguoiXem = $request->user();
 
@@ -138,7 +143,7 @@ class KycController extends Controller
             abort(403, 'Bạn không có thẩm quyền truy cập tệp minh chứng cá nhân này.');
         }
 
-        $kyc = YeuCauXacThuc::findOrFail($id);
+        $kyc = YeuCauXacThuc::findOrFail($ma_xac_thuc);
 
         if (!Storage::disk('local')->exists($kyc->duong_dan_minh_chung)) {
             abort(404, 'Tệp minh chứng không tồn tại trên hệ thống lưu trữ.');
@@ -158,9 +163,14 @@ class KycController extends Controller
     /**
      * Phê duyệt hồ sơ: Chuyển tài khoản sang ACTIVE.
      */
-    public function pheDuyetHoSo(Request $request, int $id): RedirectResponse
+    public function pheDuyetHoSo(Request $request, int $ma_xac_thuc): RedirectResponse
     {
-        $kyc = YeuCauXacThuc::with('nguoiDung')->findOrFail($id);
+        $user = $request->user();
+        if (!$user->laQuanTriVien() && !$user->laKiemDuyetVien()) {
+            abort(403, 'Bạn không có thẩm quyền thực hiện thao tác duyệt hồ sơ KYC.');
+        }
+
+        $kyc = YeuCauXacThuc::with('nguoiDung')->findOrFail($ma_xac_thuc);
 
         if ($kyc->trang_thai !== TrangThaiXacThuc::CHO_DUYET) {
             return back()->with('error', 'Hồ sơ này đã được xử lý trước đó.');
@@ -187,8 +197,13 @@ class KycController extends Controller
     /**
      * Từ chối hồ sơ kèm lý do.
      */
-    public function tuChoiHoSo(Request $request, int $id): RedirectResponse
+    public function tuChoiHoSo(Request $request, int $ma_xac_thuc): RedirectResponse
     {
+        $user = $request->user();
+        if (!$user->laQuanTriVien() && !$user->laKiemDuyetVien()) {
+            abort(403, 'Bạn không có thẩm quyền thực hiện thao tác duyệt hồ sơ KYC.');
+        }
+
         $request->validate([
             'ly_do_tu_choi' => ['required', 'string', 'min:6', 'max:500'],
         ], [
@@ -196,7 +211,7 @@ class KycController extends Controller
             'ly_do_tu_choi.min'      => 'Lý do từ chối tối thiểu 6 ký tự.',
         ]);
 
-        $kyc = YeuCauXacThuc::with('nguoiDung')->findOrFail($id);
+        $kyc = YeuCauXacThuc::with('nguoiDung')->findOrFail($ma_xac_thuc);
 
         if ($kyc->trang_thai !== TrangThaiXacThuc::CHO_DUYET) {
             return back()->with('error', 'Hồ sơ này đã được xử lý trước đó.');
