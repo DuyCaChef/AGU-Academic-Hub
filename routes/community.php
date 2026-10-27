@@ -4,6 +4,7 @@ use App\Http\Controllers\CourseReviewController;
 use App\Http\Controllers\KycController;
 use App\Http\Controllers\WishlistBountyController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AdminUserController;
 
 // Community Route (IAM, Reviews và Bounty)
 // Phân hệ Cộng đồng sinh viên, Đánh giá môn học, Săn thưởng và Ví điểm
@@ -103,13 +104,11 @@ Route::middleware('auth')->group(function () {
         Route::put('/duyet-kyc/{ma_xac_thuc}/tu-choi', [KycController::class, 'tuChoiHoSo'])->name('kyc.reject');
 
         // Quản lý danh sách người dùng & Cập nhật trạng thái (Khóa/Mở)
-        Route::get('/nguoi-dung', function () {
-            return inertia('Admin/Users/Index');
-        })->name('users.index');
+        Route::get('/nguoi-dung', [AdminUserController::class, 'index'])
+        ->name('users.index');
 
-        Route::put('/nguoi-dung/{ma_nguoi_dung}/trang-thai', function ($ma_nguoi_dung) {
-            return back()->with('success', 'Đã cập nhật trạng thái người dùng.');
-        })->name('users.status');
+        Route::put('/nguoi-dung/{ma_nguoi_dung}/trang-thai', [AdminUserController::class, 'toggleStatus'])
+        ->name('users.status');
     });
 
 });
