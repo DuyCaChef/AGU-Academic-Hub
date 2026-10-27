@@ -109,6 +109,11 @@ Route::middleware('auth')->group(function () {
 
         Route::put('/nguoi-dung/{ma_nguoi_dung}/trang-thai', [AdminUserController::class, 'toggleStatus'])
         ->name('users.status');
+
+        // Chuyển hướng khi truy cập URL /quan-tri/trang-thai về trang Quản lý Người dùng
+        Route::get('/trang-thai', function () {
+            return redirect()->route('admin.users.index');
+        });
     });
 
 });
