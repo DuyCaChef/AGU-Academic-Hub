@@ -26,22 +26,11 @@ Route::middleware('guest')->group(function () {
 });
 
 // ─── LUỒNG B: Admin/Mod quản lý hàng đợi KYC ─────────────────────────────────
+// Toàn bộ route Quản trị KYC đã được quy hoạch tập trung tại routes/community.php
+// (Prefix: quan-tri, Name: admin.kyc.* và route Signed URL xem ảnh kyc.preview)
 Route::middleware(['auth'])->prefix('admin/kyc')->name('kyc.')->group(function () {
-
-    // Danh sách hồ sơ chờ duyệt
-    Route::get('/', [KycController::class, 'hangDoiKyc'])
-        ->name('queue');
-
-    // Xem trước ảnh minh chứng — route phải có middleware 'signed' để validate Signed URL
-    Route::get('{id}/xem-truoc', [KycController::class, 'xemTruocMinhChung'])
-        ->middleware('signed')
-        ->name('preview');
-
-    // Phê duyệt hồ sơ
-    Route::post('{id}/duyet', [KycController::class, 'pheDuyetHoSo'])
-        ->name('approve');
-
-    // Từ chối hồ sơ (kèm lý do trong request body)
-    Route::post('{id}/tu-choi', [KycController::class, 'tuChoiHoSo'])
-        ->name('reject');
+    // Redirect về route chuẩn hóa của Admin
+    Route::get('/', function () {
+        return redirect()->route('admin.kyc.index');
+    })->name('queue');
 });

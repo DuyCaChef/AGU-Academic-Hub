@@ -17,6 +17,10 @@ class AdminUserController extends Controller
     // Danh sách người dùng và bộ lọc quản trị.
     public function index(Request $request): Response
     {
+        if (!$request->user()->laQuanTriVien()) {
+            abort(403, 'Bạn không có quyền truy cập trang quản lý người dùng.');
+        }
+
         $query = NguoiDung::with(['khoa:ma_khoa,ten_khoa,ky_hieu_khoa', 'viDiem'])
         ->latest('ma_nguoi_dung');
 
@@ -69,32 +73,35 @@ class AdminUserController extends Controller
             ];
         });
 
-        return Inertin::render('Admin/Users/Index', [
+        return Inertia::render('Admin/Users/Index', [
             'users' => $users,
             'filters' => $request->only(['search', 'vai_tro', 'trang_thai', 'ma_khoa']),
             'faculties' => Khoa::select('ma_khoa', 'ten_khoa', 'ky_hieu_khoa')->get(),
         ]);
     }
 
-    // Chuyển đổi trạng thái tài khoản giữa DANG_HOAT_DONG và TAM_KHOA.\
+    // Chuyển đổi trạng thái tài khoản giữa DANG_HOAT_DONG và TAM_KHOA.
     public function toggleStatus(Request $request, int $ma_nguoi_dung): RedirectResponse
     {
-        $cunrrentUser = $request->user();
+        if (!$request->user()->laQuanTriVien()) {
+            abort(403, 'Bạn không có quyền thực hiện thao tác khóa/mở khóa tài khoản.');
+        }
+
+        $currentUser = $request->user();
 
         // Chặn Admin tự khóa tài khoản của chính mình
-        if($cunrrentUser->ma_nguoi_dung === $ma_nguoi_dung){
-            return back()->with('error', 'Bạn không thể tự xóa tài khoản đang đăng nhập của chính mình!');
+        if ($currentUser->ma_nguoi_dung === $ma_nguoi_dung) {
+            return back()->with('error', 'Bạn không thể tự khóa tài khoản đang đăng nhập của chính mình!');
         }
 
         $user = NguoiDung::findOrFail($ma_nguoi_dung);
 
-        if($user->trang_thai === TrangThaiNguoiDung::DANG_HOAT_DONG)
-        {
-            $user->update(['trang_thai'=>TrangThaiNguoiDung::TAM_KHOA]);
+        if ($user->trang_thai === TrangThaiNguoiDung::DANG_HOAT_DONG) {
+            $user->update(['trang_thai' => TrangThaiNguoiDung::TAM_KHOA]);
             $message = "Đã tạm khóa tài khoản của {$user->ho_ten}. Người dùng này sẽ không thể đăng nhập.";
             $type = 'warning';
-        } else{
-            $user->update(['trang_thai' => TrangThaiNguoiDung::HOAT_DONG]);
+        } else {
+            $user->update(['trang_thai' => TrangThaiNguoiDung::DANG_HOAT_DONG]);
             $message = "Đã mở khóa và kích hoạt lại tài khoản của {$user->ho_ten}.";
             $type = 'success';
         }
