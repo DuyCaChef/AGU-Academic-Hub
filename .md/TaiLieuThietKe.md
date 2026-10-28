@@ -15,7 +15,7 @@ graph TD
     subgraph "Tầng Ứng dụng (Application Tier)"
     C1[Middleware: Auth, RoleGate]
     C2[Controllers: Auth, Doc, CourseReview...]
-    C3[Domain Services: Deduplication, KYC, Bounty]
+    C3[Domain Services: Deduplication, Alumni KYC, Bounty]
     C4[Queue Workers: Jobs]
     end 
 ```
@@ -34,9 +34,20 @@ erDiagram
     USERS ||--o{ DOCUMENT_REPORTS : "Báo cáo"
     USERS ||--o{ DOCUMENT_REQUESTS : "Yêu cầu"
     USERS ||--o{ VERIFICATIONS : "Xác thực"
+    STUDENT_ROSTER ||--o| USERS : "Đối soát đăng nhập lần đầu"
     COURSES ||--o{ DOCUMENTS : "Có tài liệu"
     COURSES ||--o{ COURSE_REVIEWS : "Có review"
-    DOCUMENTS ||--o{ DOCUMENT_REPORTS : "Bị báo cáo" 
+    DOCUMENTS ||--o{ DOCUMENT_REPORTS : "Bị báo cáo"
+    STUDENT_ROSTER {
+        bigint ma_ban_ghi PK
+        string mssv UK
+        string ho_ten
+        string email_sv
+        string mat_khau_mac_dinh
+        string ma_khoa
+        boolean da_kich_hoat
+        datetime kich_hoat_luc
+    }
 ```
 
 #### Chi tiết bảng dữ liệu:
@@ -59,6 +70,19 @@ erDiagram
   * **trang\_thai**: Lựa chọn (CHO\_XAC\_THUC, HOAT\_DONG, TAM\_KHOA).
   * **diem\_uy\_tin**: Số nguyên, Mặc định 100.
   * **ngay\_tao, ngay\_cap\_nhat, ngay\_xoa\_tam**: Dấu mốc thời gian.
+
+**2a. Bảng danh\_sach\_sinh\_vien\_raw (Danh sách sinh viên đang học do trường nạp)**
+
+  * Là nguồn dữ liệu đối soát trước khi tạo tài khoản, không phải hàng đợi KYC.
+  * Lưu MSSV, họ tên, email `@student.agu.edu.vn`, mật khẩu mặc định đã băm và khoa.
+  * **da\_kich\_hoat** mặc định false; chuyển true và lưu **kich\_hoat\_luc** sau khi sinh viên đổi mật khẩu lần đầu.
+  * Sinh viên đang học không upload ảnh thẻ và không đi qua quy trình Admin/Mod duyệt thủ công.
+
+**2b. Luồng KYC cựu sinh viên**
+
+  * Chỉ cựu sinh viên đăng ký tự do qua form riêng và nộp minh chứng.
+  * Minh chứng lưu tại `storage/app/private/kyc`, tên file được làm mới và chỉ stream qua Signed URL 30 phút cho Admin/Mod.
+  * Hồ sơ `CHO_DUYET` được duyệt hoặc từ chối kèm lý do; duyệt thành công mới chuyển tài khoản cựu sinh viên sang `DANG_HOAT_DONG`.
 
 **3. Bảng mon\_hoc (Danh mục Môn học / Học phần)**
 

@@ -193,7 +193,8 @@ Sử dụng hệ thống lưới 8px (Tailwind mặc định):
 
 Giao diện (Đặc biệt là các nút hành động) phải render có điều kiện dựa trên `auth.user.vai_tro` trong global props của Inertia. Laravel Middleware `HandleInertiaRequests` là nơi chia sẻ thông tin user/role; React đọc dữ liệu bằng `usePage().props`. Không dùng Bearer Token ở client-side để quyết định giao diện.
 
-- **Khách (Guest):** Chỉ nhìn thấy trang Landing và Form Đăng nhập/KYC. Không thấy thanh search tài liệu.
+- **Khách (Guest):** Chỉ nhìn thấy trang Landing, Form Đăng nhập và liên kết đăng ký cựu sinh viên. Không có đăng ký tự do cho sinh viên đang học và không thấy thanh search tài liệu.
+- **Sinh viên đang học:** Không có màn hình/nút nộp KYC. Tài khoản được đối soát từ dữ liệu nhà trường khi đăng nhập lần đầu và bị buộc đổi mật khẩu trước khi vào cổng học tập.
 - **Sinh viên / Cựu Sinh viên:** Thấy toàn bộ Cổng học tập.
 - **Nút Xóa tài liệu:** Chỉ hiện ở file của chính họ VÀ downloads == 0 VÀ time < 24h.
 - **Nút Request Removal (Xin gỡ):** Xuất hiện thay thế nút Xóa khi tài liệu bị khóa bởi Community Ownership.
@@ -204,7 +205,8 @@ Giao diện (Đặc biệt là các nút hành động) phải render có điề
 ## 11. ✅ UI Design and Implementation Checklist (Danh sách Kiểm tra)
 
 - [ ] Giao diện có giữ màu nền sáng, font chữ dễ đọc văn bản dài không?
-- [ ] Đã cấu hình Form KYC để người dùng có thể tải ảnh Thẻ SV / Bằng tốt nghiệp dễ dàng chưa?
+- [ ] Đã cấu hình Form Alumni KYC để cựu sinh viên có thể tải ảnh bằng tốt nghiệp, giấy chứng nhận hoặc thẻ sinh viên cũ dễ dàng chưa?
+- [ ] Đã ẩn hoàn toàn đăng ký tự do và luồng upload KYC đối với sinh viên đang học chưa?
 - [ ] Luồng Tải lên (Upload) đã xử lý UI cho cả 2 trường hợp: Báo lỗi Conflict 409 (Trùng băm) và Gợi ý v1.1 (Trùng nội dung >85%) chưa?
 - [ ] Nút "Xóa" đã biến mất và thay bằng "Khóa - Sở hữu cộng đồng" đối với file >10 lượt tải chưa?
 - [ ] Form đánh giá môn học (Course Review) có giao diện chấm điểm 3 tiêu chí trực quan không?

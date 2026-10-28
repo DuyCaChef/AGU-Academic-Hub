@@ -56,7 +56,7 @@
 
 | Nhóm chức năng                                | Khách (Guest) | Sinh viên (Student) | Cựu SV (Alumni) | Mod | Admin |
 | :-------------------------------------------- | :-----------: | :-----------------: | :-------------: | :-: | :---: |
-| Xem Landing page & Đăng ký                    | ✔             | ✖                   | ✖               | ✖   | ✖     |
+| Xem Landing page & Đăng nhập                  | ✔             | ✔                   | ✔               | ✖   | ✖     |
 | Tìm kiếm, Preview & Tải tài liệu              | ✖             | ✔                   | ✔               | ✔   | ✔     |
 | Upload tài liệu mới / Tạo Version             | ✖             | ✔                   | ✔               | ✔   | ✔     |
 | Xóa tài liệu của chính mình (Khi chưa ai tải) | ✖             | ✔                   | ✔               | ✔   | ✔     |
@@ -69,9 +69,11 @@
 
 ### Module 1: Định danh & Phân quyền Tài khoản (Identity & Access Management)
 
-  * **FR-01.1 (Đăng ký Sinh viên đang học):** Xác thực tự động qua Email định danh trường cấp (@agu.edu.vn). Trường hợp sinh viên chưa có email trường, cho phép upload ảnh Thẻ sinh viên để Admin/Mod duyệt thủ công.
-  * **FR-01.2 (Đăng ký Cựu sinh viên):** Nhập MSSV khóa cũ, năm tốt nghiệp và upload ảnh minh chứng (Thẻ cựu sinh viên, Giấy chứng nhận tốt nghiệp hoặc Bằng tốt nghiệp). Hồ sơ chuyển vào trạng thái PENDING\_ALUMNI.
-  * **FR-01.3 (Trạng thái Người dùng):** UNVERIFIED → ACTIVE → SUSPENDED (Khóa chức năng khi vi phạm tiêu chuẩn cộng đồng).
+  * **FR-01.1 (Định danh Sinh viên đang học - Pre-provisioned):** Không cung cấp đăng ký tự do và không yêu cầu sinh viên nộp ảnh thẻ để duyệt thủ công. Admin/Nhà trường nạp trước dữ liệu vào bảng `danh_sach_sinh_vien_raw` gồm MSSV, họ tên, email `@student.agu.edu.vn`, mật khẩu mặc định đã băm và khoa.
+  * **FR-01.2 (Đăng nhập lần đầu Sinh viên đang học):** Sinh viên đăng nhập bằng MSSV hoặc email trường cùng mật khẩu mặc định. Nếu thông tin khớp dữ liệu thô và chưa có tài khoản chính, hệ thống tự động khởi tạo tài khoản vai trò `SINH_VIEN` ở trạng thái `CHUA_XAC_THUC`, tạo phiên đăng nhập tạm thời và chuyển sang luồng đổi mật khẩu bắt buộc.
+  * **FR-01.3 (Cưỡng chế đổi mật khẩu và kích hoạt):** Middleware `EnsurePasswordChanged` chặn các nghiệp vụ khác cho đến khi sinh viên đặt mật khẩu mới đạt chuẩn. Khi hoàn tất, hệ thống lưu mật khẩu Bcrypt, chuyển tài khoản sang `DANG_HOAT_DONG`, đánh dấu bản ghi raw `da_kich_hoat = true`, lưu `kich_hoat_luc` và khởi tạo ví điểm với 100 điểm.
+  * **FR-01.4 (Đăng ký Cựu sinh viên - Alumni KYC):** Cựu sinh viên đăng ký qua form riêng `/alumni/register` (hoặc route tương đương `/cuu-sinh-vien/dang-ky`), cung cấp MSSV khóa cũ, năm tốt nghiệp và một minh chứng: bằng tốt nghiệp, giấy chứng nhận tốt nghiệp tạm thời hoặc thẻ sinh viên khóa cũ. Hồ sơ chuyển sang `CHO_DUYET`.
+  * **FR-01.5 (Trạng thái Người dùng):** Sinh viên đang học đi theo `CHUA_XAC_THUC` → `DANG_HOAT_DONG` sau khi đổi mật khẩu; cựu sinh viên đi theo `CHUA_XAC_THUC` → `DANG_HOAT_DONG` sau khi Admin/Mod duyệt; cả hai đều có thể chuyển sang `TAM_KHOA` khi vi phạm.
 
 ### Module 2: Quản lý & Tải lên Tài liệu (Document Lifecycle & Deduplication)
 
@@ -102,7 +104,7 @@
 
 ### 4\. Yêu cầu Phi chức năng (Non-Functional Requirements)
 
-  * **NFR-01 (Bảo mật Dữ liệu Riêng tư - PII):** File ảnh thẻ sinh viên, bằng chứng KYC phải được lưu trong phân vùng riêng (storage/app/private/kyc), nghiêm cấm tạo Symlink ra thư mục public. Chỉ cấp quyền truy cập thông qua Signed URL hoặc Route nội bộ có Middleware kiểm tra quyền Admin/Mod.
+  * **NFR-01 (Bảo mật Dữ liệu Riêng tư - PII):** Chỉ minh chứng của cựu sinh viên mới được lưu trong phân vùng riêng `storage/app/private/kyc`; tuyệt đối không lưu ảnh thẻ sinh viên đang học vì luồng này được định danh tự động từ dữ liệu nạp trước. File KYC không được tạo Symlink ra thư mục public và chỉ được truy cập qua Signed URL hoặc Route nội bộ có Middleware kiểm tra quyền Admin/Mod.
   * **NFR-02 (Hiệu năng & Tối ưu Tải):**
       * Tác vụ bóc tách text và tính toán độ tương đồng file phải thực thi qua Laravel Queue, không làm nghẽn tiến trình HTTP Request của người dùng.
       * Thời gian phản hồi trang danh mục và tìm kiếm học phần ≤500ms.
