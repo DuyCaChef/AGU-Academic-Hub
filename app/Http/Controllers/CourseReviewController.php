@@ -25,7 +25,10 @@ class CourseReviewController extends Controller
     public function index (Request $request, string $ma_hoc_phan): Response|JsonResponse
     {
         // Tìm môn học dựa theo mã học phần
-        $monHoc = MonHoc::where('ma_hoc_phan', $ma_hoc_phan)->firstOrFail();
+        // Không cho truy cập review của Môn học thuộc Khoa đã vô hiệu hóa.
+        $monHoc = MonHoc::where('ma_hoc_phan', $ma_hoc_phan)
+            ->whereHas('khoa')
+            ->firstOrFail();
 
         // Tinh toán điểm trung bình 3 tiêu chí của môn học
         $stats = DanhGiaMonHoc::where('ma_mon_hoc', $monHoc->ma_mon_hoc ?? $monHoc->getKey())
@@ -82,7 +85,10 @@ class CourseReviewController extends Controller
     // Gửi bài đánh giá môn học mới (POST /mon-hoc/{ma_hoc_phan}/danh-gia).
     public function store(StoreCourseReviewRequest $request, string $ma_hoc_phan): RedirectResponse
     {
-        $monHoc = MonHoc::where('ma_hoc_phan', $ma_hoc_phan)->firstOrFail();
+        // Chỉ cho tạo review khi Môn học và Khoa cha đều đang hiệu lực.
+        $monHoc = MonHoc::where('ma_hoc_phan', $ma_hoc_phan)
+            ->whereHas('khoa')
+            ->firstOrFail();
         $user = $request->user();
         $userId = $user->ma_nguoi_dung ?? $user->getKey();
 

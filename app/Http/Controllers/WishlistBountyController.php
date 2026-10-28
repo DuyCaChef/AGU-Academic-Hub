@@ -27,7 +27,8 @@ class WishlistBountyController extends Controller
      */
     public function index(Request $request): Response|JsonResponse
     {
-        $query = YeuCauTaiLieu::with([
+        // Chỉ hiển thị wishlist của các Môn học đang hiệu lực thực tế.
+        $query = YeuCauTaiLieu::whereHas('monHoc.khoa')->with([
             'monHoc:ma_mon_hoc,ma_hoc_phan,ten_mon_hoc',
             'nguoiTao:ma_nguoi_dung,ho_ten,mssv,anh_dai_dien,diem_uy_tin',
         ])->withCount('dapUngs');
@@ -65,7 +66,11 @@ class WishlistBountyController extends Controller
         return Inertia::render('Wishlist/Index', [
             'requests' => $danhSachYeuCau,
             'filters'  => $request->only(['trang_thai', 'ma_mon_hoc', 'phan_loai', 'sap_xep']),
-            'courses'  => MonHoc::select('ma_mon_hoc', 'ma_hoc_phan', 'ten_mon_hoc')->orderBy('ten_mon_hoc')->get(),
+            // Chỉ cho chọn Môn học đang hiệu lực trong bộ lọc/tạo yêu cầu.
+            'courses'  => MonHoc::whereHas('khoa')
+                ->select('ma_mon_hoc', 'ma_hoc_phan', 'ten_mon_hoc')
+                ->orderBy('ten_mon_hoc')
+                ->get(),
         ]);
     }
 
@@ -111,6 +116,13 @@ class WishlistBountyController extends Controller
             'phan_loai'      => ['required', 'in:DE_THI,BAI_GIANG,DO_AN,BAI_TAP,KHAC'],
             'diem_thuong'    => ['required', 'integer', 'min:10', 'max:1000'],
         ]);
+
+        // Không cho tạo yêu cầu mới cho Môn học thuộc Khoa đã vô hiệu hóa.
+        if (!MonHoc::whereKey($validated['ma_mon_hoc'])->whereHas('khoa')->exists()) {
+            return back()->withErrors([
+                'ma_mon_hoc' => 'Môn học hiện không khả dụng vì Khoa đang bị vô hiệu hóa.',
+            ]);
+        }
 
         $user = $request->user();
         $bounty = (int) $validated['diem_thuong'];

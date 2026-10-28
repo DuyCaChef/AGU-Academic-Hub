@@ -25,6 +25,14 @@ class Khoa extends Model
     ];
 
     /**
+     * Luôn hiển thị ký hiệu Khoa ở dạng chữ in hoa, kể cả dữ liệu cũ.
+     */
+    public function getKyHieuKhoaAttribute(?string $value): ?string
+    {
+        return $value === null ? null : mb_strtoupper($value);
+    }
+
+    /**
      * Mối quan hệ: Một Khoa có nhiều Chuyên ngành
      */
     public function chuyenNganhs(): HasMany

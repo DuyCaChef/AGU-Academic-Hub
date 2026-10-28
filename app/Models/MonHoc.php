@@ -26,6 +26,14 @@ class MonHoc extends Model
         'mo_ta',
     ];
 
+    /**
+     * Luôn hiển thị mã học phần ở dạng chữ in hoa, kể cả dữ liệu cũ.
+     */
+    public function getMaHocPhanAttribute(?string $value): ?string
+    {
+        return $value === null ? null : mb_strtoupper($value);
+    }
+
     protected function casts(): array
     {
         return [
