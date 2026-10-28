@@ -5,6 +5,7 @@ use App\Http\Controllers\KycController;
 use App\Http\Controllers\WishlistBountyController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminUserController;
+use App\Http\Controllers\AcademicCatalogController;
 
 // Community Route (IAM, Reviews và Bounty)
 // Phân hệ Cộng đồng sinh viên, Đánh giá môn học, Săn thưởng và Ví điểm
@@ -114,6 +115,19 @@ Route::middleware('auth')->group(function () {
         Route::get('/trang-thai', function () {
             return redirect()->route('admin.users.index');
         });
+    });
+
+    Route::middleware('role:QUAN_TRI_VIEN')->prefix('quan-tri/danh-muc')->name('admin.catalog.')->group(function () {
+        Route::get('/', [AcademicCatalogController::class, 'index'])->name('index');
+        Route::post('/khoa', [AcademicCatalogController::class, 'storeFaculty'])->name('faculties.store');
+        Route::put('/khoa/{maKhoa}', [AcademicCatalogController::class, 'updateFaculty'])->name('faculties.update');
+        Route::put('/khoa/{maKhoa}/trang-thai', [AcademicCatalogController::class, 'toggleFaculty'])->name('faculties.toggle');
+        Route::post('/chuyen-nganh', [AcademicCatalogController::class, 'storeMajor'])->name('majors.store');
+        Route::put('/chuyen-nganh/{maChuyenNganh}', [AcademicCatalogController::class, 'updateMajor'])->name('majors.update');
+        Route::put('/chuyen-nganh/{maChuyenNganh}/trang-thai', [AcademicCatalogController::class, 'toggleMajor'])->name('majors.toggle');
+        Route::post('/mon-hoc', [AcademicCatalogController::class, 'storeCourse'])->name('courses.store');
+        Route::put('/mon-hoc/{maMonHoc}', [AcademicCatalogController::class, 'updateCourse'])->name('courses.update');
+        Route::put('/mon-hoc/{maMonHoc}/trang-thai', [AcademicCatalogController::class, 'toggleCourse'])->name('courses.toggle');
     });
 
 });

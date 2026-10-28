@@ -24,6 +24,14 @@ class ChuyenNganh extends Model
         'mo_ta',
     ];
 
+    /**
+     * Luôn hiển thị ký hiệu Chuyên ngành ở dạng chữ in hoa, kể cả dữ liệu cũ.
+     */
+    public function getKyHieuNganhAttribute(?string $value): ?string
+    {
+        return $value === null ? null : mb_strtoupper($value);
+    }
+
     public function khoa(): BelongsTo
     {
         return $this->belongsTo(Khoa::class, 'ma_khoa', 'ma_khoa');

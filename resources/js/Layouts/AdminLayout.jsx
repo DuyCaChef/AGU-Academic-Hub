@@ -12,6 +12,7 @@ import {
     Coins,
     CheckCircle2,
     AlertTriangle,
+    BookOpen,
 } from 'lucide-react';
 
 /**
@@ -86,6 +87,14 @@ export default function AdminLayout({ children, title = 'Quản trị hệ thố
             fallbackUrl: '/admin/trash',
             icon: Trash2,
             desc: 'Khôi phục file đã xóa',
+            adminOnly: true,
+        },
+        {
+            label: 'Danh mục học thuật',
+            routeName: 'admin.catalog.index',
+            fallbackUrl: '/quan-tri/danh-muc',
+            icon: BookOpen,
+            desc: 'Khoa, chuyên ngành, môn học',
             adminOnly: true,
         },
     ];

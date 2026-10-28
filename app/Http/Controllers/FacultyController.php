@@ -13,6 +13,7 @@ class FacultyController extends Controller
     {
         $user = $request->user();
 
+        // Chỉ công khai Khoa đang hoạt động; Môn học con tự động kế thừa phạm vi này.
         $faculties = Khoa::with('monHocs')
             ->get()
             ->sortBy(function ($faculty) use ($user) {
@@ -33,6 +34,7 @@ class FacultyController extends Controller
     {
         $courses = MonHoc::query()
             ->where('ma_khoa', $id)
+            ->whereHas('khoa')
             ->get();
 
         return response()->json([
