@@ -61,6 +61,7 @@ class NguoiDungFactory extends Factory
     {
         return $this->state(fn(array $attributes) => [
             'vai_tro' => VaiTroNguoiDung::QUAN_TRI_VIEN,
+            'cap_quan_tri' => 'THUONG',
             'email' => 'admin@agu.edu.vn',
             'mssv' => null,
             'ma_khoa' => null,

@@ -160,3 +160,15 @@ erDiagram
 
   * **Màn hình Kho Môn Học & Tài Liệu (Desktop Hub View):** Hiển thị danh mục khoa bên trái, danh sách tài liệu chi tiết của môn học ở giữa, kèm thông tin giảng viên và các tab chức năng (Kho tài liệu, Review, Wishlist).
   * **Màn hình Đánh giá Môn học (Course Review Form):** Cửa sổ Modal hiển thị thang điểm cho các tiêu chí: Độ khó, Tính thực tiễn, Khối lượng bài tập. Hỗ trợ tùy chọn ẩn danh 2 lớp cho người dùng.
+## Thiết kế phân cấp Admin
+
+Thiết kế RBAC không tạo thêm vai trò `SUPER_ADMIN`. Thay vào đó, `QUAN_TRI_VIEN` là vai trò nền và `cap_quan_tri` là cấp quản trị. Cách này giữ tương thích với các middleware đang kiểm tra `QUAN_TRI_VIEN`, đồng thời cho phép giới hạn thao tác nhạy cảm ở controller.
+
+Luồng xử lý:
+
+1. Người dùng đăng nhập được nhận `vai_tro`, `cap_quan_tri` và các cờ quyền qua Inertia shared props.
+2. Controller xác thực Admin trước mọi endpoint quản trị.
+3. `canManageTarget()` chặn Admin thường tác động đến Moderator/Admin.
+4. Chỉ Super Admin được cấp vai trò quản trị hoặc thay đổi cấp `THUONG`/`TOI_CAO`.
+5. Giao dịch cập nhật ghi trước lịch sử phân quyền, sau đó mới cập nhật người dùng.
+6. Super Admin cuối cùng không thể bị hạ cấp.

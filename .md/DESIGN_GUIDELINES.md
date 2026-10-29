@@ -321,3 +321,10 @@ Hệ thống AI (Cursor, GitHub Copilot, v0.dev) chú ý:
 - [ ] Form có label, error message, focus state, keyboard navigation và chống submit lặp.
 - [ ] Đã kiểm tra mobile, tablet, desktop, dữ liệu dài và quyền không đủ.
 - [ ] Không có `alert()`, inline style, console error hoặc icon-only control thiếu nhãn truy cập.
+## Giao diện phân cấp quản trị
+
+- Hiển thị nhãn `Admin thường` hoặc `Super Admin` cạnh vai trò Quản trị viên.
+- Với tài khoản quản trị, giao diện phải thông báo khi người thực hiện không có quyền thao tác.
+- Không hiển thị lựa chọn Khoa cho Admin/Moderator.
+- Không dùng giao diện để làm cơ chế bảo mật duy nhất; quyền phải được kiểm tra lại tại backend.
+- Các thay đổi quyền và trạng thái phải hiển thị được người thực hiện, thời điểm và lý do trong lịch sử tài khoản.

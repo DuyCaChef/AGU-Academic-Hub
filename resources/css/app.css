@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+input,
+textarea,
+select {
+    caret-color: #000000;
+}
+
 @theme {
     --color-brand-primary: #005baa;
     --color-brand-secondary: #00a896;

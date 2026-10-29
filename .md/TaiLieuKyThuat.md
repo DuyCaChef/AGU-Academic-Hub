@@ -132,3 +132,20 @@ Hàng đợi KYC chỉ nhận hồ sơ **cựu sinh viên**. Không có hồ sơ
 | GET         | `/admin/students/import/status` | Admin      | Theo dõi kết quả nạp dữ liệu và số bản ghi đã kích hoạt |
 
 Bảng raw là nguồn đối soát đăng nhập lần đầu, không phải hàng đợi KYC. Việc kích hoạt chính thức hoàn tất sau khi sinh viên đổi mật khẩu.
+## Phân quyền quản trị tài khoản
+
+Bảng `nguoi_dung` giữ `vai_tro = QUAN_TRI_VIEN` và thêm `cap_quan_tri`:
+
+- `THUONG`: Admin thường.
+- `TOI_CAO`: Super Admin.
+- Giá trị `NULL` cho các vai trò không phải Admin.
+
+Migration `2026_10_29_000003_add_admin_level_to_nguoi_dung_and_permission_audit.php` gán các Admin hiện có là Admin thường và nâng `admin@agu.edu.vn` thành Super Admin, đồng thời xóa Khoa của tài khoản quản trị.
+
+Bảng `lich_su_phan_quyen_nguoi_dung` lưu thêm `cap_quan_tri_cu` và `cap_quan_tri_moi`. Backend bắt buộc kiểm tra cấp của người thực hiện; kiểm tra trên giao diện chỉ nhằm phản ánh đúng khả năng thao tác.
+
+Các endpoint quản trị tài khoản:
+
+- Admin thường được xử lý Sinh viên/Cựu sinh viên.
+- Chỉ Super Admin được xử lý Kiểm duyệt viên và tài khoản Admin.
+- Không có endpoint xóa tài khoản quản trị; trạng thái được khóa mềm và mọi thay đổi được audit.

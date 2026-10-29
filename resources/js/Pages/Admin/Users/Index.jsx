@@ -13,7 +13,8 @@ import {
     AlertTriangle,
     RotateCcw,
     X,
-    Loader2
+    Loader2,
+    Eye
 } from 'lucide-react';
 
 export default function UsersIndex({ users, filters = {}, faculties = [] }) {
@@ -161,7 +162,7 @@ export default function UsersIndex({ users, filters = {}, faculties = [] }) {
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 placeholder="Tìm theo tên, email, MSSV..."
-                                className="w-full pl-9 pr-4 py-2 text-xs rounded-xl border-slate-200 focus:border-[#005baa] focus:ring-[#005baa]"
+                                className="h-11 w-full rounded-xl border-slate-200 pl-10 pr-4 text-sm caret-black focus:border-[#005baa] focus:ring-2 focus:ring-[#005baa]/20"
                             />
                         </div>
 
@@ -172,7 +173,7 @@ export default function UsersIndex({ users, filters = {}, faculties = [] }) {
                                     setSelectedRole(e.target.value);
                                     applyFilters({ vai_tro: e.target.value });
                                 }}
-                                className="w-full py-2 px-3 text-xs rounded-xl border-slate-200 focus:border-[#005baa] focus:ring-[#005baa]"
+                                className="h-11 w-full rounded-xl border-slate-200 px-3 text-sm text-slate-800 focus:border-[#005baa] focus:ring-2 focus:ring-[#005baa]/20"
                             >
                                 <option value="">Tất cả vai trò</option>
                                 <option value="SINH_VIEN">Sinh viên</option>
@@ -189,7 +190,7 @@ export default function UsersIndex({ users, filters = {}, faculties = [] }) {
                                     setSelectedStatus(e.target.value);
                                     applyFilters({ trang_thai: e.target.value });
                                 }}
-                                className="w-full py-2 px-3 text-xs rounded-xl border-slate-200 focus:border-[#005baa] focus:ring-[#005baa]"
+                                className="h-11 w-full rounded-xl border-slate-200 px-3 text-sm text-slate-800 focus:border-[#005baa] focus:ring-2 focus:ring-[#005baa]/20"
                             >
                                 <option value="">Tất cả trạng thái</option>
                                 <option value="DANG_HOAT_DONG">Đang hoạt động</option>
@@ -205,7 +206,7 @@ export default function UsersIndex({ users, filters = {}, faculties = [] }) {
                                     setSelectedFaculty(e.target.value);
                                     applyFilters({ ma_khoa: e.target.value });
                                 }}
-                                className="w-full py-2 px-3 text-xs rounded-xl border-slate-200 focus:border-[#005baa] focus:ring-[#005baa]"
+                                className="h-11 w-full rounded-xl border-slate-200 px-3 text-sm text-slate-800 focus:border-[#005baa] focus:ring-2 focus:ring-[#005baa]/20"
                             >
                                 <option value="">Tất cả khoa</option>
                                 {faculties.map((f) => (
@@ -258,6 +259,8 @@ export default function UsersIndex({ users, filters = {}, faculties = [] }) {
                                         const currentUserId = auth?.user?.id || auth?.user?.ma_nguoi_dung;
                                         const isSelf = currentUserId === (u.id || u.ma_nguoi_dung);
                                         const isSuspended = u.trang_thai === 'SUSPENDED' || u.trang_thai === 'TAM_KHOA';
+                                        const isProtectedAccount = ['QUAN_TRI_VIEN', 'KIEM_DUYET_VIEN'].includes(u.vai_tro);
+                                        const canManageAccount = !isProtectedAccount || auth?.user?.la_super_admin;
 
                                         return (
                                             <tr key={u.id || u.ma_nguoi_dung} className="hover:bg-slate-50/50 transition-colors">
@@ -289,7 +292,7 @@ export default function UsersIndex({ users, filters = {}, faculties = [] }) {
 
                                                 <td className="px-6 py-4">
                                                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${role.badge}`}>
-                                                        {role.text}
+                                                        {role.text}{u.cap_quan_tri === 'TOI_CAO' ? ' · Super Admin' : ''}
                                                     </span>
                                                     {u.khoa && (
                                                         <div className="text-xs text-slate-500 mt-1 flex items-center gap-1">
@@ -304,6 +307,11 @@ export default function UsersIndex({ users, filters = {}, faculties = [] }) {
                                                         <span className="w-1.5 h-1.5 rounded-full bg-current" />
                                                         {status.text}
                                                     </span>
+                                                    {u.ly_do_khoa && (
+                                                        <div className="text-[11px] text-rose-600 mt-1 max-w-[180px]" title={u.ly_do_khoa}>
+                                                            Lý do: {u.ly_do_khoa}
+                                                        </div>
+                                                    )}
                                                 </td>
 
                                                 <td className="px-6 py-4">
@@ -327,11 +335,24 @@ export default function UsersIndex({ users, filters = {}, faculties = [] }) {
                                                 </td>
 
                                                 <td className="px-6 py-4 text-right">
-                                                    {isSelf ? (
-                                                        <span className="text-xs text-slate-400 italic">
-                                                            Không thể khóa
-                                                        </span>
-                                                    ) : (
+                                                    <div className="flex items-center justify-end gap-2">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => router.visit(route('admin.users.show', u.ma_nguoi_dung))}
+                                                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-[#005baa] bg-blue-50 hover:bg-blue-100 border border-blue-200"
+                                                        >
+                                                            <Eye className="w-3.5 h-3.5" />
+                                                            Chi tiết
+                                                        </button>
+                                                        {isSelf ? (
+                                                            <span className="text-xs text-slate-400 italic">
+                                                                Không thể khóa
+                                                            </span>
+                                                        ) : !canManageAccount ? (
+                                                            <span className="text-xs text-amber-600 italic">
+                                                                Chỉ Super Admin
+                                                            </span>
+                                                        ) : (
                                                         <button
                                                             type="button"
                                                             onClick={() => setTargetUser(u)}
@@ -352,7 +373,8 @@ export default function UsersIndex({ users, filters = {}, faculties = [] }) {
                                                                 </>
                                                             )}
                                                         </button>
-                                                    )}
+                                                        )}
+                                                    </div>
                                                 </td>
                                             </tr>
                                         );

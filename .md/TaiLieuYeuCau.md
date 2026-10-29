@@ -110,3 +110,13 @@
       * Thời gian phản hồi trang danh mục và tìm kiếm học phần ≤500ms.
   * **NFR-03 (Bảo toàn & Dung lượng):** Áp dụng nén file và tối ưu ảnh đại diện trước khi lưu trữ để tiết kiệm dung lượng máy chủ.
   * **NFR-04 (Chống Tấn công):** Rate Limiting 10 lượt upload tài liệu/ngày cho tài khoản thường; kiểm tra định dạng file (MIME-Type Sniffing) ở tầng Backend để chặn hoàn toàn file thực thi .exe, .sh, .php, .bat.
+## Bổ sung: phân cấp tài khoản quản trị
+
+Hệ thống phân biệt hai cấp trong vai trò `QUAN_TRI_VIEN`:
+
+- **Admin thường (`THUONG`)**: xem và xử lý tài khoản Sinh viên/Cựu sinh viên; không được cấp, thu hồi, hạ quyền hoặc khóa tài khoản Kiểm duyệt viên, Admin thường hay Super Admin.
+- **Super Admin (`TOI_CAO`)**: quản lý tài khoản quản trị, cấp/thu hồi quyền Admin, thay đổi cấp quản trị và khóa/mở khóa tài khoản quản trị.
+- Tài khoản `admin@agu.edu.vn` là Super Admin mặc định.
+- Không được tự thay đổi quyền hoặc tự khóa tài khoản của chính mình.
+- Không được hạ cấp Super Admin cuối cùng của hệ thống.
+- Admin/Moderator không thuộc Khoa; chỉ Sinh viên và Cựu sinh viên được gán Khoa.

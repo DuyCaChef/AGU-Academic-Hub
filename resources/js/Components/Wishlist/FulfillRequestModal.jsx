@@ -43,7 +43,7 @@ export default function FulfillRequestModal({ isOpen, onClose, requestId }) {
                             placeholder="Nhập mã ID tài liệu của bạn trên hệ thống..."
                             value={data.ma_tai_lieu}
                             onChange={(e) => setData('ma_tai_lieu', e.target.value)}
-                            className="w-full text-sm rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-slate-800 placeholder:text-slate-400 cursor-text caret-[#00a896] focus:outline-none focus:border-[#00a896] focus:ring-2 focus:ring-[#00a896]/20 transition-colors shadow-2xs"
+                            className="w-full text-sm rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-slate-800 placeholder:text-slate-400 cursor-text caret-black focus:outline-none focus:border-[#00a896] focus:ring-2 focus:ring-[#00a896]/20 transition-colors shadow-2xs"
                         />
                         <div className="flex items-center justify-between text-[11px] text-slate-500 mt-1">
                             <span>Lấy mã ID từ tài liệu bạn đã đăng tải.</span>
@@ -66,7 +66,7 @@ export default function FulfillRequestModal({ isOpen, onClose, requestId }) {
                             placeholder="VD: Đây là tài liệu thầy A vừa cho thi năm ngoái kèm lời giải chi tiết..."
                             value={data.ghi_chu_dong_gop}
                             onChange={(e) => setData('ghi_chu_dong_gop', e.target.value)}
-                            className="w-full text-sm rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-slate-800 placeholder:text-slate-400 cursor-text caret-[#00a896] focus:outline-none focus:border-[#00a896] focus:ring-2 focus:ring-[#00a896]/20 transition-colors shadow-2xs"
+                            className="w-full text-sm rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-slate-800 placeholder:text-slate-400 cursor-text caret-black focus:outline-none focus:border-[#00a896] focus:ring-2 focus:ring-[#00a896]/20 transition-colors shadow-2xs"
                         />
                         {errors.ghi_chu_dong_gop && <p className="text-rose-500 text-xs mt-1">{errors.ghi_chu_dong_gop}</p>}
                     </div>
