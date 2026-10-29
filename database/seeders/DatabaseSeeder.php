@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             MonHocSeeder::class,
             NguoiDungSeeder::class,
             TaiLieuSeeder::class,
+            BaoCaoViPhamSeeder::class,
             CommunitySeeder::class,
         ]);
     }
