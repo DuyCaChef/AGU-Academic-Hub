@@ -28,7 +28,7 @@ Route::middleware('guest')->group(function () {
 // ─── LUỒNG B: Admin/Mod quản lý hàng đợi KYC ─────────────────────────────────
 // Toàn bộ route Quản trị KYC đã được quy hoạch tập trung tại routes/community.php
 // (Prefix: quan-tri, Name: admin.kyc.* và route Signed URL xem ảnh kyc.preview)
-Route::middleware(['auth'])->prefix('admin/kyc')->name('kyc.')->group(function () {
+Route::middleware(['auth'])->prefix('quan-tri/kyc')->name('kyc.')->group(function () {
     // Redirect về route chuẩn hóa của Admin
     Route::get('/', function () {
         return redirect()->route('admin.kyc.index');

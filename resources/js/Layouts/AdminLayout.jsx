@@ -76,7 +76,7 @@ export default function AdminLayout({ children, title = 'Quản trị hệ thố
         {
             label: 'Hàng đợi Báo cáo',
             routeName: 'admin.reports.index',
-            fallbackUrl: '/admin/reports',
+            fallbackUrl: '/quan-tri/bao-cao',
             icon: Flag,
             desc: 'Xử lý báo cáo vi phạm',
             adminOnly: false,
@@ -84,7 +84,7 @@ export default function AdminLayout({ children, title = 'Quản trị hệ thố
         {
             label: 'Thùng rác Tài liệu',
             routeName: 'admin.documents.deleted',
-            fallbackUrl: '/admin/trash',
+            fallbackUrl: '/quan-tri/tai-lieu/da-xoa',
             icon: Trash2,
             desc: 'Khôi phục file đã xóa',
             adminOnly: true,

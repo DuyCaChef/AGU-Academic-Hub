@@ -96,7 +96,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 // =========================================================================
 // 3. KHU VỰC QUẢN TRỊ & KIỂM DUYỆT (MODERATOR & ADMIN)
 // =========================================================================
-Route::middleware(['auth', 'role:KIEM_DUYET_VIEN,QUAN_TRI_VIEN'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'role:KIEM_DUYET_VIEN,QUAN_TRI_VIEN'])->prefix('quan-tri')->name('admin.')->group(function () {
 
     // --- Quản lý Danh mục Môn học (Admin) ---
     Route::post('/mon-hoc', [CourseController::class, 'store'])->name('courses.store');
@@ -106,9 +106,11 @@ Route::middleware(['auth', 'role:KIEM_DUYET_VIEN,QUAN_TRI_VIEN'])->prefix('admin
     // --- Hàng đợi Báo cáo vi phạm (Report Queue) ---
     // Xem danh sách các báo cáo vi phạm cần xử lý
     Route::get('/bao-cao', [DocumentModerationController::class, 'indexReports'])->name('reports.index');
+    Route::get('/bao-cao/{id}', [DocumentModerationController::class, 'showReport'])->name('reports.show');
 
     // Quyết định xử lý báo cáo: Duyệt ẩn/xóa tài liệu hoặc Bác bỏ báo cáo
     Route::put('/bao-cao/{id}/giai-quyet', [DocumentModerationController::class, 'resolveReport'])->name('reports.resolve');
+    Route::delete('/bao-cao/{id}', [DocumentModerationController::class, 'archiveReport'])->name('reports.archive');
 
     // --- Quản lý Thùng rác & Khôi phục (Soft Delete) ---
     // Xem danh sách tài liệu trong thùng rác
