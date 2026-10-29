@@ -160,6 +160,7 @@ export default function KycIndex({ kycQueue }) {
                                     <tr>
                                         <th className="px-6 py-4">Sinh viên / Ứng viên</th>
                                         <th className="px-6 py-4">MSSV / Khóa học</th>
+                                        <th className="px-6 py-4">Khoa</th>
                                         <th className="px-6 py-4">Loại minh chứng</th>
                                         <th className="px-6 py-4">Thời gian nộp</th>
                                         <th className="px-6 py-4 text-center">Bằng chứng (Signed URL)</th>
@@ -197,6 +198,13 @@ export default function KycIndex({ kycQueue }) {
                                                             <GraduationCap className="w-3.5 h-3.5 text-slate-400" />
                                                             Tốt nghiệp: {item.nam_tot_nghiep}
                                                         </div>
+                                                    )}
+                                                </td>
+
+                                                <td className="px-6 py-4">
+                                                    <div className="font-medium text-slate-700">{item.khoa?.ten_khoa || '---'}</div>
+                                                    {item.khoa?.ky_hieu_khoa && (
+                                                        <div className="text-xs text-slate-500">{item.khoa.ky_hieu_khoa}</div>
                                                     )}
                                                 </td>
 

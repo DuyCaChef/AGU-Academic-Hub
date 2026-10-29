@@ -13,26 +13,7 @@ use App\Http\Controllers\AcademicCatalogController;
 Route::middleware('auth')->group(function () {
 
     // =========================================================================
-    // 1. XÁC THỰC DANH TÍNH & KYC (SINH VIÊN / CỰU SINH VIÊN)
-    // =========================================================================
-    Route::prefix('kyc')->name('kyc.')->group(function () {
-        // Giao diện nhập hồ sơ KYC
-        Route::get('/nop-ho-so', [KycController::class, 'create'])->name('submit');
-
-        // Gửi ảnh thẻ SV / Bằng tốt nghiệp lên server private storage
-        Route::post('/nop-ho-so', [KycController::class, 'store'])->name('store');
-
-        // Xem trạng thái hồ sơ xác thực
-        Route::get('/trang-thai', [KycController::class, 'status'])->name('status');
-
-        // CấP SIGNED URL XEM ẢNH: Stream ảnh từ private storage khi chữ ký hợp lệ
-        Route::get('/xem-anh/{ma_xac_thuc}', [KycController::class, 'xemTruocMinhChung'])
-            ->name('preview')
-            ->middleware('signed');
-    });
-
-    // =========================================================================
-    // 2. ĐÁNH GIÁ MÔN HỌC (COURSE REVIEWS AND RATING ENGINE)
+    // 1. ĐÁNH GIÁ MÔN HỌC (COURSE REVIEWS AND RATING ENGINE)
     // =========================================================================
     // Xem danh sách review theo môn học (tham số ma_hoc_phan, ví dụ: COS305)
     Route::get('/mon-hoc/{ma_hoc_phan}/danh-gia', [CourseReviewController::class, 'index'])
@@ -61,7 +42,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // =========================================================================
-    // 3. YÊU CẦU TÀI LIỆU VÀ SĂN THƯỞNG (WISHLIST VÀ BOUNTY)
+    // 2. YÊU CẦU TÀI LIỆU VÀ SĂN THƯỞNG (WISHLIST VÀ BOUNTY)
     // =========================================================================
     Route::prefix('yeu-cau-tai-lieu')->name('document-requests.')->group(function () {
         // Danh sách các bài đăng tìm tài liệu
@@ -83,7 +64,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // =========================================================================
-    // 4. VÍ ĐIỂM CÁ NHÂN VÀ LỊCH SỬ BIẾN ĐỘNG (POINT WALLET)
+    // 3. VÍ ĐIỂM CÁ NHÂN VÀ LỊCH SỬ BIẾN ĐỘNG (POINT WALLET)
     // =========================================================================
     Route::prefix('vi-diem')->name('wallet.')->group(function () {
         Route::get('/', function () {
@@ -92,7 +73,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // =========================================================================
-    // 5. QUẢN TRỊ KYC VÀ TÀI KHOẢN (KIỂM DUYỆT VIÊN VÀ QUẢN TRỊ VIÊN)
+    // 4. QUẢN TRỊ KYC VÀ TÀI KHOẢN (KIỂM DUYỆT VIÊN VÀ QUẢN TRỊ VIÊN)
     // =========================================================================
     Route::prefix('quan-tri')->name('admin.')->group(function () {
         // Hàng đợi duyệt minh chứng thẻ SV / Bằng tốt nghiệp

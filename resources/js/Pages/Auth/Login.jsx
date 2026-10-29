@@ -13,7 +13,7 @@ import {
     ShieldCheck
 } from 'lucide-react';
 
-export default function Login({ status, canResetPassword }) {
+export default function Login({ status, kycStatus, canResetPassword }) {
     // 1. Quản lý trạng thái form qua hook useForm của Inertia
     const { data, setData, post, processing, errors, reset } = useForm({
         email: '',
@@ -54,6 +54,18 @@ export default function Login({ status, canResetPassword }) {
                 <div className="mb-5 p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-sm font-medium text-emerald-800 flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                     <span>{status}</span>
+                </div>
+            )}
+
+            {kycStatus?.type === 'pending' && (
+                <div className="mb-5 p-4 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-900">
+                    <div className="flex items-start gap-2">
+                        <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                        <div>
+                            <p className="font-semibold">Hồ sơ đang chờ duyệt</p>
+                            <p className="mt-1 leading-relaxed">{kycStatus.message}</p>
+                        </div>
+                    </div>
                 </div>
             )}
 

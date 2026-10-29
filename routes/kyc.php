@@ -34,3 +34,6 @@ Route::middleware(['auth'])->prefix('admin/kyc')->name('kyc.')->group(function (
         return redirect()->route('admin.kyc.index');
     })->name('queue');
 });
+
+Route::middleware(['auth', 'signed'])->get('/kyc/xem-anh/{ma_xac_thuc}', [KycController::class, 'xemTruocMinhChung'])
+    ->name('kyc.preview');

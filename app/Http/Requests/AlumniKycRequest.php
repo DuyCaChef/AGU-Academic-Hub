@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\DanhSachSinhVienRaw;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
@@ -11,6 +12,14 @@ class AlumniKycRequest extends FormRequest
     public function authorize(): bool
     {
         return true;
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'email' => strtolower(trim((string) $this->input('email'))),
+            'mssv' => strtoupper(trim((string) $this->input('mssv'))),
+        ]);
     }
 
     public function rules(): array
@@ -31,6 +40,20 @@ class AlumniKycRequest extends FormRequest
                 'max:5120', // Tối đa 5MB
             ],
         ];
+    }
+
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator): void {
+            $mssv = (string) $this->input('mssv');
+
+            if ($mssv !== '' && DanhSachSinhVienRaw::where('mssv', $mssv)->exists()) {
+                $validator->errors()->add(
+                    'mssv',
+                    'MSSV này thuộc danh sách sinh viên đang học. Sinh viên hiện hành không nộp hồ sơ KYC cựu sinh viên.'
+                );
+            }
+        });
     }
 
     /**
