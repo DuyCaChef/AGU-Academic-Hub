@@ -80,7 +80,7 @@ export default function CreateRequestModal({ isOpen, onClose, courses = [] }) {
                             placeholder="VD: Cần tìm đề thi cuối kỳ môn Lập trình Web năm 2024"
                             value={data.tieu_de}
                             onChange={(e) => setData('tieu_de', e.target.value)}
-                            className="w-full text-sm rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-slate-800 placeholder:text-slate-400 cursor-text caret-[#005baa] focus:outline-none focus:border-[#005baa] focus:ring-2 focus:ring-[#005baa]/20 transition-colors shadow-2xs"
+                            className="w-full text-sm rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-slate-800 placeholder:text-slate-400 cursor-text caret-black focus:outline-none focus:border-[#005baa] focus:ring-2 focus:ring-[#005baa]/20 transition-colors shadow-2xs"
                         />
                         {errors.tieu_de && <p className="text-rose-500 text-xs mt-1">{errors.tieu_de}</p>}
                     </div>
@@ -94,7 +94,7 @@ export default function CreateRequestModal({ isOpen, onClose, courses = [] }) {
                                 placeholder="VD: ThS. Nguyễn Văn A"
                                 value={data.ten_giang_vien}
                                 onChange={(e) => setData('ten_giang_vien', e.target.value)}
-                                className="w-full text-sm rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-slate-800 placeholder:text-slate-400 cursor-text caret-[#005baa] focus:outline-none focus:border-[#005baa] focus:ring-2 focus:ring-[#005baa]/20 transition-colors shadow-2xs"
+                                className="w-full text-sm rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-slate-800 placeholder:text-slate-400 cursor-text caret-black focus:outline-none focus:border-[#005baa] focus:ring-2 focus:ring-[#005baa]/20 transition-colors shadow-2xs"
                             />
                             {errors.ten_giang_vien && <p className="text-rose-500 text-xs mt-1">{errors.ten_giang_vien}</p>}
                         </div>
@@ -126,7 +126,7 @@ export default function CreateRequestModal({ isOpen, onClose, courses = [] }) {
                             placeholder="Mô tả kỹ đề bài, định dạng file cần tìm hoặc phạm vi kiến thức..."
                             value={data.mo_ta}
                             onChange={(e) => setData('mo_ta', e.target.value)}
-                            className="w-full text-sm rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-slate-800 placeholder:text-slate-400 cursor-text caret-[#005baa] focus:outline-none focus:border-[#005baa] focus:ring-2 focus:ring-[#005baa]/20 transition-colors shadow-2xs"
+                            className="w-full text-sm rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-slate-800 placeholder:text-slate-400 cursor-text caret-black focus:outline-none focus:border-[#005baa] focus:ring-2 focus:ring-[#005baa]/20 transition-colors shadow-2xs"
                         />
                     </div>
 
@@ -157,7 +157,7 @@ export default function CreateRequestModal({ isOpen, onClose, courses = [] }) {
                                         setData('diem_thuong', isNaN(parsed) ? '' : parsed);
                                     }
                                 }}
-                                className="w-32 text-base font-bold text-amber-700 rounded-lg border border-amber-300 bg-white px-3.5 py-2 cursor-text caret-amber-600 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 shadow-2xs"
+                                className="w-32 text-base font-bold text-amber-700 rounded-lg border border-amber-300 bg-white px-3.5 py-2 cursor-text caret-black focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 shadow-2xs"
                             />
 
                             {/* Quick Presets */}

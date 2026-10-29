@@ -108,8 +108,17 @@ Route::middleware('auth')->group(function () {
         Route::get('/nguoi-dung', [AdminUserController::class, 'index'])
         ->name('users.index');
 
+        Route::get('/nguoi-dung/{ma_nguoi_dung}', [AdminUserController::class, 'show'])
+        ->name('users.show');
+
         Route::put('/nguoi-dung/{ma_nguoi_dung}/trang-thai', [AdminUserController::class, 'toggleStatus'])
         ->name('users.status');
+
+        Route::put('/nguoi-dung/{ma_nguoi_dung}/phan-quyen', [AdminUserController::class, 'updatePermissions'])
+        ->name('users.permissions');
+
+        Route::post('/nguoi-dung/{ma_nguoi_dung}/vi-pham', [AdminUserController::class, 'recordViolation'])
+        ->name('users.violations');
 
         // Chuyển hướng khi truy cập URL /quan-tri/trang-thai về trang Quản lý Người dùng
         Route::get('/trang-thai', function () {

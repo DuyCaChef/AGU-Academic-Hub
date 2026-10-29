@@ -40,7 +40,7 @@ class AcademicCatalogController extends Controller
 
         // Lấy Chuyên ngành, đồng thời nạp thông tin Khoa để hiển thị tên Khoa.
         $majors = $this->applyEffectiveChildStatus(ChuyenNganh::query(), $trangThai, 'chuyen_nganh')
-            ->with(['khoa' => fn ($query) => $query->withTrashed()->select('ma_khoa', 'ten_khoa', 'ky_hieu_khoa')])
+            ->with(['khoa' => fn($query) => $query->withTrashed()->select('ma_khoa', 'ten_khoa', 'ky_hieu_khoa')])
             ->when($maKhoa, fn(Builder $query) => $query->where('ma_khoa', $maKhoa))
             ->when($search, fn(Builder $query) => $query->where(function (Builder $query) use ($search): void {
                 $query->where('ky_hieu_nganh', 'like', "%{$search}%")
@@ -53,7 +53,7 @@ class AcademicCatalogController extends Controller
         // Lấy Môn học cùng Khoa và các Chuyên ngành được gán.
         $courses = $this->applyEffectiveChildStatus(MonHoc::query(), $trangThai, 'mon_hoc')
             ->with([
-                'khoa' => fn ($query) => $query->withTrashed()->select('ma_khoa', 'ten_khoa', 'ky_hieu_khoa'),
+                'khoa' => fn($query) => $query->withTrashed()->select('ma_khoa', 'ten_khoa', 'ky_hieu_khoa'),
                 'chuyenNganhs:ma_chuyen_nganh,ky_hieu_nganh,ten_chuyen_nganh',
             ])
             ->when($maKhoa, fn(Builder $query) => $query->where('ma_khoa', $maKhoa))
@@ -218,23 +218,17 @@ class AcademicCatalogController extends Controller
         };
     }
 
-    /**
-     * Lọc trạng thái hiệu lực thực tế của Chuyên ngành/Môn học.
-     *
-     * Bản ghi con chỉ hoạt động khi bản thân chưa bị soft delete và Khoa cha
-     * cũng đang hoạt động. Ở trạng thái inactive, trả cả bản ghi con đã bị
-     * soft delete và bản ghi còn nguyên dữ liệu nhưng có Khoa cha đã bị tắt.
-     */
+    // Lọc trạng thái hiệu lực thực tế của Chuyên ngành/Môn học.
     private function applyEffectiveChildStatus(Builder $query, string $status, string $table): Builder
     {
         return match ($status) {
             'active' => $this->applyStatus($query, $status)->whereHas('khoa'),
             'inactive' => $query->withTrashed()->where(function (Builder $query) use ($table): void {
-                $query->whereNotNull("{$table}.ngay_xoa_tam")
-                    ->orWhereHas('khoa', fn (Builder $faculty) => $faculty
+                    $query->whereNotNull("{$table}.ngay_xoa_tam")
+                    ->orWhereHas('khoa', fn(Builder $faculty) => $faculty
                         ->withTrashed()
                         ->whereNotNull('khoa.ngay_xoa_tam'));
-            }),
+                }),
             default => $query->withTrashed(),
         };
     }

@@ -50,11 +50,14 @@ class HandleInertiaRequests extends Middleware {
                     // Vai trò & Trạng thái tài khoản (Lấy từ Backed Enum)
                     'vai_tro' => $user->vai_tro?->value, // Trả về 'SINH_VIEN', 'CUU_SINH_VIEN', 'KIEM_DUYET_VIEN', 'QUAN_TRI_VIEN'
                     'ten_vai_tro' => $user->vai_tro?->label(), // Trả về "Sinh viên", "Cựu sinh viên", "Kiểm duyệt viên", "Quản trị viên"
+                    'cap_quan_tri' => $user->cap_quan_tri?->value,
+                    'ten_cap_quan_tri' => $user->cap_quan_tri?->label(),
                     'trang_thai' => $user->trang_thai?->value, 
                     'ten_trang_thai' => $user->trang_thai?->label(),
 
                     // Cờ phân quyền nhanh (Helper Flags)
                     'la_quan_tri' => $user->laQuanTriVien(),
+                    'la_super_admin' => $user->laSuperAdmin(),
                     'la_kiem_duyet' => $user->laKiemDuyetVien(),
                     'dang_hoat_dong' => $user->dangHoatDong(),
 

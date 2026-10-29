@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\TrangThaiNguoiDung;
+use App\Enums\CapQuanTri;
 use App\Enums\VaiTroNguoiDung;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -28,7 +29,11 @@ class NguoiDung extends Authenticatable
         'mssv',
         'mat_khau',
         'vai_tro',
+        'cap_quan_tri',
         'trang_thai',
+        'ly_do_khoa',
+        'so_lan_vi_pham',
+        'muc_canh_bao',
         'diem_uy_tin',
         'anh_dai_dien',
         'xac_thuc_email_luc',
@@ -66,9 +71,11 @@ class NguoiDung extends Authenticatable
             'xac_thuc_email_luc' => 'datetime',
             'mat_khau' => 'hashed',
             'vai_tro' => VaiTroNguoiDung::class,
+            'cap_quan_tri' => CapQuanTri::class,
             'trang_thai' => TrangThaiNguoiDung::class,
             'diem_uy_tin' => 'integer',
             'nam_tot_nghiep' => 'integer',
+            'so_lan_vi_pham' => 'integer',
         ];
     }
 
@@ -114,10 +121,30 @@ class NguoiDung extends Authenticatable
         return $this->hasMany(YeuCauXacThuc::class, 'ma_nguoi_dung', 'ma_nguoi_dung');
     }
 
+    public function lichSuTrangThai(): HasMany
+    {
+        return $this->hasMany(LichSuTrangThaiNguoiDung::class, 'ma_nguoi_dung', 'ma_nguoi_dung');
+    }
+
+    public function lichSuPhanQuyen(): HasMany
+    {
+        return $this->hasMany(LichSuPhanQuyenNguoiDung::class, 'ma_nguoi_dung', 'ma_nguoi_dung');
+    }
+
     // --- Trợ giúp phân quyền ---
     public function laQuanTriVien(): bool
     {
         return $this->vai_tro === VaiTroNguoiDung::QUAN_TRI_VIEN;
+    }
+
+    public function laSuperAdmin(): bool
+    {
+        return $this->laQuanTriVien() && $this->cap_quan_tri === CapQuanTri::TOI_CAO;
+    }
+
+    public function laAdminThuong(): bool
+    {
+        return $this->laQuanTriVien() && $this->cap_quan_tri === CapQuanTri::THUONG;
     }
 
     public function laKiemDuyetVien(): bool

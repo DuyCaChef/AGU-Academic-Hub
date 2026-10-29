@@ -39,20 +39,24 @@ class CommunitySeeder extends Seeder
         $admin = NguoiDung::firstOrCreate(
             ['email' => 'admin@agu.edu.vn'],
             [
-                'ma_khoa' => $khoa->ma_khoa,
+                'ma_khoa' => null,
                 'ho_ten' => 'Quản trị viên Hệ thống',
                 'mat_khau' => Hash::make('Admin@123456'),
                 'vai_tro' => VaiTroNguoiDung::QUAN_TRI_VIEN,
+                'cap_quan_tri' => 'TOI_CAO',
                 'trang_thai' => TrangThaiNguoiDung::DANG_HOAT_DONG,
                 'xac_thuc_email_luc' => now(),
             ]
         );
+        $admin->update([
+            'cap_quan_tri' => 'TOI_CAO',
+            'ma_khoa' => null,
+        ]);
 
         // 4. Tạo tài khoản Moderator mặc định
         $mod = NguoiDung::firstOrCreate(
             ['email' => 'mod@agu.edu.vn'],
             [
-                'ma_khoa' => $khoa->ma_khoa,
                 'ho_ten' => 'Ban Học Tập Moderation',
                 'mat_khau' => Hash::make('Mod@123456'),
                 'vai_tro' => VaiTroNguoiDung::KIEM_DUYET_VIEN,
@@ -60,6 +64,7 @@ class CommunitySeeder extends Seeder
                 'xac_thuc_email_luc' => now(),
             ]
         );
+        $mod->update(['ma_khoa' => null]);
 
         // 5. Tạo tài khoản Sinh viên kiểm thử
         $student = NguoiDung::firstOrCreate(
