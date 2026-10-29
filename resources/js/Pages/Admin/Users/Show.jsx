@@ -101,6 +101,11 @@ export default function UserShow({ user, faculties = [], statusHistory = [], rol
                     </form>
                     <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
                         <h2 className="font-bold text-slate-900 flex items-center gap-2"><UserRound className="w-5 h-5 text-[#005baa]" /> Trạng thái tài khoản</h2>
+                        {user.canh_bao_vi_pham && (
+                            <div className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-medium leading-6 text-amber-900">
+                                {user.canh_bao_vi_pham}
+                            </div>
+                        )}
                         <p className="text-sm">Trạng thái: <strong>{user.ten_trang_thai}</strong></p>
                         {user.ly_do_khoa && <p className="text-sm text-rose-700">Lý do khóa: {user.ly_do_khoa}</p>}
                         <p className="text-sm">Số lần vi phạm: <strong>{user.so_lan_vi_pham}</strong> {user.muc_canh_bao && `(${user.muc_canh_bao})`}</p>

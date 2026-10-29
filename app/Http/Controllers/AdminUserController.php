@@ -317,6 +317,9 @@ class AdminUserController extends Controller
             'ten_trang_thai' => $user->trang_thai?->label(),
             'ly_do_khoa' => $user->ly_do_khoa,
             'so_lan_vi_pham' => $user->so_lan_vi_pham,
+            'canh_bao_vi_pham' => $user->so_lan_vi_pham > 3
+                ? 'Tài khoản này đã vi phạm trên 3 lần. Khuyến nghị Admin xem xét khóa tài khoản.'
+                : null,
             'muc_canh_bao' => $user->muc_canh_bao,
             'diem_uy_tin' => $user->diem_uy_tin,
             'nam_tot_nghiep' => $user->nam_tot_nghiep,
