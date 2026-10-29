@@ -7,6 +7,7 @@ use App\Enums\TrangThaiNguoiDung;
 use App\Enums\TrangThaiXacThuc;
 use App\Enums\VaiTroNguoiDung;
 use App\Http\Requests\AlumniKycRequest;
+use App\Models\DanhSachSinhVienRaw;
 use App\Models\Khoa;
 use App\Models\NguoiDung;
 use App\Models\YeuCauXacThuc;
@@ -103,8 +104,17 @@ class KycController extends Controller
             abort(403, 'Bạn không có thẩm quyền truy cập hàng đợi duyệt KYC.');
         }
 
-        $danhSach = YeuCauXacThuc::with(['nguoiDung:ma_nguoi_dung,ho_ten,email,mssv,nam_tot_nghiep'])
+        $danhSach = YeuCauXacThuc::with(['nguoiDung:ma_nguoi_dung,ma_khoa,ho_ten,email,mssv,nam_tot_nghiep', 'nguoiDung.khoa:ma_khoa,ten_khoa,ky_hieu_khoa'])
+            ->where('loai_xac_thuc', LoaiXacThuc::CUU_SINH_VIEN)
             ->where('trang_thai', TrangThaiXacThuc::CHO_DUYET)
+            ->whereHas('nguoiDung', function ($query): void {
+                $query->where('vai_tro', VaiTroNguoiDung::CUU_SINH_VIEN)
+                    ->whereNotExists(function ($subQuery): void {
+                        $subQuery->selectRaw('1')
+                            ->from('danh_sach_sinh_vien_raw')
+                            ->whereColumn('danh_sach_sinh_vien_raw.mssv', 'nguoi_dung.mssv');
+                    });
+            })
             ->orderBy('ma_yeu_cau_xac_thuc', 'asc')
             ->paginate(15)
             ->through(function ($item) {
@@ -113,6 +123,11 @@ class KycController extends Controller
                     'ma_nguoi_dung'   => $item->ma_nguoi_dung,
                     'ho_ten'          => $item->nguoiDung?->ho_ten,
                     'email'           => $item->nguoiDung?->email,
+                    'khoa'            => $item->nguoiDung?->khoa ? [
+                        'ma_khoa' => $item->nguoiDung->khoa->ma_khoa,
+                        'ten_khoa' => $item->nguoiDung->khoa->ten_khoa,
+                        'ky_hieu_khoa' => $item->nguoiDung->khoa->ky_hieu_khoa,
+                    ] : null,
                     'mssv'            => $item->mssv,
                     'nam_tot_nghiep'  => $item->nam_tot_nghiep,
                     'loai_minh_chung' => $item->loai_minh_chung,
@@ -143,7 +158,8 @@ class KycController extends Controller
             abort(403, 'Bạn không có thẩm quyền truy cập tệp minh chứng cá nhân này.');
         }
 
-        $kyc = YeuCauXacThuc::findOrFail($ma_xac_thuc);
+        $kyc = YeuCauXacThuc::where('loai_xac_thuc', LoaiXacThuc::CUU_SINH_VIEN)
+            ->findOrFail($ma_xac_thuc);
 
         if (!Storage::disk('local')->exists($kyc->duong_dan_minh_chung)) {
             abort(404, 'Tệp minh chứng không tồn tại trên hệ thống lưu trữ.');
@@ -170,13 +186,30 @@ class KycController extends Controller
             abort(403, 'Bạn không có thẩm quyền thực hiện thao tác duyệt hồ sơ KYC.');
         }
 
-        $kyc = YeuCauXacThuc::with('nguoiDung')->findOrFail($ma_xac_thuc);
+        $kyc = YeuCauXacThuc::with('nguoiDung')
+            ->where('loai_xac_thuc', LoaiXacThuc::CUU_SINH_VIEN)
+            ->findOrFail($ma_xac_thuc);
 
         if ($kyc->trang_thai !== TrangThaiXacThuc::CHO_DUYET) {
             return back()->with('error', 'Hồ sơ này đã được xử lý trước đó.');
         }
 
         DB::transaction(function () use ($kyc, $request) {
+            $kyc = YeuCauXacThuc::with('nguoiDung')
+                ->whereKey($kyc->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if (
+                $kyc->trang_thai !== TrangThaiXacThuc::CHO_DUYET ||
+                $kyc->loai_xac_thuc !== LoaiXacThuc::CUU_SINH_VIEN ||
+                !$kyc->nguoiDung ||
+                $kyc->nguoiDung->vai_tro !== VaiTroNguoiDung::CUU_SINH_VIEN ||
+                DanhSachSinhVienRaw::where('mssv', $kyc->nguoiDung->mssv)->exists()
+            ) {
+                throw new \RuntimeException('Hồ sơ KYC cựu sinh viên không còn hợp lệ để phê duyệt.');
+            }
+
             $kyc->update([
                 'trang_thai'      => TrangThaiXacThuc::DA_DUYET,
                 'nguoi_duyet'     => $request->user()->ma_nguoi_dung,
@@ -189,6 +222,16 @@ class KycController extends Controller
                 'trang_thai' => TrangThaiNguoiDung::DANG_HOAT_DONG,
                 'vai_tro'    => VaiTroNguoiDung::CUU_SINH_VIEN,
             ]);
+
+            $kyc->nguoiDung->viDiem()->firstOrCreate([], [
+                'diem_kha_dung' => 100,
+                'diem_tam_giu' => 0,
+            ]);
+
+            $kyc->nguoiDung->notify(new \App\Notifications\KycDecisionNotification(
+                'DA_DUYET',
+                'Hồ sơ cựu sinh viên đã được duyệt. Tài khoản của bạn đã được kích hoạt.'
+            ));
         });
 
         return back()->with('success', "Đã phê duyệt tài khoản cựu sinh viên {$kyc->nguoiDung->ho_ten} thành công.");
@@ -211,18 +254,42 @@ class KycController extends Controller
             'ly_do_tu_choi.min'      => 'Lý do từ chối tối thiểu 6 ký tự.',
         ]);
 
-        $kyc = YeuCauXacThuc::with('nguoiDung')->findOrFail($ma_xac_thuc);
+        $kyc = YeuCauXacThuc::with('nguoiDung')
+            ->where('loai_xac_thuc', LoaiXacThuc::CUU_SINH_VIEN)
+            ->findOrFail($ma_xac_thuc);
 
         if ($kyc->trang_thai !== TrangThaiXacThuc::CHO_DUYET) {
             return back()->with('error', 'Hồ sơ này đã được xử lý trước đó.');
         }
 
-        $kyc->update([
-            'trang_thai'      => TrangThaiXacThuc::TU_CHOI,
-            'nguoi_duyet'     => $request->user()->ma_nguoi_dung,
-            'thoi_gian_duyet' => now(),
-            'ly_do_tu_choi'   => $request->input('ly_do_tu_choi'),
-        ]);
+        DB::transaction(function () use ($kyc, $request): void {
+            $lockedKyc = YeuCauXacThuc::with('nguoiDung')
+                ->whereKey($kyc->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if (
+                $lockedKyc->trang_thai !== TrangThaiXacThuc::CHO_DUYET ||
+                $lockedKyc->loai_xac_thuc !== LoaiXacThuc::CUU_SINH_VIEN ||
+                !$lockedKyc->nguoiDung ||
+                $lockedKyc->nguoiDung->vai_tro !== VaiTroNguoiDung::CUU_SINH_VIEN ||
+                DanhSachSinhVienRaw::where('mssv', $lockedKyc->nguoiDung->mssv)->exists()
+            ) {
+                throw new \RuntimeException('Hồ sơ KYC cựu sinh viên không còn hợp lệ để từ chối.');
+            }
+
+            $lockedKyc->update([
+                'trang_thai'      => TrangThaiXacThuc::TU_CHOI,
+                'nguoi_duyet'     => $request->user()->ma_nguoi_dung,
+                'thoi_gian_duyet' => now(),
+                'ly_do_tu_choi'   => $request->input('ly_do_tu_choi'),
+            ]);
+
+            $lockedKyc->nguoiDung->notify(new \App\Notifications\KycDecisionNotification(
+                'TU_CHOI',
+                'Hồ sơ cựu sinh viên bị từ chối: ' . $request->input('ly_do_tu_choi')
+            ));
+        });
 
         return back()->with('warning', "Đã từ chối hồ sơ của cựu sinh viên {$kyc->nguoiDung->ho_ten}.");
     }

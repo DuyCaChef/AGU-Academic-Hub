@@ -105,8 +105,23 @@ class LoginRequest extends FormRequest
         ) {
             \Illuminate\Support\Facades\RateLimiter::hit($this->layKhoaGioiHan());
 
+            $rejectedKyc = $user->yeuCauXacThucs()
+                ->where('loai_xac_thuc', \App\Enums\LoaiXacThuc::CUU_SINH_VIEN)
+                ->where('trang_thai', \App\Enums\TrangThaiXacThuc::TU_CHOI)
+                ->latest('thoi_gian_duyet')
+                ->first();
+
+            if (!$rejectedKyc) {
+                $this->session()->flash('kyc_status', [
+                    'type' => 'pending',
+                    'message' => 'Hồ sơ cựu sinh viên của bạn đang chờ Admin đối soát. Bạn sẽ có thể đăng nhập sau khi hồ sơ được duyệt.',
+                ]);
+            }
+
             throw ValidationException::withMessages([
-                'email' => 'Hồ sơ minh chứng cựu sinh viên của bạn đang chờ Quản trị viên đối soát và kích hoạt. Vui lòng quay lại sau.',
+                'email' => $rejectedKyc
+                    ? 'Hồ sơ cựu sinh viên của bạn đã bị từ chối: ' . $rejectedKyc->ly_do_tu_choi
+                    : 'Hồ sơ minh chứng cựu sinh viên của bạn đang chờ Quản trị viên đối soát và kích hoạt. Vui lòng quay lại sau.',
             ]);
         }
 
