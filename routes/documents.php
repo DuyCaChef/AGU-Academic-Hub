@@ -3,6 +3,7 @@
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\DocumentModerationController;
+use App\Http\Controllers\DocumentRemovalRequestController;
 use App\Http\Controllers\DocumentReportController;
 use App\Http\Controllers\FacultyController;
 use Illuminate\Support\Facades\Route;
@@ -115,6 +116,11 @@ Route::middleware(['auth', 'role:KIEM_DUYET_VIEN,QUAN_TRI_VIEN'])->prefix('quan-
     // Quyết định xử lý báo cáo: Duyệt ẩn/xóa tài liệu hoặc Bác bỏ báo cáo
     Route::put('/bao-cao/{id}/giai-quyet', [DocumentModerationController::class, 'resolveReport'])->name('reports.resolve');
     Route::delete('/bao-cao/{id}', [DocumentModerationController::class, 'archiveReport'])->name('reports.archive');
+
+    // --- Hàng đợi yêu cầu gỡ tài liệu thuộc quyền sở hữu cộng đồng ---
+    Route::get('/yeu-cau-go-tai-lieu', [DocumentRemovalRequestController::class, 'index'])->name('documents.removal-requests.index');
+    Route::get('/yeu-cau-go-tai-lieu/{id}', [DocumentRemovalRequestController::class, 'show'])->name('documents.removal-requests.show');
+    Route::put('/yeu-cau-go-tai-lieu/{id}/quyet-dinh', [DocumentRemovalRequestController::class, 'decide'])->name('documents.removal-requests.decide');
 
     // --- Quản lý Thùng rác & Khôi phục (Soft Delete) ---
     // Xem danh sách tài liệu trong thùng rác
