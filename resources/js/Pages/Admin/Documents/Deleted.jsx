@@ -75,7 +75,7 @@ export default function DeletedDocumentsIndex({ documents }) {
                                                 {doc.nguoi_dang?.ho_ten || '---'}
                                             </td>
                                             <td className="px-6 py-4 text-xs text-slate-500">
-                                                {doc.deleted_at}
+                                                {doc.ngay_xoa_tam}
                                             </td>
                                             <td className="px-6 py-4 text-right">
                                                 <button

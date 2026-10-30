@@ -13,7 +13,9 @@ class BaoCaoViPham extends Model
     use HasFactory, SoftDeletes;
 
     protected $table = 'bao_cao_vi_pham';
+
     protected $primaryKey = 'ma_bao_cao';
+
     const DELETED_AT = 'ngay_xoa_tam';
 
     protected $fillable = [
@@ -53,5 +55,11 @@ class BaoCaoViPham extends Model
     {
         return $this->hasMany(self::class, 'ma_tai_lieu', 'ma_tai_lieu')
             ->where('ma_bao_cao', '!=', $this->ma_bao_cao);
+    }
+
+    public function laHopLe(): bool
+    {
+        return $this->trang_thai_xu_ly !== 'BAC_BO'
+            && ($this->nguoiBaoCao?->diem_uy_tin ?? 0) >= config('moderation.trusted_reporter_reputation');
     }
 }
