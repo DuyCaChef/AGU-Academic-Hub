@@ -109,6 +109,12 @@ Các endpoint bổ sung cho luồng sinh viên đang học:
 | PUT         | `/admin/reports/{id}/resolve`     | Mod / Admin   | Xử lý báo cáo: Duyệt xóa tài liệu / Bác bỏ báo cáo        |
 | POST        | `/documents/{id}/request-removal` | Uploader      | Tác giả gửi yêu cầu gỡ tài liệu đã thuộc sở hữu cộng đồng |
 
+Quy trình yêu cầu gỡ tài liệu cộng đồng:
+
+- Tác giả chỉ có thể gửi yêu cầu khi tài liệu đạt tối thiểu `DOCUMENT_COMMUNITY_OWNERSHIP_DOWNLOAD_THRESHOLD` (mặc định 10) lượt tải.
+- Moderator/Admin xem hàng đợi tại `/quan-tri/yeu-cau-go-tai-lieu`, cùng tài liệu, tác giả, lượt tải và lý do yêu cầu.
+- Khi duyệt, tài liệu được xóa mềm; khi từ chối, bắt buộc nhập lý do. Cả hai quyết định đều lưu người xử lý, thời điểm và gửi thông báo cho tác giả.
+
 #### G. Module 7: Quản trị Hệ thống & KYC (Admin Control Panel)
 
 Hàng đợi KYC chỉ nhận hồ sơ **cựu sinh viên**. Không có hồ sơ KYC, ảnh thẻ hoặc thao tác duyệt thủ công đối với sinh viên đang học.

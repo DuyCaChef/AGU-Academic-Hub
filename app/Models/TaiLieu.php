@@ -73,4 +73,9 @@ class TaiLieu extends Model
     {
         return $this->hasMany(BaoCaoViPham::class, 'ma_tai_lieu', 'ma_tai_lieu');
     }
+
+    public function yeuCauGoBos(): HasMany
+    {
+        return $this->hasMany(YeuCauGoBoTaiLieu::class, 'ma_tai_lieu', 'ma_tai_lieu');
+    }
 }

@@ -13,6 +13,7 @@ import {
     CheckCircle2,
     AlertTriangle,
     BookOpen,
+    FileWarning,
 } from 'lucide-react';
 
 /**
@@ -90,6 +91,14 @@ export default function AdminLayout({ children, title = 'Quản trị hệ thố
             adminOnly: false,
         },
         {
+            label: 'Yêu cầu gỡ tài liệu',
+            routeName: 'admin.documents.removal-requests.index',
+            fallbackUrl: '/quan-tri/yeu-cau-go-tai-lieu',
+            icon: FileWarning,
+            desc: 'Duyệt gỡ tài liệu cộng đồng',
+            adminOnly: false,
+        },
+        {
             label: 'Thùng rác Tài liệu',
             routeName: 'admin.documents.deleted',
             fallbackUrl: '/quan-tri/tai-lieu/da-xoa',
@@ -125,11 +134,11 @@ export default function AdminLayout({ children, title = 'Quản trị hệ thố
             {/* 1. SIDEBAR CỐ ĐỊNH 280PX TÔNG MÀU TỐI bg-surface-admin    */}
             {/* ========================================================= */}
             <aside
-                className={`fixed top-0 bottom-0 left-0 w-[280px] bg-surface-admin text-slate-200 z-50 flex flex-col justify-between border-r border-slate-800 transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+                className={`fixed inset-y-0 left-0 z-50 flex w-[280px] flex-col overflow-hidden border-r border-slate-800 bg-surface-admin text-slate-200 transition-transform duration-300 ease-in-out lg:translate-x-0 ${
                     mobileOpen ? 'translate-x-0' : '-translate-x-full'
                 }`}
             >
-                <div>
+                <div className="admin-sidebar-scroll min-h-0 flex-1 overflow-y-auto">
                     {/* Phần đầu Sidebar: Logo và nhận diện quản trị */}
                     <div className="h-16 flex items-center justify-between px-6 border-b border-slate-800/80 bg-slate-950/60">
                         <Link href={getSafeRoute('dashboard', '/')} className="flex items-center gap-3 group">
@@ -219,7 +228,7 @@ export default function AdminLayout({ children, title = 'Quản trị hệ thố
                 </div>
 
                 {/* Phần đáy Sidebar: Về Cổng Sinh Viên & Đăng xuất */}
-                <div className="p-4 border-t border-slate-800/80 bg-slate-950/60 space-y-2">
+                <div className="shrink-0 space-y-2 border-t border-slate-800/80 bg-slate-950/60 p-4">
                     <Link
                         href={getSafeRoute('dashboard', '/')}
                         className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-md text-xs font-medium text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 transition-colors"

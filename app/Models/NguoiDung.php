@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use App\Enums\TrangThaiNguoiDung;
 use App\Enums\CapQuanTri;
+use App\Enums\TrangThaiNguoiDung;
 use App\Enums\VaiTroNguoiDung;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -18,6 +18,7 @@ class NguoiDung extends Authenticatable
     use HasFactory, Notifiable, SoftDeletes;
 
     protected $table = 'nguoi_dung';
+
     protected $primaryKey = 'ma_nguoi_dung';
 
     const DELETED_AT = 'ngay_xoa_tam';
@@ -114,6 +115,11 @@ class NguoiDung extends Authenticatable
     public function taiLieuDaDangs(): HasMany
     {
         return $this->hasMany(TaiLieu::class, 'ma_nguoi_dang', 'ma_nguoi_dung');
+    }
+
+    public function yeuCauGoBoTaiLieus(): HasMany
+    {
+        return $this->hasMany(YeuCauGoBoTaiLieu::class, 'ma_nguoi_yeu_cau', 'ma_nguoi_dung');
     }
 
     public function yeuCauXacThucs(): HasMany
