@@ -36,6 +36,10 @@ class TaiLieu extends Model
         'so_bao_cao_hop_le',
         'ly_do_trang_thai',
         'tu_dong_chuyen_luc',
+        'ma_nguoi_xoa',
+        'ly_do_xoa',
+        'nguon_xoa',
+        'han_luu_thung_rac',
     ];
 
     protected function casts(): array
@@ -46,6 +50,8 @@ class TaiLieu extends Model
             'luot_thich' => 'integer',
             'so_bao_cao_hop_le' => 'integer',
             'tu_dong_chuyen_luc' => 'datetime',
+            'ngay_xoa_tam' => 'datetime',
+            'han_luu_thung_rac' => 'datetime',
         ];
     }
 
@@ -77,5 +83,15 @@ class TaiLieu extends Model
     public function yeuCauGoBos(): HasMany
     {
         return $this->hasMany(YeuCauGoBoTaiLieu::class, 'ma_tai_lieu', 'ma_tai_lieu');
+    }
+
+    public function nguoiXoa(): BelongsTo
+    {
+        return $this->belongsTo(NguoiDung::class, 'ma_nguoi_xoa', 'ma_nguoi_dung');
+    }
+
+    public function lichSuThungRacs(): HasMany
+    {
+        return $this->hasMany(LichSuThungRac::class, 'ma_tai_lieu', 'ma_tai_lieu');
     }
 }

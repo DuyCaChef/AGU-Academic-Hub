@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\YeuCauGoBoTaiLieu;
+use App\Models\LichSuThungRac;
 use App\Notifications\DocumentRemovalRequestResolvedNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -90,7 +91,20 @@ class DocumentRemovalRequestController extends Controller
 
             // Nếu duyệt: Thực hiện Xóa Mềm (Soft Delete) tài liệu khỏi cổng tra cứu cộng đồng
             if ($approved) {
+                $removalRequest->taiLieu->forceFill([
+                    'ma_nguoi_xoa' => $request->user()->getKey(),
+                    'ly_do_xoa' => $removalRequest->ly_do,
+                    'nguon_xoa' => 'TAC_GIA',
+                    'han_luu_thung_rac' => now()->addDays(config('documents.trash_admin_delete_after_days')),
+                ])->save();
                 $removalRequest->taiLieu->delete();
+                LichSuThungRac::create([
+                    'ma_tai_lieu' => $removalRequest->taiLieu->getKey(),
+                    'ma_nguoi_thuc_hien' => $request->user()->getKey(),
+                    'hanh_dong' => 'SOFT_DELETE',
+                    'nguon' => 'TAC_GIA',
+                    'ly_do' => $removalRequest->ly_do,
+                ]);
             }
 
             // Làm mới bản ghi kèm quan hệ tài liệu (kể cả bản ghi đã xóa mềm withTrashed) để chuẩn bị gửi thông báo
