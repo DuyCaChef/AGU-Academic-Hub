@@ -10,6 +10,7 @@ use App\Notifications\DocumentRemovalRequestResolvedNotification;
 use App\Notifications\DocumentRemovalRequestSubmittedNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class DocumentRemovalRequestTest extends TestCase
@@ -67,7 +68,104 @@ class DocumentRemovalRequestTest extends TestCase
             'trang_thai' => 'DA_DUYET',
             'ma_nguoi_xu_ly' => $admin->getKey(),
         ]);
+        $this->assertDatabaseHas('tai_lieu', [
+            'ma_tai_lieu' => $document->getKey(),
+            'ma_nguoi_xoa' => $admin->getKey(),
+            'nguon_xoa' => 'TAC_GIA',
+            'ly_do_xoa' => 'Tài liệu cần được gỡ theo yêu cầu của tác giả.',
+        ]);
+        $this->assertDatabaseHas('lich_su_thung_rac', [
+            'ma_tai_lieu' => $document->getKey(),
+            'hanh_dong' => 'SOFT_DELETE',
+            'nguon' => 'TAC_GIA',
+        ]);
         Notification::assertSentTo($author, DocumentRemovalRequestResolvedNotification::class);
+    }
+
+    public function test_moderator_must_confirm_pending_violation_before_restore(): void
+    {
+        $moderator = NguoiDung::factory()->moderator()->create();
+        $author = NguoiDung::factory()->create();
+        $reporter = NguoiDung::factory()->create();
+        $document = $this->createDocument($author, 0);
+        $document->forceFill([
+            'ma_nguoi_xoa' => $moderator->getKey(),
+            'nguon_xoa' => 'MODERATOR',
+            'han_luu_thung_rac' => now()->addDays(60),
+        ])->save();
+        $document->delete();
+        \App\Models\BaoCaoViPham::create([
+            'ma_tai_lieu' => $document->getKey(),
+            'ma_nguoi_bao_cao' => $reporter->getKey(),
+            'ly_do' => 'MA_DOC',
+            'trang_thai_xu_ly' => 'CHO_XU_LY',
+        ]);
+
+        $this->actingAs($moderator)
+            ->post(route('admin.documents.restore', $document), [])
+            ->assertSessionHasErrors('document');
+
+        $this->actingAs($moderator)
+            ->post(route('admin.documents.restore', $document), ['confirm_violation' => true])
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('tai_lieu', [
+            'ma_tai_lieu' => $document->getKey(),
+            'trang_thai' => 'CHO_KIEM_TRA',
+        ]);
+        $this->assertDatabaseHas('lich_su_thung_rac', [
+            'ma_tai_lieu' => $document->getKey(),
+            'hanh_dong' => 'RESTORE',
+        ]);
+    }
+
+    public function test_expired_documents_are_physically_removed_and_audited(): void
+    {
+        Storage::fake('local');
+        $admin = NguoiDung::factory()->admin()->create();
+        $document = $this->createDocument(NguoiDung::factory()->create(), 0);
+        Storage::disk('local')->put($document->duong_dan_tep, 'test');
+        $document->forceFill([
+            'ma_nguoi_xoa' => $admin->getKey(),
+            'nguon_xoa' => 'ADMIN',
+            'han_luu_thung_rac' => now()->subDays(90),
+        ])->save();
+        $document->delete();
+        $document->forceFill(['ngay_xoa_tam' => now()->subDays(91)])->save();
+
+        $this->artisan('documents:purge-trash')->assertSuccessful();
+
+        $this->assertDatabaseMissing('tai_lieu', ['ma_tai_lieu' => $document->getKey()]);
+        $this->assertDatabaseHas('lich_su_thung_rac', [
+            'ma_tai_lieu' => $document->getKey(),
+            'hanh_dong' => 'PERMANENT_DELETE',
+            'nguon' => 'SYSTEM',
+        ]);
+        Storage::disk('local')->assertMissing($document->duong_dan_tep);
+    }
+
+    public function test_admin_can_permanently_delete_after_sixty_days(): void
+    {
+        Storage::fake('local');
+        $admin = NguoiDung::factory()->admin()->create();
+        $document = $this->createDocument(NguoiDung::factory()->create(), 0);
+        Storage::disk('local')->put($document->duong_dan_tep, 'test');
+        $document->forceFill([
+            'ma_nguoi_xoa' => $admin->getKey(),
+            'nguon_xoa' => 'ADMIN',
+            'han_luu_thung_rac' => now()->subDay(),
+        ])->save();
+        $document->delete();
+        $document->forceFill(['ngay_xoa_tam' => now()->subDays(61)])->save();
+
+        $this->actingAs($admin)
+            ->delete(route('admin.documents.permanent-delete', $document), [
+                'reason' => 'Admin xóa thủ công sau thời hạn 60 ngày.',
+            ])
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseMissing('tai_lieu', ['ma_tai_lieu' => $document->getKey()]);
+        Storage::disk('local')->assertMissing($document->duong_dan_tep);
     }
 
     public function test_rejection_requires_a_reason_and_records_processor(): void

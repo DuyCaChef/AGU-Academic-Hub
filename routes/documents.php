@@ -128,4 +128,5 @@ Route::middleware(['auth', 'role:KIEM_DUYET_VIEN,QUAN_TRI_VIEN'])->prefix('quan-
 
     // Khôi phục tài liệu đã xóa mềm
     Route::post('/tai-lieu/{id}/khoi-phuc', [DocumentModerationController::class, 'restoreDocument'])->name('documents.restore');
+    Route::delete('/tai-lieu/{id}/xoa-vinh-vien', [DocumentModerationController::class, 'permanentlyDeleteDocument'])->name('documents.permanent-delete');
 });
