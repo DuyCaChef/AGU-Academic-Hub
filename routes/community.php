@@ -6,6 +6,7 @@ use App\Http\Controllers\WishlistBountyController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AcademicCatalogController;
+use App\Http\Controllers\AdminDashboardController;
 
 // Community Route (IAM, Reviews và Bounty)
 // Phân hệ Cộng đồng sinh viên, Đánh giá môn học, Săn thưởng và Ví điểm
@@ -76,6 +77,10 @@ Route::middleware('auth')->group(function () {
     // 4. QUẢN TRỊ KYC VÀ TÀI KHOẢN (KIỂM DUYỆT VIÊN VÀ QUẢN TRỊ VIÊN)
     // =========================================================================
     Route::prefix('quan-tri')->name('admin.')->group(function () {
+        Route::get('/', AdminDashboardController::class)
+            ->middleware('role:KIEM_DUYET_VIEN,QUAN_TRI_VIEN')
+            ->name('dashboard');
+
         // Hàng đợi duyệt minh chứng thẻ SV / Bằng tốt nghiệp
         Route::get('/duyet-kyc', [KycController::class, 'hangDoiKyc'])->name('kyc.index');
 
