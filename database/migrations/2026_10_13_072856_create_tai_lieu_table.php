@@ -47,7 +47,7 @@ return new class extends Migration
             $table->unsignedInteger('luot_tai')->default(0)->comment('Tổng số lượt tải về');
             $table->unsignedInteger('luot_thich')->default(0)->comment('Tổng số lượt upvote');
             
-            $table->enum('trang_thai', ['CHO_DUYET', 'DA_DUYET', 'TAM_AN_KIEM_TRA', 'TU_CHOI'])
+            $table->enum('trang_thai', ['CHO_DUYET', 'DA_DUYET', 'CHO_KIEM_TRA', 'TAM_AN_KIEM_TRA', 'TU_CHOI'])
                   ->default('DA_DUYET')
                   ->comment('Trạng thái kiểm duyệt tài liệu');
 

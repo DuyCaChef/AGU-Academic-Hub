@@ -107,6 +107,10 @@ Route::middleware(['auth', 'role:KIEM_DUYET_VIEN,QUAN_TRI_VIEN'])->prefix('quan-
     // Xem danh sách các báo cáo vi phạm cần xử lý
     Route::get('/bao-cao', [DocumentModerationController::class, 'indexReports'])->name('reports.index');
     Route::get('/bao-cao/{id}', [DocumentModerationController::class, 'showReport'])->name('reports.show');
+    Route::get('/tai-lieu/cho-kiem-tra', [DocumentModerationController::class, 'reviewQueue'])->name('documents.review-queue');
+    Route::get('/tai-lieu/{id}/kiem-tra', [DocumentModerationController::class, 'reviewDocument'])->name('documents.review-detail');
+    Route::get('/tai-lieu/{id}/xem-tep', [DocumentModerationController::class, 'previewDocument'])->name('documents.preview');
+    Route::put('/tai-lieu/{id}/quyet-dinh', [DocumentModerationController::class, 'decideDocument'])->name('documents.decide');
 
     // Quyết định xử lý báo cáo: Duyệt ẩn/xóa tài liệu hoặc Bác bỏ báo cáo
     Route::put('/bao-cao/{id}/giai-quyet', [DocumentModerationController::class, 'resolveReport'])->name('reports.resolve');

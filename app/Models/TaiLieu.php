@@ -13,6 +13,7 @@ class TaiLieu extends Model
     use HasFactory, SoftDeletes;
 
     protected $table = 'tai_lieu';
+
     protected $primaryKey = 'ma_tai_lieu';
 
     const DELETED_AT = 'ngay_xoa_tam';
@@ -32,6 +33,9 @@ class TaiLieu extends Model
         'luot_tai',
         'luot_thich',
         'trang_thai',
+        'so_bao_cao_hop_le',
+        'ly_do_trang_thai',
+        'tu_dong_chuyen_luc',
     ];
 
     protected function casts(): array
@@ -40,6 +44,8 @@ class TaiLieu extends Model
             'dung_luong_kb' => 'integer',
             'luot_tai' => 'integer',
             'luot_thich' => 'integer',
+            'so_bao_cao_hop_le' => 'integer',
+            'tu_dong_chuyen_luc' => 'datetime',
         ];
     }
 

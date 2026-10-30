@@ -82,6 +82,14 @@ export default function AdminLayout({ children, title = 'Quản trị hệ thố
             adminOnly: false,
         },
         {
+            label: 'Kiểm tra tài liệu',
+            routeName: 'admin.documents.review-queue',
+            fallbackUrl: '/quan-tri/tai-lieu/cho-kiem-tra',
+            icon: AlertTriangle,
+            desc: 'Tài liệu có nhiều báo cáo',
+            adminOnly: false,
+        },
+        {
             label: 'Thùng rác Tài liệu',
             routeName: 'admin.documents.deleted',
             fallbackUrl: '/quan-tri/tai-lieu/da-xoa',
