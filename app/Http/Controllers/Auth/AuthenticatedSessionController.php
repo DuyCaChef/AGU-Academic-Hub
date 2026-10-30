@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Enums\TrangThaiNguoiDung;
+use App\Enums\VaiTroNguoiDung;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\RedirectResponse;
@@ -37,14 +39,18 @@ class AuthenticatedSessionController extends Controller
         $user = Auth::user();
         if (
             $user &&
-            $user->vai_tro === \App\Enums\VaiTroNguoiDung::SINH_VIEN &&
-            $user->trang_thai === \App\Enums\TrangThaiNguoiDung::CHUA_XAC_THUC
+            $user->vai_tro === VaiTroNguoiDung::SINH_VIEN &&
+            $user->trang_thai === TrangThaiNguoiDung::CHUA_XAC_THUC
         ) {
             return redirect()->route('password.change')
                 ->with('warning', 'Đây là lần đầu đăng nhập. Bạn bắt buộc phải đổi mật khẩu để kích hoạt tài khoản.');
         }
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        $defaultRoute = $user?->laQuanTriVien() || $user?->laKiemDuyetVien()
+            ? 'admin.dashboard'
+            : 'dashboard';
+
+        return redirect()->intended(route($defaultRoute, absolute: false));
     }
 
     /**

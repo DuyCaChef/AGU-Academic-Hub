@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
     ShieldCheck,
@@ -14,6 +14,8 @@ import {
     AlertTriangle,
     BookOpen,
     FileWarning,
+    PanelLeftClose,
+    PanelLeftOpen,
 } from 'lucide-react';
 
 /**
@@ -29,7 +31,16 @@ import {
 export default function AdminLayout({ children, title = 'Quản trị hệ thống' }) {
     const { auth, flash } = usePage().props;
     const user = auth?.user;
+    const showPersonalWallet = !user?.la_quan_tri && !user?.la_kiem_duyet;
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+        if (typeof window === 'undefined') return false;
+        return window.localStorage.getItem('admin-sidebar-collapsed') === 'true';
+    });
+
+    useEffect(() => {
+        window.localStorage.setItem('admin-sidebar-collapsed', String(sidebarCollapsed));
+    }, [sidebarCollapsed]);
 
     // Helper sinh URL Ziggy an toàn (có fallback phòng trường hợp BE chưa nạp đủ route)
     const getSafeRoute = (routeName, fallbackUrl) => {
@@ -134,18 +145,20 @@ export default function AdminLayout({ children, title = 'Quản trị hệ thố
             {/* 1. SIDEBAR CỐ ĐỊNH 280PX TÔNG MÀU TỐI bg-surface-admin    */}
             {/* ========================================================= */}
             <aside
-                className={`fixed inset-y-0 left-0 z-50 flex w-[280px] flex-col overflow-hidden border-r border-slate-800 bg-surface-admin text-slate-200 transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+                className={`fixed inset-y-0 left-0 z-50 flex w-[280px] flex-col overflow-hidden border-r border-slate-800 bg-surface-admin text-slate-200 transition-[width,transform] duration-300 ease-in-out lg:translate-x-0 ${
+                    sidebarCollapsed ? 'lg:w-20' : 'lg:w-[280px]'
+                } ${
                     mobileOpen ? 'translate-x-0' : '-translate-x-full'
                 }`}
             >
                 <div className="admin-sidebar-scroll min-h-0 flex-1 overflow-y-auto">
                     {/* Phần đầu Sidebar: Logo và nhận diện quản trị */}
-                    <div className="h-16 flex items-center justify-between px-6 border-b border-slate-800/80 bg-slate-950/60">
+                    <div className={`flex h-16 items-center justify-between border-b border-slate-800/80 bg-slate-950/60 px-6 ${sidebarCollapsed ? 'lg:justify-center lg:px-3' : ''}`}>
                         <Link href={getSafeRoute('dashboard', '/')} className="flex items-center gap-3 group">
                             <div className="w-9 h-9 rounded-lg bg-brand-primary flex items-center justify-center text-white font-extrabold text-sm shadow group-hover:scale-105 transition-transform">
                                 AGU
                             </div>
-                            <div className="flex flex-col">
+                            <div className={`flex flex-col ${sidebarCollapsed ? 'lg:hidden' : ''}`}>
                                 <span className="font-bold text-white text-sm tracking-tight">
                                     Admin Console
                                 </span>
@@ -167,11 +180,11 @@ export default function AdminLayout({ children, title = 'Quản trị hệ thố
                     </div>
 
                     {/* Thẻ thông tin vắn tắt của người dùng đăng nhập */}
-                    <div className="p-4 mx-3 my-4 rounded-xl bg-slate-800/50 border border-slate-700/50 flex items-center gap-3">
+                    <div className={`my-4 mx-3 flex items-center gap-3 rounded-xl border border-slate-700/50 bg-slate-800/50 p-4 ${sidebarCollapsed ? 'lg:mx-2 lg:justify-center lg:p-3' : ''}`}>
                         <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-brand-primary to-brand-secondary flex items-center justify-center font-bold text-white text-sm shrink-0 shadow-sm">
                             {user?.ho_ten ? user.ho_ten.charAt(0).toUpperCase() : 'A'}
                         </div>
-                        <div className="min-w-0 flex-1">
+                        <div className={`min-w-0 flex-1 ${sidebarCollapsed ? 'lg:hidden' : ''}`}>
                             <p className="text-xs font-semibold text-white truncate">
                                 {user?.ho_ten || 'Quản trị viên'}
                             </p>
@@ -183,7 +196,7 @@ export default function AdminLayout({ children, title = 'Quản trị hệ thố
 
                     {/* Danh mục menu điều hướng */}
                     <nav className="px-3 space-y-1">
-                        <div className="px-3 py-2 text-[11px] font-bold tracking-wider text-slate-400 uppercase">
+                        <div className={`px-3 py-2 text-[11px] font-bold tracking-wider text-slate-400 uppercase ${sidebarCollapsed ? 'lg:hidden' : ''}`}>
                             Nghiệp vụ Quản trị
                         </div>
 
@@ -198,7 +211,10 @@ export default function AdminLayout({ children, title = 'Quản trị hệ thố
                                 <Link
                                     key={index}
                                     href={getSafeRoute(item.routeName, item.fallbackUrl)}
-                                    className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all group ${
+                                    title={sidebarCollapsed ? `${item.label}: ${item.desc}` : undefined}
+                                    className={`flex items-center rounded-xl py-2.5 text-sm font-medium transition-all group ${
+                                        sidebarCollapsed ? 'gap-3 px-3.5 lg:justify-center lg:gap-0 lg:px-2' : 'gap-3 px-3.5'
+                                    } ${
                                         active
                                             ? 'bg-brand-primary text-white shadow-md shadow-brand-primary/20'
                                             : 'text-slate-300 hover:text-white hover:bg-slate-800/80'
@@ -209,7 +225,7 @@ export default function AdminLayout({ children, title = 'Quản trị hệ thố
                                             active ? 'text-white' : 'text-slate-400 group-hover:text-white'
                                         }`}
                                     />
-                                    <div className="flex flex-col min-w-0">
+                                    <div className={`flex min-w-0 flex-col ${sidebarCollapsed ? 'lg:hidden' : ''}`}>
                                         <span className="truncate">{item.label}</span>
                                         <span
                                             className={`text-[11px] font-normal truncate ${
@@ -228,23 +244,25 @@ export default function AdminLayout({ children, title = 'Quản trị hệ thố
                 </div>
 
                 {/* Phần đáy Sidebar: Về Cổng Sinh Viên & Đăng xuất */}
-                <div className="shrink-0 space-y-2 border-t border-slate-800/80 bg-slate-950/60 p-4">
+                <div className={`shrink-0 space-y-2 border-t border-slate-800/80 bg-slate-950/60 ${sidebarCollapsed ? 'p-3' : 'p-4'}`}>
                     <Link
                         href={getSafeRoute('dashboard', '/')}
-                        className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-md text-xs font-medium text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 transition-colors"
+                        title={sidebarCollapsed ? 'Về Cổng Sinh Viên' : undefined}
+                        className={`flex w-full items-center justify-center rounded-md py-2 text-xs font-medium text-slate-300 transition-colors hover:bg-slate-700 hover:text-white ${sidebarCollapsed ? 'gap-2 px-3 lg:gap-0 lg:px-2' : 'gap-2 px-3'}`}
                     >
                         <GraduationCap className="w-4 h-4" />
-                        <span>Về Cổng Sinh Viên</span>
+                        <span className={sidebarCollapsed ? 'inline lg:hidden' : 'inline'}>Về Cổng Sinh Viên</span>
                     </Link>
 
                     <Link
                         href={getSafeRoute('logout', '/logout')}
                         method="post"
                         as="button"
-                        className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-md text-xs font-medium text-rose-400 hover:text-rose-300 hover:bg-rose-950/40 border border-rose-900/30 transition-colors"
+                        title={sidebarCollapsed ? 'Đăng xuất' : undefined}
+                        className={`flex w-full items-center justify-center rounded-md border border-rose-900/30 py-2 text-xs font-medium text-rose-400 transition-colors hover:bg-rose-950/40 hover:text-rose-300 ${sidebarCollapsed ? 'gap-2 px-3 lg:gap-0 lg:px-2' : 'gap-2 px-3'}`}
                     >
                         <LogOut className="w-4 h-4" />
-                        <span>Đăng xuất</span>
+                        <span className={sidebarCollapsed ? 'inline lg:hidden' : 'inline'}>Đăng xuất</span>
                     </Link>
                 </div>
             </aside>
@@ -252,7 +270,7 @@ export default function AdminLayout({ children, title = 'Quản trị hệ thố
             {/* ========================================================= */}
             {/* 2. MAIN CONTENT (Lùi sang phải 280px nhường chỗ cho Sidebar) */}
             {/* ========================================================= */}
-            <div className="flex-1 flex flex-col min-w-0 lg:pl-[280px]">
+            <div className={`flex min-w-0 flex-1 flex-col transition-[padding] duration-300 ${sidebarCollapsed ? 'lg:pl-20' : 'lg:pl-[280px]'}`}>
                 {/* Topbar điều hướng trên cùng */}
                 <header className="h-16 bg-surface-default border-b border-border-default px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30 shadow-xs">
                     <div className="flex items-center gap-3">
@@ -264,20 +282,30 @@ export default function AdminLayout({ children, title = 'Quản trị hệ thố
                         >
                             <Menu className="w-5 h-5" />
                         </button>
+                        <button
+                            type="button"
+                            onClick={() => setSidebarCollapsed((collapsed) => !collapsed)}
+                            aria-label={sidebarCollapsed ? 'Mở rộng sidebar quản trị' : 'Thu gọn sidebar quản trị'}
+                            aria-expanded={!sidebarCollapsed}
+                            className="hidden rounded-md p-2 text-text-secondary transition-colors hover:bg-slate-100 hover:text-text-primary lg:inline-flex"
+                        >
+                            {sidebarCollapsed ? <PanelLeftOpen className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
+                        </button>
                         <h1 className="text-base sm:text-lg font-bold text-text-primary truncate">
                             {title}
                         </h1>
                     </div>
 
-                    {/* Huy hiệu hiển thị ví cá nhân (nếu có) */}
-                    <div className="flex items-center gap-3">
-                        <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-200 rounded-full text-xs text-amber-800 font-medium">
-                            <Coins className="w-3.5 h-3.5 text-amber-600" />
-                            <span>
-                                Ví cá nhân: <strong>{user?.vi_diem?.diem_kha_dung ?? 0}</strong> điểm
-                            </span>
+                    {showPersonalWallet && (
+                        <div className="flex items-center gap-3">
+                            <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-200 rounded-full text-xs text-amber-800 font-medium">
+                                <Coins className="w-3.5 h-3.5 text-amber-600" />
+                                <span>
+                                    Ví cá nhân: <strong>{user?.vi_diem?.diem_kha_dung ?? 0}</strong> điểm
+                                </span>
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </header>
 
                 {/* Vùng hiển thị Toast Flash Session */}
