@@ -185,15 +185,6 @@ export default function StudentHeader({
 
                 {/* thông tin bên phải header */}
                 <div className="flex items-center gap-3">
-                    {/* nút đăng tải tài liệu */}
-                    <Link
-                        href={route('documents.create')}
-                        className="flex items-center gap-2 bg-blue-800 hover:bg-blue-900 text-white font-medium text-sm px-3.5 py-2 rounded-full shadow-xs active:scale-95 transition-all"
-                    >
-                        <Upload size={16} />
-                        <span className="hidden sm:inline">Đăng tài liệu</span>
-                    </Link>
-
                     {/* nút Săn thưởng tài liệu */}
                     <Link
                         href={typeof route === 'function' && route().has('document-requests.index') ? route('document-requests.index') : '/yeu-cau-tai-lieu'}
