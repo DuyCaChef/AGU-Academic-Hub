@@ -144,7 +144,7 @@ Hệ thống tích hợp bộ runner kiểm thử độc lập hỗ trợ môi t
 php scratch/run_phpunit.php tests/Feature
 ```
 
-Kết quả: **112/112 tests passed (558 assertions) — 100% OK**.
+Kết quả: **118/118 tests passed (670 assertions) — 100% OK**.
 
 ### 4.2. Biên dịch Frontend (Vite Production Build)
 
@@ -165,7 +165,7 @@ Tất cả 114 endpoints của hệ thống đều được nạp đầy đủ q
 ## 5. Trạng thái dự án
 
 Hệ thống đã **hoàn thành 100% công tác tái cấu trúc toàn diện qua 6 giai đoạn**:
-- [x] **Phase 1: Administration** (Thống kê lưu trữ đa driver CSDL, Quản lý tài khoản, Admin Dashboard).
+- [x] **Phase 1: Administration** (Thống kê lưu trữ đa driver CSDL, Quản lý tài khoản, Admin Dashboard 14 chỉ số & cảnh báo).
 - [x] **Phase 2: AcademicCatalog** (Khoa, Chuyên ngành, Môn học Public & Admin).
 - [x] **Phase 3: Identity & KYC** (Đăng ký Cựu SV KYC, Hàng đợi duyệt, Signed URL xem ảnh 30 phút, Đổi mật khẩu lần đầu).
 - [x] **Phase 4: DocumentManagement & Moderation** (Upload, Lọc trùng SHA-256 + SimHash, Stream PDF, Upvote, Hàng đợi duyệt, Thùng rác 60 ngày).
