@@ -13,10 +13,6 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__ . '/../routes/console.php',
         health: '/up',
         then: function () {
-            // Nạp tập tin routes/documents.php với middleware 'web'
-            Route::middleware('web')
-                ->group(base_path('routes/documents.php'));
-
             // Nạp tập tin routes/community.php với middleware 'web'
             Route::middleware('web')
                 ->group(base_path('routes/community.php'));

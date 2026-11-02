@@ -56,3 +56,4 @@ class AlumniKycRuleEvaluator
         return $this->canApprove($kyc);
     }
 }
+

@@ -49,3 +49,4 @@ class KycRepository
             ->firstOrFail();
     }
 }
+

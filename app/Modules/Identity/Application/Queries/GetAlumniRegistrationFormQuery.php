@@ -13,3 +13,4 @@ class GetAlumniRegistrationFormQuery
         return Khoa::select('ma_khoa', 'ten_khoa', 'ky_hieu_khoa')->get();
     }
 }
+
