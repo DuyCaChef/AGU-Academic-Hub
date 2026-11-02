@@ -46,97 +46,77 @@
 
 ### 1\. Kiến trúc Kỹ thuật & Công nghệ (System Architecture)
 
-Hệ thống được thiết kế theo chuẩn kiến trúc **Modular Monolith 4 tầng** (Domain-Driven Design), phân chia thành **7 Bounded Contexts** nghiệp vụ độc lập:
-
-  * **Backend Framework:** Laravel 11.x (PHP 8.2+), tổ chức 4 tầng (`Presentation`, `Application`, `Domain`, `Infrastructure`).
-  * **Frontend & UI Stack:** Inertia.js v2, React 18+, Tailwind CSS v4, Ziggy Route Helper, Lucide React.
-  * **Cơ sở dữ liệu:** MySQL 8.0 (InnoDB Engine, Fulltext Index) cho môi trường Production; SQLite In-Memory tương thích 100% cho môi trường Automated Testing thông qua cơ chế tự động nhận diện Driver.
-  * **Xử lý Bất đồng bộ (Queues/Jobs):** Database/Redis Queue phục vụ bóc tách văn bản, tính toán mã băm SHA-256, so khớp SimHash > 85%, gửi email xác thực.
-  * **Lưu trữ File (Storage):** Tách biệt ổ đĩa công khai (`storage/app/public/documents`) và phân vùng riêng tư nhạy cảm (`storage/app/private/kyc`) với quyền truy cập thông qua Temporary Signed URL 30 phút hoặc Stream Controller an toàn.
+  * **Backend:** Laravel 11.x (PHP 8.2+).
+  * **Cơ sở dữ liệu:** MySQL 8.0 (InnoDB Engine, Fulltext Index).
+  * **Xử lý Bất đồng bộ (Queues/Jobs):** Database/Redis Queue phục vụ bóc tách văn bản, tính toán mã băm SHA-256, gửi email xác thực.
+  * **Lưu trữ File (Storage):** Local Private Storage / S3-compatible Object Storage (Tách biệt thư mục công khai và thư mục nhạy cảm).
+  * **Giao diện & Tương tác:** Laravel Blade + TailwindCSS + [Alpine.js](http://Alpine.js).
 
 ### Ma trận Phân quyền Truy cập (RBAC Matrix)
 
-| Nhóm chức năng                                | Khách (Guest) | Sinh viên (Student) | Cựu SV (Alumni) | Mod | Admin thường | Super Admin |
-| :-------------------------------------------- | :-----------: | :-----------------: | :-------------: | :-: | :----------: | :---------: |
-| Xem Landing page & Đăng nhập                  | ✔             | ✔                   | ✔               | ✖   | ✖            | ✖           |
-| Tìm kiếm, Preview & Tải tài liệu              | ✖             | ✔                   | ✔               | ✔   | ✔            | ✔           |
-| Upload tài liệu mới / Tạo Version             | ✖             | ✔                   | ✔               | ✔   | ✔            | ✔           |
-| Xóa tài liệu của chính mình (Khi chưa ai tải) | ✖             | ✔                   | ✔               | ✔   | ✔            | ✔           |
-| Xóa mềm tài liệu bất kỳ (Kèm lý do)           | ✖             | ✖                   | ✖               | ✔   | ✔            | ✔           |
-| Khôi phục tài liệu đã xóa (Restore)           | ✖             | ✖                   | ✖               | ✖   | ✔            | ✔           |
-| Dọn dẹp vĩnh viễn thùng rác (Purge)           | ✖             | ✖                   | ✖               | ✖   | ✖            | ✔           |
-| Tạo yêu cầu tài liệu (Wishlist Request)       | ✖             | ✔                   | ✔               | ✔   | ✔            | ✔           |
-| Đăng review môn học (Ẩn danh/Công khai)       | ✖             | ✔                   | ✔               | ✖   | ✖            | ✖           |
-| Duyệt hàng đợi KYC & Xử lý Báo cáo            | ✖             | ✖                   | ✖               | ✔   | ✔            | ✔           |
-| Quản lý Khoa / Ngành / Môn học                | ✖             | ✖                   | ✖               | ✖   | ✔            | ✔           |
-| Phân quyền & Quản lý Admin/Mod                | ✖             | ✖                   | ✖               | ✖   | ✖            | ✔           |
+| Nhóm chức năng                                | Khách (Guest) | Sinh viên (Student) | Cựu SV (Alumni) | Mod | Admin |
+| :-------------------------------------------- | :-----------: | :-----------------: | :-------------: | :-: | :---: |
+| Xem Landing page & Đăng nhập                  | ✔             | ✔                   | ✔               | ✖   | ✖     |
+| Tìm kiếm, Preview & Tải tài liệu              | ✖             | ✔                   | ✔               | ✔   | ✔     |
+| Upload tài liệu mới / Tạo Version             | ✖             | ✔                   | ✔               | ✔   | ✔     |
+| Xóa tài liệu của chính mình (Khi chưa ai tải) | ✖             | ✔                   | ✔               | ✔   | ✔     |
+| Xóa mềm tài liệu bất kỳ (Kèm lý do)           | ✖             | ✖                   | ✖               | ✔   | ✔     |
+| Khôi phục tài liệu đã xóa (Restore)           | ✖             | ✖                   | ✖               | ✖   | ✔     |
+| Tạo yêu cầu tài liệu (Wishlist Request)       | ✖             | ✔                   | ✔               | ✔   | ✔     |
+| Đăng review môn học (Ẩn danh/Công khai)       | ✖             | ✔                   | ✔               | ✖   | ✖     |
+| Duyệt hàng đợi KYC & Xử lý Báo cáo            | ✖             | ✖                   | ✖               | ✔   | ✔     |
+| Cấu hình Khoa / Môn học / Quản trị hệ thống   | ✖             | ✖                   | ✖               | ✖   | ✔     |
 
----
+### Module 1: Định danh & Phân quyền Tài khoản (Identity & Access Management)
 
-### Phân Rã Yêu Cầu Chức Năng (Functional Requirements) Theo 7 Bounded Contexts
+  * **FR-01.1 (Định danh Sinh viên đang học - Pre-provisioned):** Không cung cấp đăng ký tự do và không yêu cầu sinh viên nộp ảnh thẻ để duyệt thủ công. Admin/Nhà trường nạp trước dữ liệu vào bảng `danh_sach_sinh_vien_raw` gồm MSSV, họ tên, email `@student.agu.edu.vn`, mật khẩu mặc định đã băm và khoa.
+  * **FR-01.2 (Đăng nhập lần đầu Sinh viên đang học):** Sinh viên đăng nhập bằng MSSV hoặc email trường cùng mật khẩu mặc định. Nếu thông tin khớp dữ liệu thô và chưa có tài khoản chính, hệ thống tự động khởi tạo tài khoản vai trò `SINH_VIEN` ở trạng thái `CHUA_XAC_THUC`, tạo phiên đăng nhập tạm thời và chuyển sang luồng đổi mật khẩu bắt buộc.
+  * **FR-01.3 (Cưỡng chế đổi mật khẩu và kích hoạt):** Middleware `EnsurePasswordChanged` chặn các nghiệp vụ khác cho đến khi sinh viên đặt mật khẩu mới đạt chuẩn. Khi hoàn tất, hệ thống lưu mật khẩu Bcrypt, chuyển tài khoản sang `DANG_HOAT_DONG`, đánh dấu bản ghi raw `da_kich_hoat = true`, lưu `kich_hoat_luc` và khởi tạo ví điểm với 100 điểm.
+  * **FR-01.4 (Đăng ký Cựu sinh viên - Alumni KYC):** Cựu sinh viên đăng ký qua form riêng `/alumni/register` (hoặc route tương đương `/cuu-sinh-vien/dang-ky`), cung cấp MSSV khóa cũ, năm tốt nghiệp và một minh chứng: bằng tốt nghiệp, giấy chứng nhận tốt nghiệp tạm thời hoặc thẻ sinh viên khóa cũ. Hồ sơ chuyển sang `CHO_DUYET`.
+  * **FR-01.5 (Trạng thái Người dùng):** Sinh viên đang học đi theo `CHUA_XAC_THUC` → `DANG_HOAT_DONG` sau khi đổi mật khẩu; cựu sinh viên đi theo `CHUA_XAC_THUC` → `DANG_HOAT_DONG` sau khi Admin/Mod duyệt; cả hai đều có thể chuyển sang `TAM_KHOA` khi vi phạm.
 
-#### Bounded Context 1: Định danh, Xác thực & KYC (`app/Modules/Identity/`)
-  * **FR-01.1 (Định danh Sinh viên đang học - Pre-provisioned):** Không cung cấp đăng ký tự do và không yêu cầu sinh viên nộp ảnh thẻ để duyệt thủ công. Dữ liệu nạp trước vào bảng `danh_sach_sinh_vien_raw` gồm MSSV, họ tên, email `@student.agu.edu.vn`, mật khẩu mặc định đã băm và khoa.
-  * **FR-01.2 (Đăng nhập lần đầu & Đối soát thô):** Sinh viên đăng nhập bằng MSSV hoặc email trường cùng mật khẩu mặc định. Nếu thông tin khớp dữ liệu thô và chưa có tài khoản chính, hệ thống tự động khởi tạo tài khoản vai trò `SINH_VIEN` ở trạng thái `CHUA_XAC_THUC`, tạo phiên đăng nhập tạm thời và chuyển sang luồng đổi mật khẩu bắt buộc.
-  * **FR-01.3 (Cưỡng chế đổi mật khẩu và kích hoạt):** Middleware `EnsurePasswordChanged` chặn các nghiệp vụ khác cho đến khi sinh viên đặt mật khẩu mới đạt chuẩn. Khi hoàn tất, hệ thống chuyển tài khoản sang `DANG_HOAT_DONG`, đánh dấu bản ghi raw `da_kich_hoat = true`, lưu `kich_hoat_luc` và khởi tạo ví điểm với 100 điểm.
-  * **FR-01.4 (Đăng ký Cựu sinh viên - Alumni KYC):** Cựu sinh viên đăng ký qua form riêng `/cuu-sinh-vien/dang-ky`, cung cấp MSSV khóa cũ, năm tốt nghiệp và một minh chứng (bằng tốt nghiệp, giấy chứng nhận hoặc thẻ sinh viên cũ). File lưu tại `storage/app/private/kyc/` và hồ sơ chuyển sang `CHO_DUYET`.
-  * **FR-01.5 (Vòng đời Tài khoản & Email Verification):** Quản lý trạng thái (`CHO_XAC_THUC` → `DANG_HOAT_DONG` → `TAM_KHOA`), xác thực email qua trường `xac_thuc_email_luc` (tương thích `email_verified_at`), cập nhật thông tin cá nhân và quy trình đổi mật khẩu an toàn.
-  * **FR-01.6 (Hàng đợi Xét duyệt KYC):** Cho phép Moderator và Admin xem danh sách hồ sơ cựu sinh viên, xem trước ảnh minh chứng qua Temporary Signed URL 30 phút, duyệt hồ sơ kích hoạt tài khoản hoặc từ chối kèm lý do phản hồi.
+### Module 2: Quản lý & Tải lên Tài liệu (Document Lifecycle & Deduplication)
 
-#### Bounded Context 2: Danh mục Đào tạo (`app/Modules/AcademicCatalog/`)
-  * **FR-02.0a (Cấu trúc Danh mục Đa cấp):** Quản lý quan hệ phân cấp Khoa → Chuyên ngành → Môn học (Mã học phần, số tín chỉ, mô tả).
-  * **FR-02.0b (Bảo vệ Trạng thái Phân cấp - Cascading Status Protection):**
-    - Khi chuyển trạng thái Khoa sang `TAM_KHOA`, toàn bộ Chuyên ngành và Môn học trực thuộc bị khóa liên đới.
-    - Không cho phép kích hoạt Chuyên ngành hoặc Môn học nếu Khoa cha đang ở trạng thái `TAM_KHOA`.
-  * **FR-02.0c (Tra cứu Danh mục Công khai):** Cung cấp API và giao diện Cây phân cấp (Tree View) cho sinh viên dễ dàng lọc và tìm kiếm môn học nhanh chóng theo Mã HP / Tên môn.
-
-#### Bounded Context 3: Quản lý & Tải lên Tài liệu (`app/Modules/Documents/`)
-  * **FR-02.1 (Phân loại Cấu trúc):** Bắt buộc liên kết tài liệu với: Khoa → Chuyên ngành → Môn học (Mã HP) → Phân loại (Đề thi, Bài giảng, Đồ án, Bài tập, Khác).
+  * **FR-02.1 (Phân loại Cấu trúc):** Bắt buộc liên kết tài liệu với: Khoa → Ngành → Môn học (Mã HP) → Phân loại (Đề thi, Bài giảng, Đồ án, Trắc nghiệm).
   * **FR-02.2 (Quy trình Lọc trùng 2 lớp - Deduplication Pipeline):**
-      * *Lớp 1 (Mã băm nhị phân SHA-256):* Tính chuỗi SHA-256 của file tải lên. Nếu mã băm đã tồn tại trong cùng Môn học → Chặn lưu file vật lý lập tức, báo lỗi Conflict 409.
-      * *Lớp 2 (So khớp tương đồng nội dung SimHash):* Đẩy file vào Background Queue, trích xuất text, tính toán tương đồng. Nếu độ trùng lặp >85% so với tài liệu hiện có → Đưa ra cảnh báo và gợi ý tạo phiên bản mới kế tiếp (v1.1, v2.0) thay vì tạo tài liệu độc lập.
-  * **FR-02.3 (Xem trước Trực tuyến An toàn):** Trình xem trước file PDF trực tiếp trên trình duyệt qua luồng Stream Flysystem an toàn, chống lộ đường dẫn lưu trữ vật lý trên server.
-  * **FR-02.4 (Phiên bản hóa - Versioning):** Cho phép người dùng đóng góp bản cập nhật liên kết `ma_tai_lieu_goc`, hiển thị nhóm phiên bản v1.0, v1.1, v2.0.
-  * **FR-02.5 (Tải về & Upvote):** Ghi nhận lượt tải (tăng counter `luot_tai`) và cho phép sinh viên upvote tài liệu hữu ích.
-  * **FR-02.6 (Quyền Tác giả Xóa):** Tác giả chỉ được tự xóa tài liệu trong vòng 24 giờ đầu kể từ khi đăng VÀ số lượt tải bằng 0 (`luot_tai == 0`).
+      * Lớp 1 (Mã băm nhị phân): Tính chuỗi SHA-256 của file tải lên. Nếu file\_hash đã tồn tại trong cùng Mã học phần → Chặn lưu file vật lý, thông báo tài liệu đã có trên hệ thống.
+      * Lớp 2 (So khớp tương đồng nội dung): Đẩy file vào Background Queue, trích xuất text (bỏ trang bìa), tính toán độ tương đồng qua SimHash/Cosine Similarity. Nếu độ trùng lặp \>85% so với tài liệu hiện có → Đưa ra cảnh báo và yêu cầu xác nhận tạo phiên bản mới (parent\_id) thay vì tạo tài liệu độc lập.
+  * **FR-02.3 (Xem trước Trực tuyến / Document Preview):** Tích hợp trình xem trước file PDF/Office trực tiếp trên trình duyệt mà không bắt buộc tải về máy.
+  * **FR-02.4 (Phiên bản hóa - Versioning):** Cho phép người dùng đóng góp bản cập nhật (sửa lỗi, bổ sung lời giải) cho một tài liệu đã có, gom nhóm hiển thị dưới dạng v1.0, v1.1, v2.0.
 
-#### Bounded Context 4: Kiểm duyệt & Chống Phá hoại (`app/Modules/Moderation/`)
-  * **FR-03.1 (Quyền sở hữu cộng đồng - Community Ownership):** Khi tài liệu đạt `luot_tai >= 10` hoặc đánh giá `diem_danh_gia >= 4.0`, tài liệu trở thành tài sản chung của cộng đồng. Tác giả bị vô hiệu hóa quyền xóa và chuyển sang cơ chế gửi Yêu cầu Gỡ bỏ (Removal Request) kèm lý do để Mod/Admin xét duyệt.
-  * **FR-03.2 (Cơ chế Xóa mềm - Soft Deletes 60 Ngày):** Toàn bộ thao tác xóa từ người dùng, Mod hoặc Admin đều chỉ cập nhật `deleted_at`. File vật lý và bản ghi CSDL được bảo lưu trong thùng rác hệ thống ít nhất 60 ngày, cho phép khôi phục nguyên trạng.
-  * **FR-03.3 (Hàng đợi Báo cáo Vi phạm - Report Queue):** Người dùng có quyền báo cáo tài liệu (Trùng lặp, Sai nội dung, Mã độc, Bản quyền). Khi nhận đủ ≥3 báo cáo, tài liệu tự động chuyển sang trạng thái `TAM_AN_KIEM_TRA` chờ Mod/Admin xử lý.
-  * **FR-03.4 (Hàng đợi Phê duyệt Tài liệu):** Kiểm duyệt viên xem xét các tài liệu mới tải lên trước khi công khai ra toàn trường.
+### Module 3: Bảo vệ Dữ liệu & Chống Phá hoại (Data Protection & Anti-Sabotage)
 
-#### Bounded Context 5: Đánh giá Môn học (`app/Modules/Reviews/`)
-  * **FR-05.1 (Tiêu chí Đánh giá 3 Chiều):** Chấm điểm 1 - 5 sao theo 3 tiêu chí độc lập: Độ khó của môn, Tính thực tiễn, và Khối lượng bài tập.
-  * **FR-05.2 (Ẩn danh 2 lớp):** Lớp hiển thị (Presentation/Inertia) ẩn toàn bộ danh tính sinh viên khi `la_an_danh = true`. Lớp dữ liệu (Database) lưu `ma_nguoi_danh_gia` phục vụ hậu kiểm chống phá hoại học thuật.
-  * **FR-05.3 (Bộ lọc Từ cấm Thông minh):** Tự động phát hiện và ngăn chặn từ ngữ thô tục, chuẩn hóa leetspeak, kết hợp danh sách từ cấm nội bộ và fallback CSDL.
-  * **FR-05.4 (Bình chọn Hữu ích):** Sinh viên có thể bấm "Hữu ích" cho bài đánh giá; hệ thống ngăn chặn tác giả tự bình chọn bài viết của chính mình.
+  * **FR-03.1 (Ràng buộc Quyền xóa - Laravel Policy):** Sinh viên chỉ được xóa tài liệu do chính mình tải lên trong vòng 24 giờ đầu VÀ số lượt tải bằng 0 (downloads\_count = 0). Khi tài liệu có ≥10 lượt tải hoặc đánh giá ≥4 sao → Hệ thống khóa quyền xóa của tác giả (Áp dụng cơ chế Community Ownership). Tác giả chỉ có thể gửi yêu cầu gỡ bỏ (Request Removal) kèm lý do để Mod/Admin xét duyệt.
+  * **FR-03.2 (Cơ chế Xóa mềm - Soft Deletes):** Toàn bộ thao tác xóa từ người dùng, Mod hoặc Admin đều chỉ cập nhật trường deleted\_at. File vật lý và bản ghi Database được giữ nguyên trong thùng rác hệ thống ít nhất 60 ngày.
+  * **FR-03.3 (Hàng đợi Báo cáo Vi phạm - Report Queue):** Người dùng có quyền báo cáo tài liệu (Nội dung sai, trùng lặp, chứa mã độc, vi phạm bản quyền). Khi nhận đủ ≥3 báo cáo từ các tài khoản uy tín, tài liệu tự động chuyển sang trạng thái HIDDEN\_FOR\_REVIEW chờ Mod/Admin xử lý.
 
-#### Bounded Context 6: Cân bằng Cung - Cầu & Wishlist (`app/Modules/Bounties/`)
-  * **FR-04.1 (Yêu cầu Tài liệu - Wishlist):** Sinh viên đăng yêu cầu tìm tài liệu hiếm, đính kèm mức điểm thưởng trích từ ví cá nhân (`diem_thuong`).
-  * **FR-04.2 (Ký quỹ Điểm an toàn - Escrow):** Sử dụng khóa bi quan `lockForUpdate` và ghi nhận sổ cái `giao_dich_diem_thuong` với trạng thái `TAM_GIU`, đảm bảo không bị trừ điểm hai lần (Idempotency Key).
-  * **FR-04.3 (Nộp Tài liệu Giải quyết):** Sinh viên khác tải lên tài liệu giải quyết yêu cầu; hệ thống chặn tác giả tự nộp tài liệu giải quyết yêu cầu của chính mình.
-  * **FR-04.4 (Tất toán & Hoàn trả):** Khi người yêu cầu xác nhận tài liệu đạt chuẩn, hệ thống giải phóng điểm ký quỹ và cộng điểm thưởng cho người đóng góp (`CONG_DIEM`); trường hợp đóng/hủy yêu cầu, điểm được hoàn trả nguyên vẹn về ví (`HOAN_TRA`).
+### Module 4: Cân bằng Cung - Cầu (Document Wishlist & Bounty System)
 
-#### Bounded Context 7: Quản trị Hệ thống & Lưu trữ (`app/Modules/Administration/`)
-  * **FR-06.1 (Giám sát Dung lượng Lưu trữ):** Thống kê tổng dung lượng ổ đĩa, phân bổ theo loại file (PDF, DOCX, ZIP...), phát hiện file có dung lượng lớn bất thường, tương thích truy vấn thống kê trên cả MySQL và SQLite.
-  * **FR-06.2 (Dọn dẹp Thùng rác Vĩnh viễn):** Chỉ Super Admin mới có quyền dọn dẹp các file trong thùng rác đã quá hạn 60 ngày. Bắt buộc thực thi trong DB Transaction, xóa file vật lý an toàn và ghi nhận bản ghi kiểm toán tại bảng `lich_su_thung_rac`.
-  * **FR-06.3 (Phân cấp Quản trị Tài khoản):**
-    - Hệ thống phân biệt hai cấp trong vai trò `QUAN_TRI_VIEN`: Admin thường (`THUONG`) và Super Admin (`TOI_CAO`).
-    - Admin thường chỉ quản lý tài khoản Sinh viên/Cựu sinh viên; không được can thiệp vào tài khoản Moderator hoặc Admin khác.
-    - Chỉ Super Admin mới có quyền phân quyền Quản trị viên, nâng hạ cấp `cap_quan_tri`, hoặc khóa tài khoản quản trị.
-    - Bảo vệ tài khoản `admin@agu.edu.vn` và không cho phép hạ cấp/xóa Super Admin cuối cùng của hệ thống.
-  * **FR-06.4 (Bảng Điều khiển Quản trị Tổng thể):** Tổng hợp số liệu người dùng, tài liệu, báo cáo chờ xử lý và tình trạng tài nguyên hệ thống theo thời gian thực.
+  * **FR-04.1 (Yêu cầu Tài liệu):** Sinh viên tạo phiếu yêu cầu: Tên môn, giảng viên phụ trách, loại tài liệu cần tìm, mức điểm thưởng trích từ ví cá nhân (bounty\_points).
+  * **FR-04.2 (Thông báo Điều hướng):** Hệ thống tự động gửi thông báo đến các Cựu sinh viên hoặc sinh viên đã hoàn thành môn học đó với điểm số cao.
+  * **FR-04.3 (Trả thưởng Tự động):** Khi tài liệu tải lên để giải quyết yêu cầu được người yêu cầu hoặc Mod xác nhận hợp lệ → Hệ thống tự động chuyển điểm thưởng cho người đóng góp.
 
----
+### Module 5: Đánh giá Môn học (Course & Lecturer Review Engine)
+
+  * **FR-05.1 (Tiêu chí Đánh giá):** Thang điểm 1 - 5 sao cho: Độ khó của môn, Tính thực tiễn, Khối lượng bài tập.
+  * **FR-05.2 (Ẩn danh 2 lớp):** Ẩn hoàn toàn thông tin định danh của người đánh giá ở tầng giao diện và API public. Lưu trữ user\_id nội bộ tại Database có mã hóa phục vụ hậu kiểm.
+  * **FR-05.3 (Bộ lọc Từ khóa Tự động):** Chặn các từ ngữ lăng mạ, bôi nhọ danh dự cá nhân trước khi bài đánh giá được lưu vào hệ thống.
 
 ### 4\. Yêu cầu Phi chức năng (Non-Functional Requirements)
 
-  * **NFR-01 (Bảo mật Dữ liệu Riêng tư - PII):** Chỉ minh chứng của cựu sinh viên mới được lưu trong phân vùng riêng `storage/app/private/kyc`; tuyệt đối không lưu ảnh thẻ sinh viên đang học vì luồng này được định danh tự động từ dữ liệu nạp trước. File KYC không được tạo Symlink ra thư mục public và chỉ được truy cập qua Temporary Signed URL 30 phút hoặc Route nội bộ có Middleware kiểm tra quyền Admin/Mod.
-  * **NFR-02 (Hiệu năng & Tương thích Đa Driver CSDL):**
+  * **NFR-01 (Bảo mật Dữ liệu Riêng tư - PII):** Chỉ minh chứng của cựu sinh viên mới được lưu trong phân vùng riêng `storage/app/private/kyc`; tuyệt đối không lưu ảnh thẻ sinh viên đang học vì luồng này được định danh tự động từ dữ liệu nạp trước. File KYC không được tạo Symlink ra thư mục public và chỉ được truy cập qua Signed URL hoặc Route nội bộ có Middleware kiểm tra quyền Admin/Mod.
+  * **NFR-02 (Hiệu năng & Tối ưu Tải):**
       * Tác vụ bóc tách text và tính toán độ tương đồng file phải thực thi qua Laravel Queue, không làm nghẽn tiến trình HTTP Request của người dùng.
-      * Tầng Infrastructure Repositories phải bọc kiểm tra `DB::getDriverName()` nhằm hỗ trợ đồng thời cả cú pháp `DATE_FORMAT` (MySQL Production) và `strftime` (SQLite In-Memory Test).
-      * Áp dụng Caching thông minh (`Cache::remember`) cho các truy vấn thống kê nặng với thời gian TTL hợp lý (30 - 60 phút).
       * Thời gian phản hồi trang danh mục và tìm kiếm học phần ≤500ms.
-  * **NFR-03 (Bảo toàn & Lưu vết Kiểm toán):** Áp dụng Soft Delete 60 ngày cho mọi tài liệu. Khi thực hiện xóa vĩnh viễn, bắt buộc ghi nhận vào bảng `lich_su_thung_rac` để phục vụ công tác đối soát.
-  * **NFR-04 (Chống Tấn công & Toàn vẹn Dữ liệu):** Rate Limiting 10 lượt upload tài liệu/ngày cho tài khoản thường; kiểm tra định dạng file (MIME-Type Sniffing) ở tầng Backend để chặn hoàn toàn file thực thi .exe, .sh, .php, .bat; áp dụng cơ chế khóa dòng `lockForUpdate` chống Race Condition khi giao dịch điểm ví.
+  * **NFR-03 (Bảo toàn & Dung lượng):** Áp dụng nén file và tối ưu ảnh đại diện trước khi lưu trữ để tiết kiệm dung lượng máy chủ.
+  * **NFR-04 (Chống Tấn công):** Rate Limiting 10 lượt upload tài liệu/ngày cho tài khoản thường; kiểm tra định dạng file (MIME-Type Sniffing) ở tầng Backend để chặn hoàn toàn file thực thi .exe, .sh, .php, .bat.
+## Bổ sung: phân cấp tài khoản quản trị
+
+Hệ thống phân biệt hai cấp trong vai trò `QUAN_TRI_VIEN`:
+
+- **Admin thường (`THUONG`)**: xem và xử lý tài khoản Sinh viên/Cựu sinh viên; không được cấp, thu hồi, hạ quyền hoặc khóa tài khoản Kiểm duyệt viên, Admin thường hay Super Admin.
+- **Super Admin (`TOI_CAO`)**: quản lý tài khoản quản trị, cấp/thu hồi quyền Admin, thay đổi cấp quản trị và khóa/mở khóa tài khoản quản trị.
+- Tài khoản `admin@agu.edu.vn` là Super Admin mặc định.
+- Không được tự thay đổi quyền hoặc tự khóa tài khoản của chính mình.
+- Không được hạ cấp Super Admin cuối cùng của hệ thống.
+- Admin/Moderator không thuộc Khoa; chỉ Sinh viên và Cựu sinh viên được gán Khoa.

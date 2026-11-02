@@ -18,7 +18,7 @@ Các tài liệu đặc tả nằm trong thư mục `.md/`:
 - [Thiết kế hệ thống](.md/TaiLieuThietKe.md)
 - [Tài liệu kỹ thuật](.md/TaiLieuKyThuat.md)
 - [Design Guidelines](.md/DESIGN_GUIDELINES.md)
-- [Báo cáo Tái cấu trúc Toàn diện 6 Phase](.md/BAO_CAO_TAI_CAU_TRUC_MODULAR_MONOLITH.md)
+- [Báo cáo Tái cấu trúc Toàn diện 6 Phase](.md/reportChange/BAO_CAO_TAI_CAU_TRUC_MODULAR_MONOLITH.md)
 
 ## 2. Kiến trúc tổng thể (Modular Monolith 4 Tầng)
 
