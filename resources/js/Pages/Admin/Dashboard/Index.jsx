@@ -9,6 +9,7 @@ import {
     FileText,
     ShieldCheck,
     Users,
+    HardDrive,
 } from 'lucide-react';
 
 const queueCards = [
@@ -99,7 +100,7 @@ export default function AdminDashboard({ stats }) {
                     })}
                 </section>
 
-                <section className="grid gap-4 sm:grid-cols-2">
+                <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs">
                         <div className="flex items-center gap-3">
                             <span className="rounded-xl bg-slate-100 p-2.5 text-slate-600"><Users className="h-5 w-5" /></span>
@@ -114,6 +115,29 @@ export default function AdminDashboard({ stats }) {
                         </div>
                         {isAdmin && <Link href={route('admin.catalog.index')} className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-[#005baa]">Quản lý danh mục <ArrowRight className="h-3.5 w-3.5" /></Link>}
                     </div>
+                    {stats?.storage && (
+                        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs">
+                            <div className="flex items-center justify-between gap-3">
+                                <div className="flex items-center gap-3">
+                                    <span className="rounded-xl bg-sky-50 p-2.5 text-[#005baa]"><HardDrive className="h-5 w-5" /></span>
+                                    <div>
+                                        <p className="text-xs text-slate-500">Dung lượng lưu trữ</p>
+                                        <p className="text-2xl font-bold text-slate-900">{stats.storage.tong_dung_luong_dinh_dang}</p>
+                                    </div>
+                                </div>
+                                <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${
+                                    stats.storage.trang_thai === 'NGUY_HIEM'
+                                        ? 'bg-rose-100 text-rose-700'
+                                        : stats.storage.trang_thai === 'CANH_BAO'
+                                        ? 'bg-amber-100 text-amber-700'
+                                        : 'bg-emerald-100 text-emerald-700'
+                                }`}>
+                                    {stats.storage.ty_le_su_dung_phan_tram}%
+                                </span>
+                            </div>
+                            {isAdmin && <Link href={route('admin.storage.index')} className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-[#005baa]">Theo dõi dung lượng <ArrowRight className="h-3.5 w-3.5" /></Link>}
+                        </div>
+                    )}
                 </section>
             </div>
         </AdminLayout>

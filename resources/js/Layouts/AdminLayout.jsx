@@ -16,6 +16,7 @@ import {
     FileWarning,
     PanelLeftClose,
     PanelLeftOpen,
+    HardDrive,
 } from 'lucide-react';
 
 /**
@@ -123,6 +124,14 @@ export default function AdminLayout({ children, title = 'Quản trị hệ thố
             fallbackUrl: '/quan-tri/danh-muc',
             icon: BookOpen,
             desc: 'Khoa, chuyên ngành, môn học',
+            adminOnly: true,
+        },
+        {
+            label: 'Quản lý lưu trữ',
+            routeName: 'admin.storage.index',
+            fallbackUrl: '/quan-tri/luu-tru',
+            icon: HardDrive,
+            desc: 'Theo dõi tài nguyên lưu trữ',
             adminOnly: true,
         },
     ];

@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AcademicCatalogController;
 use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\AdminStorageController;
 
 // Community Route (IAM, Reviews và Bounty)
 // Phân hệ Cộng đồng sinh viên, Đánh giá môn học, Săn thưởng và Ví điểm
@@ -123,6 +124,14 @@ Route::middleware('auth')->group(function () {
         Route::post('/mon-hoc', [AcademicCatalogController::class, 'storeCourse'])->name('courses.store');
         Route::put('/mon-hoc/{maMonHoc}', [AcademicCatalogController::class, 'updateCourse'])->name('courses.update');
         Route::put('/mon-hoc/{maMonHoc}/trang-thai', [AcademicCatalogController::class, 'toggleCourse'])->name('courses.toggle');
+    });
+
+    // =========================================================================
+    // 5. THEO DÕI VÀ QUẢN LÝ DUNG LƯỢNG LƯU TRỮ (QUẢN TRỊ VIÊN)
+    // =========================================================================
+    Route::middleware('role:QUAN_TRI_VIEN')->prefix('quan-tri/luu-tru')->name('admin.storage.')->group(function () {
+        Route::get('/', [AdminStorageController::class, 'index'])->name('index');
+        Route::post('/don-dep-thung-rac', [AdminStorageController::class, 'purgeExpiredTrash'])->name('purge-expired-trash');
     });
 
 });

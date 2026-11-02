@@ -12,7 +12,7 @@ use Inertia\Response;
 
 class AdminDashboardController extends Controller
 {
-    public function __invoke(): Response
+    public function __invoke(AdminStorageController $storageController): Response
     {
         return Inertia::render('Admin/Dashboard/Index', [
             'stats' => [
@@ -30,6 +30,7 @@ class AdminDashboardController extends Controller
                     ->count(),
                 'totalUsers' => NguoiDung::query()->count(),
                 'totalDocuments' => TaiLieu::query()->count(),
+                'storage' => $storageController->getOverviewStats()['totalStats'] ?? $storageController->calculateTotalStorageStats(),
             ],
         ]);
     }
