@@ -286,3 +286,4 @@ Quá trình tái cấu trúc hệ thống **AGU Academic Hub** qua toàn bộ 6 
 2. **Không gây Breaking Changes:** Giữ vững 100% logic nghiệp vụ, tính toán chỉ số, bảo mật dữ liệu PII, định danh route và giao diện React Inertia.
 3. **Mã nguồn sạch và dễ bảo trì:** Các Skinny Controller chỉ còn dưới 70 dòng, logic rẽ nhánh chuyển vào Domain Evaluators, truy vấn dữ liệu vào Repositories và điều phối vào Actions/Queries.
 4. **Sẵn sàng mở rộng:** Kiến trúc mới cho phép đội ngũ phát triển dễ dàng nâng cấp, viết kiểm thử độc lập từng module, hoặc tách thành Microservices trong tương lai mà không gặp trở ngại về mặt cấu trúc.
+

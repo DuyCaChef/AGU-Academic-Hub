@@ -230,21 +230,33 @@ Hệ thống AI (Cursor, GitHub Copilot, v0.dev) chú ý:
 - Bất kỳ component "Xóa" nào liên quan đến tài liệu phải giả định có trạng thái is_community_owned để render fallback UI (Nút Xin Gỡ Tài Liệu) thay vì nút Xóa thông thường.
 - Mọi link nội bộ phải dùng Ziggy `route()`; không tự ghép chuỗi URL và không hard-code ID vào path.
 
-## 14. 🏗️ Frontend Architecture & File Organization (Kiến trúc Frontend)
+## 14. 🏗️ Frontend Architecture & Bounded Context Mapping (Kiến trúc Frontend & Phân hệ)
 
-- Laravel là nơi xử lý routing, authentication, authorization, validation, query và business rules. React chỉ chịu trách nhiệm hiển thị và tương tác người dùng.
-- Mọi trang được render qua Inertia, không tạo SPA router riêng và không dùng Blade để dựng các màn hình ứng dụng sau khi đã chuyển sang Inertia.
-- Quy ước thư mục chuẩn:
-    - `resources/js/Pages/`: mỗi file là một màn hình tương ứng với một Inertia page.
-    - `resources/js/Layouts/`: layout dùng chung theo vai trò, ví dụ `StudentLayout`, `AdminLayout`, `GuestLayout`.
-    - `resources/js/Components/`: component có thể tái sử dụng giữa nhiều page.
-    - `resources/js/Components/ui/`: primitive UI như Button, Input, Modal, Badge, Skeleton, Tooltip.
-    - `resources/js/Components/domain/`: component theo nghiệp vụ như DocumentCard, CourseFilters, ReviewForm.
-    - `resources/js/hooks/`: custom hooks dùng chung, đặt tên theo dạng `useSomething`.
-    - `resources/js/lib/`: helper thuần, formatter, constants và quy tắc mapping trạng thái.
-- Tên file component dùng PascalCase. Tên page dùng PascalCase và phản ánh route, ví dụ `Documents/Index.jsx`, `Documents/Show.jsx`.
-- Không đặt business rule, query hoặc quyền truy cập trong React. Không hard-code dữ liệu nghiệp vụ trong component nếu dữ liệu đó có thể thay đổi từ backend.
-- Mỗi page phải có một layout rõ ràng; không lặp lại header, sidebar, breadcrumb và flash-message ở từng page.
+Frontend được xây dựng bằng **Inertia.js v2** và **React 18+**, kết hợp với **Tailwind CSS v4** và **Ziggy**. Hệ thống tuân thủ nghiêm ngặt nguyên tắc **Single Responsibility** và liên kết chặt chẽ với kiến trúc **Modular Monolith 4 tầng** của Backend.
+
+### 🔹 Cấu trúc Thư mục Frontend Chuẩn
+
+- `resources/js/Pages/`: Các màn hình tương ứng với từng Inertia Page Component.
+- `resources/js/Layouts/`: Layout dùng chung theo vai trò (`StudentLayout`, `AdminLayout`, `GuestLayout`, `AppLayout`, `AuthenticatedLayout`).
+- `resources/js/Components/`: Các component tái sử dụng (Atomic UI, Common Pagination, Navigation).
+- `resources/js/Components/domain/`: Component gắn liền với nghiệp vụ miền (ví dụ: `DocumentCard.jsx`).
+- `resources/js/Components/layouts/`: Component điều hướng và cây dữ liệu (`FacultyCourseTree.jsx`, `StudentSidebar.jsx`, `StudentHeader.jsx`).
+- `resources/js/Components/Reviews/`: Component chuyên biệt cho phân hệ đánh giá (`CreateReviewModal.jsx`).
+- `resources/js/Components/Wishlist/`: Component chuyên biệt cho phân hệ săn thưởng (`CreateRequestModal.jsx`, `FulfillRequestModal.jsx`).
+
+### 🔹 Bảng Ánh xạ 7 Bounded Contexts & Inertia Pages
+
+| Bounded Context (Backend Module) | React Page Component (`resources/js/Pages/`) | Layout tương ứng | Đặc tả UI & Nghiệp vụ Frontend chính |
+| :--- | :--- | :--- | :--- |
+| **1. Administration**<br>`app/Modules/Administration/` | • `Admin/Dashboard/Index.jsx`<br>• `Admin/Storage/Index.jsx`<br>• `Admin/Users/Index.jsx`<br>• `Admin/Users/Show.jsx` | `AdminLayout` | • Dashboard tổng quan hệ thống, biểu đồ dung lượng.<br>• Quản trị dung lượng Disk, dọn dẹp thùng rác.<br>• Quản lý người dùng, phân cấp Super Admin / Admin thường.<br>• Phù hợp với mọi driver CSDL (MySQL / SQLite). |
+| **2. AcademicCatalog**<br>`app/Modules/AcademicCatalog/` | • `Courses/Index.jsx`<br>• `Admin/AcademicCatalog/Index.jsx` | `StudentLayout`<br>`AdminLayout` | • Tra cứu Khoa, Chuyên ngành, Môn học theo cây đa cấp.<br>• Modal quản trị CRUD danh mục, chuyển đổi trạng thái Hoạt động / Tạm khóa.<br>• Cảnh báo cascading lock khi tắt Khoa/Ngành cha. |
+| **3. Identity**<br>`app/Modules/Identity/` | • `Auth/Login.jsx`<br>• `Auth/Register.jsx`<br>• `Auth/AlumniRegister.jsx`<br>• `Auth/FirstTimeChangePassword.jsx`<br>• `Auth/VerifyEmail.jsx`<br>• `Profile/Edit.jsx`<br>• `Admin/Kyc/Index.jsx` | `GuestLayout`<br>`StudentLayout`<br>`AdminLayout` | • Đối soát đăng nhập lần đầu từ `danh_sach_sinh_vien_raw`.<br>• Cưỡng chế đổi mật khẩu lần đầu trước khi vào cổng học tập.<br>• Form đăng ký Cựu SV & Upload minh chứng KYC an toàn.<br>• Modal duyệt KYC cho Admin/Mod với Signed URL 30 phút. |
+| **4. Documents**<br>`app/Modules/Documents/` | • `Documents/Index.jsx` | `StudentLayout` | • Bộ lọc tài liệu đa tiêu chí, phân trang paginator.<br>• Upload Dropzone với cảnh báo lọc trùng 2 lớp (SHA-256 + SimHash).<br>• Hiển thị huy hiệu Community Ownership 🛡️ khi tài liệu được bảo tồn.<br>• Xem trước trực tuyến PDF qua luồng Stream an toàn. |
+| **5. Moderation**<br>`app/Modules/Moderation/` | • `Admin/Documents/ReviewQueue.jsx`<br>• `Admin/Documents/ReviewDetail.jsx`<br>• `Admin/Documents/RemovalRequests/Index.jsx`<br>• `Admin/Documents/RemovalRequests/Show.jsx`<br>• `Admin/Documents/Deleted.jsx`<br>• `Admin/Reports/Index.jsx`<br>• `Admin/Reports/Show.jsx` | `AdminLayout` | • Hàng đợi phê duyệt tài liệu mới tải lên.<br>• Hàng đợi xử lý yêu cầu xin gỡ tài liệu (Removal Requests).<br>• Hàng đợi xử lý báo cáo vi phạm (ngưỡng tự động ẩn ≥ 3 reports).<br>• Thùng rác 60 ngày: Khôi phục hoặc xóa vĩnh viễn ghi audit log. |
+| **6. Reviews**<br>`app/Modules/Reviews/` | • `Reviews/CourseReviews.jsx` | `StudentLayout` | • Chấm điểm môn học 3 tiêu chí trực quan (Độ khó, Thực tiễn, Áp lực).<br>• Tùy chọn ẩn danh 2 lớp (`la_an_danh = true`).<br>• Bộ lọc từ ngữ khiếm nhã real-time và nút Upvote bài đánh giá. |
+| **7. Bounties**<br>`app/Modules/Bounties/` | • `Wishlist/Index.jsx`<br>• `Wishlist/Show.jsx` | `StudentLayout` | • Đăng yêu cầu tìm tài liệu kèm điểm thưởng (Bounty Points).<br>• Trạng thái khóa điểm ký quỹ (`TAM_GIU`), hiệu ứng Confetti khi tất toán.<br>• Modal giải quyết yêu cầu và chống tự giải quyết tài liệu chính mình. |
+
+---
 
 ## 15. 🔗 Inertia.js & Laravel Contract (Hợp đồng Backend/Frontend)
 
@@ -321,10 +333,50 @@ Hệ thống AI (Cursor, GitHub Copilot, v0.dev) chú ý:
 - [ ] Form có label, error message, focus state, keyboard navigation và chống submit lặp.
 - [ ] Đã kiểm tra mobile, tablet, desktop, dữ liệu dài và quyền không đủ.
 - [ ] Không có `alert()`, inline style, console error hoặc icon-only control thiếu nhãn truy cập.
-## Giao diện phân cấp quản trị
+## 22. 🛡️ Quy chuẩn UI cho các Tính năng Đặc thù (Specialized Features UI)
 
-- Hiển thị nhãn `Admin thường` hoặc `Super Admin` cạnh vai trò Quản trị viên.
-- Với tài khoản quản trị, giao diện phải thông báo khi người thực hiện không có quyền thao tác.
-- Không hiển thị lựa chọn Khoa cho Admin/Moderator.
-- Không dùng giao diện để làm cơ chế bảo mật duy nhất; quyền phải được kiểm tra lại tại backend.
-- Các thay đổi quyền và trạng thái phải hiển thị được người thực hiện, thời điểm và lý do trong lịch sử tài khoản.
+### 🔹 Community Ownership & Cơ chế Xóa tài liệu
+- **Điều kiện hiển thị:** Khi `downloads_count >= 10` hoặc `average_rating >= 4.0`, tài liệu tự động trở thành **Tài sản cộng đồng**.
+- **Chỉ báo trực quan:** Hiển thị huy hiệu chiếc khiên `ShieldCheck` màu xanh `text-semantic-success` tại góc trên của thẻ `DocumentCard`.
+- **Nút hành động:**
+  - Ẩn hoàn toàn nút "Xóa" thông thường.
+  - Thay thế bằng nút "Yêu cầu Gỡ bỏ" (Request Removal) với biểu tượng cờ vàng `Flag` hoặc lá chắn.
+  - Khi người dùng click, mở Modal nhập lý do gỡ bỏ (Bản quyền, Nội dung lỗi thời, Sai thông tin) để gửi vào hàng đợi của Moderator/Admin.
+
+### 🔹 Đánh giá Môn học & Ẩn danh 2 Lớp (Course Reviews Anonymity)
+- **Giao diện Chấm điểm:** Sử dụng component `RatingStarInput` với 3 thang đo sao (1 - 5) độc lập:
+  - 🌟 Độ khó môn học
+  - 🌟 Tính thực tiễn
+  - 🌟 Áp lực bài tập / đồ án
+- **Cơ chế Ẩn danh:**
+  - Checkbox "Đánh giá ẩn danh" bật mặc định.
+  - Khi bật: Tên sinh viên, ảnh đại diện và MSSV được thay bằng nhãn "Sinh viên ẩn danh" kèm avatar trung tính.
+  - Backend vẫn lưu mã người dùng phục vụ hậu kiểm, nhưng tầng `Presentation` lọc bỏ hoàn toàn thông tin định danh trước khi gửi xuống client.
+- **Bộ lọc Từ cấm (Profanity Filter):** Input nhận xét kích hoạt kiểm tra thời gian thực; khi phát hiện từ cấm, cảnh báo nhẹ nhàng xuất hiện dưới ô nhập liệu và nút "Gửi đánh giá" bị vô hiệu hóa.
+
+### 🔹 Xem trước Minh chứng KYC qua Signed URL (PII Protection)
+- **Bảo mật tệp:** Toàn bộ ảnh thẻ/bằng tốt nghiệp của cựu sinh viên được lưu tại ổ đĩa riêng tư `storage/app/private/kyc/`.
+- **Luồng hiển thị Admin:**
+  - Trong hàng đợi KYC (`Admin/Kyc/Index.jsx`), hình ảnh minh chứng không bao giờ render qua đường dẫn tĩnh công khai.
+  - Sử dụng Temporary Signed URL với thời hạn sống chính xác 30 phút (`URL::temporarySignedRoute(...)`).
+  - Hỗ trợ Modal xem ảnh phóng to (Zoom) hoặc trình xem tài liệu đính kèm kèm trạng thái duyệt: Duyệt / Từ chối (bắt buộc nhập lý do).
+
+### 🔹 Phản hồi Kiểm tra Trùng lặp (Deduplication Feedback)
+- **Trùng nhị phân 100% (SHA-256 Collision):** Khung kéo thả tài liệu rung lắc nhẹ (Shake effect), chuyển viền đỏ `border-semantic-danger` và hiển thị thông báo lỗi: *"Tài liệu này đã tồn tại trên hệ thống cho môn học đã chọn"*.
+- **Tương đồng nội dung > 85% (SimHash):** Hiển thị Modal thông báo tương đồng cao, gợi ý tác giả tạo phiên bản kế tiếp (ví dụ: v1.1, v2.0) thay vì tạo một tài liệu hoàn toàn mới.
+
+### 🔹 Ví điểm & Đặt hàng Tài liệu (Bounty Escrow & Confetti)
+- **Ký quỹ điểm (`TAM_GIU`):** Khi sinh viên tạo yêu cầu Wishlist với mức thưởng X điểm, số dư hiển thị trong ví bị trừ và chuyển vào trạng thái "Đang tạm giữ".
+- **Không tự giải quyết:** Nếu tác giả yêu cầu mở trang giải quyết của chính mình, giao diện ẩn nút nộp bài giải quyết và hiển thị cảnh báo: *"Bạn không thể tự nộp tài liệu giải quyết yêu cầu của chính mình"*.
+- **Tất toán thành công:** Khi người yêu cầu xác nhận tài liệu nộp là chính xác, hệ thống kích hoạt hiệu ứng pháo hoa Confetti và cập nhật trạng thái đã giải quyết.
+
+---
+
+## 23. 👥 Giao diện Phân cấp Quản trị (Admin Hierarchy UI)
+
+- **Phân biệt cấp bậc:** Hiển thị rõ nhãn `Admin thường` hoặc `Super Admin` cạnh vai trò Quản trị viên trên thanh tiêu đề và bảng người dùng.
+- **Ràng buộc phân quyền:**
+  - Admin thường không thấy nút hoặc bị vô hiệu hóa khi cố gắng chỉnh sửa trạng thái/quyền của Moderator hoặc Admin khác.
+  - Chỉ Super Admin mới thấy các nút: Nâng/Hạ cấp Quản trị viên, Cấp vai trò Ban kiểm duyệt, và Truy cập bảng Dọn dẹp Thùng rác vĩnh viễn.
+- **Bảo vệ tài khoản tối cao:** Super Admin cuối cùng của hệ thống bị vô hiệu hóa nút xóa hoặc hạ cấp vai trò.
+- **Lịch sử thao tác:** Mọi hành vi thay đổi quyền hoặc trạng thái người dùng phải hiển thị được lịch sử kiểm toán (Audit Trail) bao gồm người thực hiện, thời điểm và lý do thay đổi.
