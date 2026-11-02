@@ -4,10 +4,6 @@ use App\Http\Controllers\CourseReviewController;
 use App\Http\Controllers\KycController;
 use App\Http\Controllers\WishlistBountyController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AdminUserController;
-use App\Http\Controllers\AcademicCatalogController;
-use App\Http\Controllers\AdminDashboardController;
-use App\Http\Controllers\AdminStorageController;
 
 // Community Route (IAM, Reviews và Bounty)
 // Phân hệ Cộng đồng sinh viên, Đánh giá môn học, Săn thưởng và Ví điểm
@@ -75,13 +71,9 @@ Route::middleware('auth')->group(function () {
     });
 
     // =========================================================================
-    // 4. QUẢN TRỊ KYC VÀ TÀI KHOẢN (KIỂM DUYỆT VIÊN VÀ QUẢN TRỊ VIÊN)
+    // 4. QUẢN TRỊ HÀNG ĐỢI KYC (KIỂM DUYỆT VIÊN VÀ QUẢN TRỊ VIÊN)
     // =========================================================================
     Route::prefix('quan-tri')->name('admin.')->group(function () {
-        Route::get('/', AdminDashboardController::class)
-            ->middleware('role:KIEM_DUYET_VIEN,QUAN_TRI_VIEN')
-            ->name('dashboard');
-
         // Hàng đợi duyệt minh chứng thẻ SV / Bằng tốt nghiệp
         Route::get('/duyet-kyc', [KycController::class, 'hangDoiKyc'])->name('kyc.index');
 
@@ -90,48 +82,6 @@ Route::middleware('auth')->group(function () {
 
         // Từ chối hồ sơ KYC kèm lý do
         Route::put('/duyet-kyc/{ma_xac_thuc}/tu-choi', [KycController::class, 'tuChoiHoSo'])->name('kyc.reject');
-
-        // Quản lý danh sách người dùng & Cập nhật trạng thái (Khóa/Mở)
-        Route::get('/nguoi-dung', [AdminUserController::class, 'index'])
-        ->name('users.index');
-
-        Route::get('/nguoi-dung/{ma_nguoi_dung}', [AdminUserController::class, 'show'])
-        ->name('users.show');
-
-        Route::put('/nguoi-dung/{ma_nguoi_dung}/trang-thai', [AdminUserController::class, 'toggleStatus'])
-        ->name('users.status');
-
-        Route::put('/nguoi-dung/{ma_nguoi_dung}/phan-quyen', [AdminUserController::class, 'updatePermissions'])
-        ->name('users.permissions');
-
-        Route::post('/nguoi-dung/{ma_nguoi_dung}/vi-pham', [AdminUserController::class, 'recordViolation'])
-        ->name('users.violations');
-
-        // Chuyển hướng khi truy cập URL /quan-tri/trang-thai về trang Quản lý Người dùng
-        Route::get('/trang-thai', function () {
-            return redirect()->route('admin.users.index');
-        });
-    });
-
-    Route::middleware('role:QUAN_TRI_VIEN')->prefix('quan-tri/danh-muc')->name('admin.catalog.')->group(function () {
-        Route::get('/', [AcademicCatalogController::class, 'index'])->name('index');
-        Route::post('/khoa', [AcademicCatalogController::class, 'storeFaculty'])->name('faculties.store');
-        Route::put('/khoa/{maKhoa}', [AcademicCatalogController::class, 'updateFaculty'])->name('faculties.update');
-        Route::put('/khoa/{maKhoa}/trang-thai', [AcademicCatalogController::class, 'toggleFaculty'])->name('faculties.toggle');
-        Route::post('/chuyen-nganh', [AcademicCatalogController::class, 'storeMajor'])->name('majors.store');
-        Route::put('/chuyen-nganh/{maChuyenNganh}', [AcademicCatalogController::class, 'updateMajor'])->name('majors.update');
-        Route::put('/chuyen-nganh/{maChuyenNganh}/trang-thai', [AcademicCatalogController::class, 'toggleMajor'])->name('majors.toggle');
-        Route::post('/mon-hoc', [AcademicCatalogController::class, 'storeCourse'])->name('courses.store');
-        Route::put('/mon-hoc/{maMonHoc}', [AcademicCatalogController::class, 'updateCourse'])->name('courses.update');
-        Route::put('/mon-hoc/{maMonHoc}/trang-thai', [AcademicCatalogController::class, 'toggleCourse'])->name('courses.toggle');
-    });
-
-    // =========================================================================
-    // 5. THEO DÕI VÀ QUẢN LÝ DUNG LƯỢNG LƯU TRỮ (QUẢN TRỊ VIÊN)
-    // =========================================================================
-    Route::middleware('role:QUAN_TRI_VIEN')->prefix('quan-tri/luu-tru')->name('admin.storage.')->group(function () {
-        Route::get('/', [AdminStorageController::class, 'index'])->name('index');
-        Route::post('/don-dep-thung-rac', [AdminStorageController::class, 'purgeExpiredTrash'])->name('purge-expired-trash');
     });
 
 });

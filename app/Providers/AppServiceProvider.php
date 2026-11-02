@@ -2,9 +2,12 @@
 
 namespace App\Providers;
 
+use App\Modules\AcademicCatalog\AcademicCatalogServiceProvider;
+use App\Modules\Administration\AdministrationServiceProvider;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -12,7 +15,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->register(AdministrationServiceProvider::class);
+        $this->app->register(AcademicCatalogServiceProvider::class);
     }
 
     /**

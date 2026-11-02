@@ -3,11 +3,13 @@
 namespace App\Modules\Administration;
 
 use App\Shared\Support\Module;
+use Illuminate\Support\Facades\Route;
 
 class AdministrationServiceProvider extends Module
 {
     public function boot(): void
     {
-        $this->loadRoutesFrom(__DIR__.'/routes.php');
+        Route::middleware('web')
+            ->group(__DIR__ . '/routes.php');
     }
 }

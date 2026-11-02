@@ -1,11 +1,9 @@
 <?php
 
-use App\Http\Controllers\CourseController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\DocumentModerationController;
 use App\Http\Controllers\DocumentRemovalRequestController;
 use App\Http\Controllers\DocumentReportController;
-use App\Http\Controllers\FacultyController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,33 +17,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 // =========================================================================
-// 1. DANH MỤC KHOA & MÔN HỌC (PUBLIC / XEM CÔNG KHAI)
-// =========================================================================
-
-// --- Danh mục Khoa / Bộ môn ---
-Route::prefix('khoa')->name('faculties.')->group(function () {
-    // Lấy danh sách tất cả các Khoa/Bộ môn
-    Route::get('/', [FacultyController::class, 'index'])->name('index');
-
-    // Lấy danh sách môn học thuộc một Khoa cụ thể
-    Route::get('/{id}/mon-hoc', [FacultyController::class, 'layDanhSachMonHoc'])->name('courses');
-});
-
-// --- Danh mục Môn học ---
-Route::prefix('mon-hoc')->name('courses.')->group(function () {
-    // Tìm kiếm / Tra cứu danh sách môn học
-    Route::get('/', [CourseController::class, 'index'])->name('index');
-
-    // Xem chi tiết môn học theo Mã học phần (VD: COS101, KTE201)
-    Route::get('/{course_code}', [CourseController::class, 'show'])->name('show');
-
-    // Lấy danh sách tài liệu thuộc môn học
-    Route::get('/{course_code}/tai-lieu', [CourseController::class, 'documents'])->name('documents');
-});
-
-
-// =========================================================================
-// 2. LUỒNG QUẢN LÝ TÀI LIỆU (YÊU CẦU ĐĂNG NHẬP & XÁC THỰC)
+// LUỒNG QUẢN LÝ TÀI LIỆU (YÊU CẦU ĐĂNG NHẬP & XÁC THỰC)
 // =========================================================================
 Route::middleware(['auth', 'verified'])->group(function () {
 
@@ -98,11 +70,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 // 3. KHU VỰC QUẢN TRỊ & KIỂM DUYỆT (MODERATOR & ADMIN)
 // =========================================================================
 Route::middleware(['auth', 'role:KIEM_DUYET_VIEN,QUAN_TRI_VIEN'])->prefix('quan-tri')->name('admin.')->group(function () {
-
-    // --- Quản lý Danh mục Môn học (Admin) ---
-    Route::post('/mon-hoc', [CourseController::class, 'store'])->name('courses.store');
-    Route::put('/mon-hoc/{id}', [CourseController::class, 'update'])->name('courses.update');
-    Route::delete('/mon-hoc/{id}', [CourseController::class, 'destroy'])->name('courses.destroy');
 
     // --- Hàng đợi Báo cáo vi phạm (Report Queue) ---
     // Xem danh sách các báo cáo vi phạm cần xử lý
