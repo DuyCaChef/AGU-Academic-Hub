@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
+use App\Models\NguoiDung;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -12,7 +12,7 @@ class ProfileTest extends TestCase
 
     public function test_profile_page_is_displayed(): void
     {
-        $user = User::factory()->create();
+        $user = NguoiDung::factory()->create();
 
         $response = $this
             ->actingAs($user)
@@ -23,7 +23,7 @@ class ProfileTest extends TestCase
 
     public function test_profile_information_can_be_updated(): void
     {
-        $user = User::factory()->create();
+        $user = NguoiDung::factory()->create();
 
         $response = $this
             ->actingAs($user)
@@ -34,18 +34,18 @@ class ProfileTest extends TestCase
 
         $response
             ->assertSessionHasNoErrors()
-            ->assertRedirect('/profile');
+            ->assertRedirect(route('profile.edit'));
 
         $user->refresh();
 
-        $this->assertSame('Test User', $user->name);
+        $this->assertSame('Test User', $user->ho_ten);
         $this->assertSame('test@example.com', $user->email);
-        $this->assertNull($user->email_verified_at);
+        $this->assertNull($user->xac_thuc_email_luc);
     }
 
     public function test_email_verification_status_is_unchanged_when_the_email_address_is_unchanged(): void
     {
-        $user = User::factory()->create();
+        $user = NguoiDung::factory()->create();
 
         $response = $this
             ->actingAs($user)
@@ -56,14 +56,16 @@ class ProfileTest extends TestCase
 
         $response
             ->assertSessionHasNoErrors()
-            ->assertRedirect('/profile');
+            ->assertRedirect(route('profile.edit'));
 
-        $this->assertNotNull($user->refresh()->email_verified_at);
+        $this->assertNotNull($user->refresh()->xac_thuc_email_luc);
     }
 
     public function test_user_can_delete_their_account(): void
     {
-        $user = User::factory()->create();
+        $user = NguoiDung::factory()->create([
+            'mat_khau' => 'password',
+        ]);
 
         $response = $this
             ->actingAs($user)
@@ -76,12 +78,14 @@ class ProfileTest extends TestCase
             ->assertRedirect('/');
 
         $this->assertGuest();
-        $this->assertNull($user->fresh());
+        $this->assertNull(NguoiDung::find($user->ma_nguoi_dung));
     }
 
     public function test_correct_password_must_be_provided_to_delete_account(): void
     {
-        $user = User::factory()->create();
+        $user = NguoiDung::factory()->create([
+            'mat_khau' => 'password',
+        ]);
 
         $response = $this
             ->actingAs($user)

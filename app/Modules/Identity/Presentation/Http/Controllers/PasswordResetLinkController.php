@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Auth;
+namespace App\Modules\Identity\Presentation\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
@@ -10,11 +10,10 @@ use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
+// Controller điều phối luồng yêu cầu cấp lại liên kết đặt lại mật khẩu qua email
 class PasswordResetLinkController extends Controller
 {
-    /**
-     * Display the password reset link request view.
-     */
+    // Hiển thị biểu mẫu yêu cầu cấp lại liên kết đặt lại mật khẩu
     public function create(): Response
     {
         return Inertia::render('Auth/ForgotPassword', [
@@ -22,25 +21,18 @@ class PasswordResetLinkController extends Controller
         ]);
     }
 
-    /**
-     * Handle an incoming password reset link request.
-     *
-     * @throws ValidationException
-     */
+    // Gửi liên kết đặt lại mật khẩu
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'email' => 'required|email',
+            'email' => ['required', 'email'],
         ]);
 
-        // We will send the password reset link to this user. Once we have attempted
-        // to send the link, we will examine the response then see the message we
-        // need to show to the user. Finally, we'll send out a proper response.
         $status = Password::sendResetLink(
             $request->only('email')
         );
 
-        if ($status == Password::RESET_LINK_SENT) {
+        if ($status === Password::RESET_LINK_SENT) {
             return back()->with('status', __($status));
         }
 
@@ -49,3 +41,4 @@ class PasswordResetLinkController extends Controller
         ]);
     }
 }
+

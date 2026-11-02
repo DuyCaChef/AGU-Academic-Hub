@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Auth;
+namespace App\Modules\Identity\Presentation\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
@@ -10,19 +10,16 @@ use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
+// Controller điều phối xác nhận mật khẩu cho các tác vụ nhạy cảm
 class ConfirmablePasswordController extends Controller
 {
-    /**
-     * Show the confirm password view.
-     */
+    // Hiển thị giao diện xác nhận mật khẩu
     public function show(): Response
     {
         return Inertia::render('Auth/ConfirmPassword');
     }
 
-    /**
-     * Confirm the user's password.
-     */
+    // Xác thực mật khẩu và lưu mốc thời gian xác nhận vào phiên
     public function store(Request $request): RedirectResponse
     {
         if (! Auth::guard('web')->validate([
@@ -39,3 +36,4 @@ class ConfirmablePasswordController extends Controller
         return redirect()->intended(route('dashboard', absolute: false));
     }
 }
+

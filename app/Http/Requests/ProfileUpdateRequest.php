@@ -2,30 +2,9 @@
 
 namespace App\Http\Requests;
 
-use App\Models\NguoiDung;
-use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
+use App\Modules\Identity\Presentation\Http\Requests\ProfileUpdateRequest as BaseProfileUpdateRequest;
 
-class ProfileUpdateRequest extends FormRequest
+// Lớp bọc kế thừa bảo đảm tương thích ngược
+class ProfileUpdateRequest extends BaseProfileUpdateRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, ValidationRule|array<mixed>|string>
-     */
-    public function rules(): array
-    {
-        return [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => [
-                'required',
-                'string',
-                'lowercase',
-                'email',
-                'max:255',
-                Rule::unique(NguoiDung::class)->ignore($this->user()->ma_nguoi_dung, 'ma_nguoi_dung'),
-            ],
-        ];
-    }
 }

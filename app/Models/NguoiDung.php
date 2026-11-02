@@ -66,6 +66,31 @@ class NguoiDung extends Authenticatable
         return $this->ma_nguoi_dung;
     }
 
+    // Tương thích ngược với thuộc tính email_verified_at của Laravel
+    public function getEmailVerifiedAtAttribute(): ?\Illuminate\Support\Carbon
+    {
+        return $this->xac_thuc_email_luc;
+    }
+
+    public function setEmailVerifiedAtAttribute($value): void
+    {
+        $this->attributes['xac_thuc_email_luc'] = $value;
+    }
+
+    // Kiểm tra xem người dùng đã xác minh địa chỉ email chưa
+    public function hasVerifiedEmail(): bool
+    {
+        return ! is_null($this->xac_thuc_email_luc);
+    }
+
+    // Đánh dấu địa chỉ email đã được xác minh
+    public function markEmailAsVerified(): bool
+    {
+        return $this->forceFill([
+            'xac_thuc_email_luc' => $this->freshTimestamp(),
+        ])->save();
+    }
+
     protected function casts(): array
     {
         return [
