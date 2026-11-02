@@ -17,6 +17,7 @@ import {
     PanelLeftClose,
     PanelLeftOpen,
     HardDrive,
+    LayoutDashboard,
 } from 'lucide-react';
 
 /**
@@ -63,6 +64,9 @@ export default function AdminLayout({ children, title = 'Quản trị hệ thố
             }
         } catch (e) {}
         if (typeof window !== 'undefined') {
+            if (fallbackUrl === '/quan-tri') {
+                return window.location.pathname === '/quan-tri' || window.location.pathname === '/quan-tri/';
+            }
             return window.location.pathname.startsWith(fallbackUrl);
         }
         return false;
@@ -70,6 +74,14 @@ export default function AdminLayout({ children, title = 'Quản trị hệ thố
 
     // Danh sách các mục điều hướng trong Sidebar Quản trị
     const navItems = [
+        {
+            label: 'Tổng quan hệ thống',
+            routeName: 'admin.dashboard',
+            fallbackUrl: '/quan-tri',
+            icon: LayoutDashboard,
+            desc: 'Bảng điều khiển và cảnh báo',
+            adminOnly: false,
+        },
         {
             label: 'Hàng đợi duyệt KYC',
             routeName: 'admin.kyc.index',
