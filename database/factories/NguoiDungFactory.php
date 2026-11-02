@@ -84,4 +84,12 @@ class NguoiDungFactory extends Factory
             'nam_tot_nghiep' => fake()->numberBetween(2020, 2024),
         ]);
     }
+
+    // Trạng thái tài khoản chưa xác thực email
+    public function unverified(): static
+    {
+        return $this->state(fn(array $attributes) => [
+            'xac_thuc_email_luc' => null,
+        ]);
+    }
 }
