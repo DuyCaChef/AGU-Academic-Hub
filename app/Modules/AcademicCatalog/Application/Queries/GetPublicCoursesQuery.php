@@ -25,3 +25,4 @@ class GetPublicCoursesQuery
         return $this->repository->findActiveCourseByCode($courseCode);
     }
 }
+

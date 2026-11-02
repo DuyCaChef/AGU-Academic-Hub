@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\CourseReviewController;
-use App\Http\Controllers\KycController;
 use App\Http\Controllers\WishlistBountyController;
 use Illuminate\Support\Facades\Route;
 
@@ -68,20 +67,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/', function () {
             return inertia('Wallet/Index');
         })->name('index');
-    });
-
-    // =========================================================================
-    // 4. QUẢN TRỊ HÀNG ĐỢI KYC (KIỂM DUYỆT VIÊN VÀ QUẢN TRỊ VIÊN)
-    // =========================================================================
-    Route::prefix('quan-tri')->name('admin.')->group(function () {
-        // Hàng đợi duyệt minh chứng thẻ SV / Bằng tốt nghiệp
-        Route::get('/duyet-kyc', [KycController::class, 'hangDoiKyc'])->name('kyc.index');
-
-        // Phê duyệt hồ sơ KYC
-        Route::put('/duyet-kyc/{ma_xac_thuc}/duyet', [KycController::class, 'pheDuyetHoSo'])->name('kyc.approve');
-
-        // Từ chối hồ sơ KYC kèm lý do
-        Route::put('/duyet-kyc/{ma_xac_thuc}/tu-choi', [KycController::class, 'tuChoiHoSo'])->name('kyc.reject');
     });
 
 });

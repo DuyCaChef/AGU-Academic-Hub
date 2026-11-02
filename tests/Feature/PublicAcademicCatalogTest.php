@@ -97,3 +97,4 @@ class PublicAcademicCatalogTest extends TestCase
         $response->assertNotFound();
     }
 }
+

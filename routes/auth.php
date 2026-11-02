@@ -36,13 +36,6 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
-    // Đổi mật khẩu bắt buộc cho sinh viên lần đầu đăng nhập
-    Route::get('mat-khau-lan-dau', [\App\Http\Controllers\Auth\FirstTimePasswordController::class, 'hienThiFormDoiMatKhau'])
-        ->name('password.change');
-
-    Route::post('mat-khau-lan-dau', [\App\Http\Controllers\Auth\FirstTimePasswordController::class, 'capNhatMatKhau'])
-        ->name('password.change.update');
-
     Route::get('xac-minh-email', EmailVerificationPromptController::class)
         ->name('verification.notice');
 

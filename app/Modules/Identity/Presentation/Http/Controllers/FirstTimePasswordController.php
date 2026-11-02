@@ -1,11 +1,10 @@
 <?php
 
-namespace App\Http\Controllers\Auth;
+namespace App\Modules\Identity\Presentation\Http\Controllers;
 
 use App\Enums\TrangThaiNguoiDung;
-use App\Enums\VaiTroNguoiDung;
 use App\Http\Controllers\Controller;
-use App\Models\DanhSachSinhVienRaw;
+use App\Modules\Identity\Application\Actions\ChangeFirstTimePasswordAction;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,9 +14,7 @@ use Inertia\Response;
 
 class FirstTimePasswordController extends Controller
 {
-    /**
-     * Hiển thị giao diện bắt buộc đổi mật khẩu lần đầu cho sinh viên.
-     */
+    // Hiển thị giao diện bắt buộc đổi mật khẩu lần đầu cho sinh viên
     public function hienThiFormDoiMatKhau(): Response|RedirectResponse
     {
         $user = Auth::user();
@@ -36,10 +33,8 @@ class FirstTimePasswordController extends Controller
         ]);
     }
 
-    /**
-     * Cập nhật mật khẩu mới và kích hoạt tài khoản sinh viên.
-     */
-    public function capNhatMatKhau(Request $request): RedirectResponse
+    // Cập nhật mật khẩu mới và kích hoạt tài khoản sinh viên
+    public function capNhatMatKhau(Request $request, ChangeFirstTimePasswordAction $action): RedirectResponse
     {
         $request->validate([
             'password' => ['required', 'confirmed', Password::defaults()],
@@ -48,19 +43,7 @@ class FirstTimePasswordController extends Controller
             'password.confirmed' => 'Mật khẩu xác nhận không trùng khớp.',
         ]);
 
-        $user = $request->user();
-
-        // 1. Cập nhật mật khẩu mới và chuyển trạng thái sang ĐANG_HOAT_DONG
-        $user->update([
-            'mat_khau'   => $request->password, // model NguoiDung tự động hash qua casts
-            'trang_thai' => TrangThaiNguoiDung::DANG_HOAT_DONG,
-        ]);
-
-        // 2. Đánh dấu bản ghi trong bảng dữ liệu thô sinh viên đã kích hoạt
-        $rawStudent = DanhSachSinhVienRaw::where('mssv', $user->mssv)->first();
-        if ($rawStudent) {
-            $rawStudent->danhDauKichHoat();
-        }
+        $action->execute($request->user(), $request->password);
 
         return redirect()->route('dashboard')->with(
             'success',
