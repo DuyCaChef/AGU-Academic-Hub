@@ -41,3 +41,4 @@ class RemovalRequestRepository
             ->findOrFail($id);
     }
 }
+

@@ -21,3 +21,4 @@ class SubmitDocumentReportAction
         return $this->recalculator->createReport($document, $reporter, $data);
     }
 }
+

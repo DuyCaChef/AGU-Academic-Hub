@@ -43,3 +43,4 @@ class TrashManagementRepository
             ->findOrFail($id);
     }
 }
+

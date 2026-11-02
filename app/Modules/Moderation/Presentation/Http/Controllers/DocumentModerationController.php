@@ -138,3 +138,4 @@ class DocumentModerationController extends Controller
         return back()->with('success', 'Đã xóa vĩnh viễn tài liệu và tệp vật lý.');
     }
 }
+

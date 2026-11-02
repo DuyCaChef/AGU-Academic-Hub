@@ -23,3 +23,4 @@ class UpvoteDocumentAction
         return (int) $document->luot_binh_chon;
     }
 }
+

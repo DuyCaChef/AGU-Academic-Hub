@@ -40,3 +40,4 @@ class ModerationReportRepository
             ->get();
     }
 }
+

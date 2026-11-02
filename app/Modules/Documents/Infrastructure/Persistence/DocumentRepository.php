@@ -45,3 +45,4 @@ class DocumentRepository
         $document->increment('luot_tai');
     }
 }
+

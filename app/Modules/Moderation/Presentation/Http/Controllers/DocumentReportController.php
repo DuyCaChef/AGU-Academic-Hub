@@ -23,3 +23,4 @@ class DocumentReportController extends Controller
         return back()->with('success', 'Đã gửi báo cáo. Cảm ơn bạn đã giúp bảo vệ kho tài liệu.');
     }
 }
+

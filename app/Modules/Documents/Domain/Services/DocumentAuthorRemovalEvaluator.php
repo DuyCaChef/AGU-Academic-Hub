@@ -44,3 +44,4 @@ class DocumentAuthorRemovalEvaluator
         return ['allowed' => true, 'status' => 200, 'message' => 'Hợp lệ'];
     }
 }
+

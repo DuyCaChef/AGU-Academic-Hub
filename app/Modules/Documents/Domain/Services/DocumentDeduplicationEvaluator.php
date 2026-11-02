@@ -63,3 +63,4 @@ class DocumentDeduplicationEvaluator
         return round($matchingBits / 64, 4);
     }
 }
+

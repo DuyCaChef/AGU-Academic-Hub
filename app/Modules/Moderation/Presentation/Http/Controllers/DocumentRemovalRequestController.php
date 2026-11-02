@@ -48,3 +48,4 @@ class DocumentRemovalRequestController extends Controller
         );
     }
 }
+

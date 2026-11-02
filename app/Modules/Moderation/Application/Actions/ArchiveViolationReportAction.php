@@ -18,3 +18,4 @@ class ArchiveViolationReportAction
         $report->delete();
     }
 }
+

@@ -89,3 +89,4 @@ class DocumentReportRecalculator
                 ->where('diem_uy_tin', '>=', config('moderation.trusted_reporter_reputation', 100)));
     }
 }
+

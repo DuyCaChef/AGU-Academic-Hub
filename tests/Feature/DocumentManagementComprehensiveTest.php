@@ -309,3 +309,4 @@ class DocumentManagementComprehensiveTest extends TestCase
         $this->assertSame('DA_DUYET', $document->fresh()->trang_thai);
     }
 }
+

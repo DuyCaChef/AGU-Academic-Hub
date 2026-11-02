@@ -66,3 +66,4 @@ class SubmitRemovalRequestAction
         return $removalRequest;
     }
 }
+

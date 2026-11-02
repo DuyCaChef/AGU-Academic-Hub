@@ -17,3 +17,4 @@ class GetDocumentDetailQuery
         return $this->repository->findById($id);
     }
 }
+
