@@ -10,6 +10,8 @@ use App\Models\NguoiDung;
 use App\Models\YeuCauXacThuc;
 use App\Modules\Identity\Domain\Services\AlumniKycRuleEvaluator;
 use App\Modules\Identity\Domain\ValueObjects\KycProofFile;
+use App\Modules\Identity\Infrastructure\Notifications\AlumniKycReceivedNotification;
+use App\Modules\Identity\Infrastructure\Notifications\NewAlumniKycNotification;
 use App\Modules\Identity\Infrastructure\Storage\PrivateKycStorage;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -56,7 +58,7 @@ class SubmitAlumniKycAction
             $storedPath = $this->storage->store($file, $safeFileName);
 
             // 4. Lưu bản ghi yêu cầu xác thực
-            YeuCauXacThuc::create([
+            $kyc = YeuCauXacThuc::create([
                 'ma_nguoi_dung'        => $user->ma_nguoi_dung,
                 'loai_xac_thuc'        => LoaiXacThuc::CUU_SINH_VIEN,
                 'loai_minh_chung'      => $data['loai_minh_chung'],
@@ -66,6 +68,18 @@ class SubmitAlumniKycAction
                 'loai_tep'             => $file->getClientMimeType(),
                 'trang_thai'           => TrangThaiXacThuc::CHO_DUYET,
             ]);
+
+            // 5. Gửi thông báo tiếp nhận hồ sơ cho cựu sinh viên (hồ sơ đang chờ xử lý)
+            $user->notify(new AlumniKycReceivedNotification($kyc));
+
+            // 6. Gửi thông báo có hồ sơ Alumni KYC mới cho Admin và Moderator
+            $staff = NguoiDung::query()
+                ->whereIn('vai_tro', [VaiTroNguoiDung::QUAN_TRI_VIEN, VaiTroNguoiDung::KIEM_DUYET_VIEN])
+                ->get();
+
+            foreach ($staff as $recipient) {
+                $recipient->notify(new NewAlumniKycNotification($kyc, $user));
+            }
 
             return $user;
         });

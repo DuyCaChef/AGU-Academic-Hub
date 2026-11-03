@@ -10,8 +10,8 @@ use App\Models\YeuCauXacThuc;
 use App\Modules\Administration\Domain\Enums\HanhDongKiemToan;
 use App\Modules\Administration\Domain\Enums\LoaiDoiTuongKiemToan;
 use App\Modules\Administration\Domain\Services\AuditLogger;
-use App\Notifications\KycDecisionNotification;
 use App\Modules\Identity\Domain\Services\AlumniKycRuleEvaluator;
+use App\Modules\Identity\Infrastructure\Notifications\AlumniKycDecisionNotification;
 use App\Modules\Identity\Infrastructure\Persistence\KycRepository;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
@@ -53,10 +53,10 @@ class ApproveKycAction
                 'diem_tam_giu'  => 0,
             ]);
 
-            // Gửi thông báo phê duyệt tới tài khoản người dùng
-            $kyc->nguoiDung->notify(new KycDecisionNotification(
+            // Gửi thông báo phê duyệt tới tài khoản người dùng (được phép đăng nhập sau khi duyệt)
+            $kyc->nguoiDung->notify(new AlumniKycDecisionNotification(
                 'DA_DUYET',
-                'Hồ sơ cựu sinh viên đã được duyệt. Tài khoản của bạn đã được kích hoạt.'
+                'Hồ sơ cựu sinh viên đã được duyệt. Tài khoản của bạn đã được kích hoạt. Bạn hiện đã được phép đăng nhập vào hệ thống.'
             ));
 
             // Ghi nhận nhật ký kiểm toán

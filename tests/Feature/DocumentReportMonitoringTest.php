@@ -5,7 +5,7 @@ namespace Tests\Feature;
 use App\Models\MonHoc;
 use App\Models\NguoiDung;
 use App\Models\TaiLieu;
-use App\Notifications\DocumentReviewRequiredNotification;
+use App\Modules\Moderation\Infrastructure\Notifications\DocumentReviewRequiredNotification;
 use App\Shared\Services\DocumentReportService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
+import NotificationDropdown from '@/Components/NotificationDropdown';
 import {
     ShieldCheck,
     Users,
@@ -65,7 +66,7 @@ export default function AdminLayout({ children, title = 'Quản trị hệ thố
             if (typeof route === 'function' && route().has(routeName)) {
                 return route().current(routeName) || route().current(`${routeName}.*`);
             }
-        } catch (e) {}
+        } catch (e) { }
         if (typeof window !== 'undefined') {
             if (fallbackUrl === '/quan-tri') {
                 return window.location.pathname === '/quan-tri' || window.location.pathname === '/quan-tri/';
@@ -218,11 +219,9 @@ export default function AdminLayout({ children, title = 'Quản trị hệ thố
             {/* 1. SIDEBAR CỐ ĐỊNH 280PX TÔNG MÀU TỐI bg-surface-admin    */}
             {/* ========================================================= */}
             <aside
-                className={`fixed inset-y-0 left-0 z-50 flex w-[280px] flex-col overflow-hidden border-r border-slate-800 bg-surface-admin text-slate-200 transition-[width,transform] duration-300 ease-in-out lg:translate-x-0 ${
-                    sidebarCollapsed ? 'lg:w-20' : 'lg:w-[280px]'
-                } ${
-                    mobileOpen ? 'translate-x-0' : '-translate-x-full'
-                }`}
+                className={`fixed inset-y-0 left-0 z-50 flex w-[280px] flex-col overflow-hidden border-r border-slate-800 bg-surface-admin text-slate-200 transition-[width,transform] duration-300 ease-in-out lg:translate-x-0 ${sidebarCollapsed ? 'lg:w-20' : 'lg:w-[280px]'
+                    } ${mobileOpen ? 'translate-x-0' : '-translate-x-full'
+                    }`}
             >
                 <div className="admin-sidebar-scroll min-h-0 flex-1 overflow-y-auto">
                     {/* Phần đầu Sidebar: Logo và nhận diện quản trị */}
@@ -279,9 +278,8 @@ export default function AdminLayout({ children, title = 'Quản trị hệ thố
                                 <div key={groupIdx} className="space-y-1">
                                     {/* Tiêu đề cụm menu khi mở rộng */}
                                     <div
-                                        className={`px-3 pt-2 pb-1 text-[11px] font-bold tracking-wider text-slate-400 uppercase select-none ${
-                                            sidebarCollapsed ? 'lg:hidden' : 'block'
-                                        }`}
+                                        className={`px-3 pt-2 pb-1 text-[11px] font-bold tracking-wider text-slate-400 uppercase select-none ${sidebarCollapsed ? 'lg:hidden' : 'block'
+                                            }`}
                                     >
                                         {group.title}
                                     </div>
@@ -289,9 +287,8 @@ export default function AdminLayout({ children, title = 'Quản trị hệ thố
                                     {/* Đường phân cách khi thu gọn sidebar */}
                                     {groupIdx > 0 && (
                                         <div
-                                            className={`border-t border-slate-800/80 my-2 mx-1.5 ${
-                                                sidebarCollapsed ? 'hidden lg:block' : 'hidden'
-                                            }`}
+                                            className={`border-t border-slate-800/80 my-2 mx-1.5 ${sidebarCollapsed ? 'hidden lg:block' : 'hidden'
+                                                }`}
                                         />
                                     )}
 
@@ -305,29 +302,25 @@ export default function AdminLayout({ children, title = 'Quản trị hệ thố
                                                 key={itemIdx}
                                                 href={getSafeRoute(item.routeName, item.fallbackUrl)}
                                                 title={sidebarCollapsed ? `${item.label}: ${item.desc}` : undefined}
-                                                className={`flex items-center rounded-xl py-2 text-sm font-medium transition-all group ${
-                                                    sidebarCollapsed
+                                                className={`flex items-center rounded-xl py-2 text-sm font-medium transition-all group ${sidebarCollapsed
                                                         ? 'gap-3 px-3.5 lg:justify-center lg:gap-0 lg:px-2'
                                                         : 'gap-3 px-3'
-                                                } ${
-                                                    active
+                                                    } ${active
                                                         ? 'bg-brand-primary text-white shadow-md shadow-brand-primary/20'
                                                         : 'text-slate-300 hover:text-white hover:bg-slate-800/80'
-                                                }`}
+                                                    }`}
                                             >
                                                 <IconComponent
-                                                    className={`w-5 h-5 shrink-0 transition-transform group-hover:scale-105 ${
-                                                        active ? 'text-white' : 'text-slate-400 group-hover:text-white'
-                                                    }`}
+                                                    className={`w-5 h-5 shrink-0 transition-transform group-hover:scale-105 ${active ? 'text-white' : 'text-slate-400 group-hover:text-white'
+                                                        }`}
                                                 />
                                                 <div className={`flex min-w-0 flex-col ${sidebarCollapsed ? 'lg:hidden' : ''}`}>
                                                     <span className="truncate leading-tight">{item.label}</span>
                                                     <span
-                                                        className={`text-[11px] font-normal truncate mt-0.5 ${
-                                                            active
+                                                        className={`text-[11px] font-normal truncate mt-0.5 ${active
                                                                 ? 'text-blue-100'
                                                                 : 'text-slate-400 group-hover:text-slate-300'
-                                                        }`}
+                                                            }`}
                                                     >
                                                         {item.desc}
                                                     </span>
@@ -394,16 +387,18 @@ export default function AdminLayout({ children, title = 'Quản trị hệ thố
                         </h1>
                     </div>
 
-                    {showPersonalWallet && (
-                        <div className="flex items-center gap-3">
-                            <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-200 rounded-full text-xs text-amber-800 font-medium">
-                                <Coins className="w-3.5 h-3.5 text-amber-600" />
-                                <span>
-                                    Ví cá nhân: <strong>{user?.vi_diem?.diem_kha_dung ?? 0}</strong> điểm
-                                </span>
-                            </div>
+                            <div className="flex items-center gap-3">
+                                <NotificationDropdown variant="admin" />
+
+                                {showPersonalWallet && (
+                                    <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-200 rounded-full text-xs text-amber-800 font-medium">
+                                        <Coins className="w-3.5 h-3.5 text-amber-600" />
+                                        <span>
+                                            Ví cá nhân: <strong>{user?.vi_diem?.diem_kha_dung ?? 0}</strong> điểm
+                                        </span>
+                                    </div>
+                        )}
                         </div>
-                    )}
                 </header>
 
                 {/* Vùng hiển thị Toast Flash Session */}

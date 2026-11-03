@@ -4,6 +4,7 @@ namespace App\Modules\Identity\Application\Actions;
 
 use App\Models\NguoiDung;
 use App\Modules\Identity\Domain\Services\IdentityRuleEvaluator;
+use App\Modules\Identity\Infrastructure\Notifications\FirstTimePasswordChangeRequiredNotification;
 use App\Modules\Identity\Infrastructure\Persistence\IdentityRepository;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Support\Facades\Auth;
@@ -64,7 +65,7 @@ class AuthenticateUserAction
             if (!empty($check['is_pending'])) {
                 session()->flash('kyc_status', [
                     'type' => 'pending',
-                    'message' => 'Hồ sơ cựu sinh viên của bạn đang chờ Admin đối soát. Bạn sẽ có thể đăng nhập sau khi hồ sơ được duyệt.',
+                    'message' => 'Hồ sơ cựu sinh viên của bạn đang chờ xử lý. Bạn sẽ được phép đăng nhập sau khi hồ sơ được duyệt.',
                 ]);
             }
 
@@ -76,6 +77,17 @@ class AuthenticateUserAction
         // 6. Đăng nhập người dùng vào phiên làm việc
         Auth::login($user, $remember);
         RateLimiter::clear($throttleKey);
+
+        // 7. Gửi thông báo yêu cầu đổi mật khẩu lần đầu cho sinh viên đang học
+        if ($this->ruleEvaluator->isFirstTimeLogin($user)) {
+            $alreadyNotified = $user->notifications()
+                ->where('type', FirstTimePasswordChangeRequiredNotification::class)
+                ->exists();
+
+            if (!$alreadyNotified) {
+                $user->notify(new FirstTimePasswordChangeRequiredNotification((string) $user->mssv));
+            }
+        }
 
         return $user;
     }

@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -160,6 +161,11 @@ class NguoiDung extends Authenticatable
     public function lichSuPhanQuyen(): HasMany
     {
         return $this->hasMany(LichSuPhanQuyenNguoiDung::class, 'ma_nguoi_dung', 'ma_nguoi_dung');
+    }
+
+    public function notifications(): MorphMany
+    {
+        return $this->morphMany(ThongBao::class, 'notifiable')->latest();
     }
 
     // --- Trợ giúp phân quyền ---

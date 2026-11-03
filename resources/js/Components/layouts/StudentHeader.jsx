@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, usePage, router } from '@inertiajs/react';
+import NotificationDropdown from '@/Components/NotificationDropdown';
 import {
     Upload,
     Search,
@@ -215,14 +216,7 @@ export default function StudentHeader({
                     )}
 
                     {/* Notifications */}
-                    <button
-                        type="button"
-                        className="p-2 text-white hover:text-brand-primary hover:bg-surface-page rounded-full relative transition-colors"
-                        aria-label="Thông báo"
-                    >
-                        <Bell size={20} />
-                        <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-green-700 rounded-full ring-2 ring-white"></span>
-                    </button>
+                    <NotificationDropdown variant="student" />
 
                     {/* User Profile Menu */}
                     {user ? (

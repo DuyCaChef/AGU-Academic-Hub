@@ -80,28 +80,61 @@ class RawStudentRepository
     {
         $created = 0;
         $updated = 0;
+        $errors = [];
+        $duplicates = [];
+        $seenMssvs = [];
 
-        foreach ($records as $item) {
+        foreach ($records as $index => $item) {
             $mssv = strtoupper(trim($item['mssv'] ?? ''));
+            $hoTen = trim($item['ho_ten'] ?? '');
+            $email = trim($item['email_sv'] ?? '');
+
+            // 1. Kiểm tra lỗi dữ liệu thiếu bắt buộc
             if ($mssv === '') {
+                $errors[] = [
+                    'row' => $index + 1,
+                    'mssv' => '',
+                    'reason' => 'Thiếu mã số sinh viên (MSSV).',
+                ];
                 continue;
             }
 
+            if ($hoTen === '') {
+                $errors[] = [
+                    'row' => $index + 1,
+                    'mssv' => $mssv,
+                    'reason' => 'Thiếu họ và tên sinh viên.',
+                ];
+                continue;
+            }
+
+            // 2. Kiểm tra bản ghi trùng lặp trong cùng lô nạp (batch duplicate)
+            if (isset($seenMssvs[$mssv])) {
+                $duplicates[] = [
+                    'row' => $index + 1,
+                    'mssv' => $mssv,
+                    'reason' => "MSSV {$mssv} xuất hiện nhiều lần trong danh sách nạp.",
+                ];
+            } else {
+                $seenMssvs[$mssv] = true;
+            }
+
+            // 3. Xử lý lưu hoặc cập nhật
             $existing = DanhSachSinhVienRaw::timTheoMssv($mssv);
             $rawPassword = $item['mat_khau_mac_dinh'] ?? 'Agu@' . $mssv;
 
             if ($existing) {
                 $existing->update([
-                    'ho_ten'   => trim($item['ho_ten'] ?? $existing->ho_ten),
-                    'email_sv' => trim($item['email_sv'] ?? $existing->email_sv),
+                    'ho_ten'   => $hoTen,
+                    'email_sv' => $email !== '' ? $email : $existing->email_sv,
                     'ma_khoa'  => $item['ma_khoa'] ?? $existing->ma_khoa,
                 ]);
                 $updated++;
             } else {
                 DanhSachSinhVienRaw::create([
                     'mssv'              => $mssv,
-                    'ho_ten'            => trim($item['ho_ten'] ?? ''),
-                    'email_sv'          => trim($item['email_sv'] ?? strtolower($mssv) . '@student.agu.edu.vn'),
+                    'ho_ten'            => $hoTen,
+                    'email_sv'          => $email !== '' ? $email : strtolower($mssv) . '@student.agu.edu.vn',
                     'mat_khau_mac_dinh' => Hash::make($rawPassword),
                     'ma_khoa'           => $item['ma_khoa'] ?? null,
                     'da_kich_hoat'      => false,
@@ -111,9 +144,11 @@ class RawStudentRepository
         }
 
         return [
-            'created' => $created,
-            'updated' => $updated,
-            'total'   => $created + $updated,
+            'created'    => $created,
+            'updated'    => $updated,
+            'total'      => $created + $updated,
+            'errors'     => $errors,
+            'duplicates' => $duplicates,
         ];
     }
 }

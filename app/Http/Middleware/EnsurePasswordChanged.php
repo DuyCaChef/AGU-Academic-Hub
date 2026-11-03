@@ -33,8 +33,8 @@ class EnsurePasswordChanged
             $user->trang_thai === TrangThaiNguoiDung::CHUA_XAC_THUC &&
             $user->vai_tro->value === 'SINH_VIEN'
         ) {
-            // Cho phép truy cập route đổi mật khẩu và logout
-            if ($request->routeIs('password.change', 'password.change.update', 'logout', 'auth.logout')) {
+            // Cho phép truy cập route đổi mật khẩu, logout và API thông báo
+            if ($request->routeIs('password.change', 'password.change.update', 'logout', 'auth.logout', 'notifications.*')) {
                 return $next($request);
             }
 

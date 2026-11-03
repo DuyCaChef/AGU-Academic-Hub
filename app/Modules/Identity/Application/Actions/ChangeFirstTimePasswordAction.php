@@ -5,6 +5,7 @@ namespace App\Modules\Identity\Application\Actions;
 use App\Enums\TrangThaiNguoiDung;
 use App\Models\DanhSachSinhVienRaw;
 use App\Models\NguoiDung;
+use App\Modules\Identity\Infrastructure\Notifications\StudentAccountActivatedNotification;
 
 class ChangeFirstTimePasswordAction
 {
@@ -22,6 +23,9 @@ class ChangeFirstTimePasswordAction
         if ($rawStudent) {
             $rawStudent->danhDauKichHoat();
         }
+
+        // 3. Gửi thông báo kích hoạt tài khoản sinh viên thành công
+        $user->notify(new StudentAccountActivatedNotification((string) $user->mssv, (string) $user->ho_ten));
     }
 }
 
