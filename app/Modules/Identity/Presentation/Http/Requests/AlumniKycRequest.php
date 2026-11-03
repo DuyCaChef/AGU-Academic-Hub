@@ -50,11 +50,19 @@ class AlumniKycRequest extends FormRequest
     {
         $validator->after(function ($validator): void {
             $mssv = (string) $this->input('mssv');
+            $email = (string) $this->input('email');
 
             if ($mssv !== '' && DanhSachSinhVienRaw::where('mssv', $mssv)->exists()) {
                 $validator->errors()->add(
                     'mssv',
                     'MSSV này thuộc danh sách sinh viên đang học. Sinh viên hiện hành không nộp hồ sơ KYC cựu sinh viên.'
+                );
+            }
+
+            if ($email !== '' && (str_ends_with($email, '@student.agu.edu.vn') || DanhSachSinhVienRaw::where('email_sv', $email)->exists())) {
+                $validator->errors()->add(
+                    'email',
+                    'Email trường cấp thuộc về sinh viên đang học. Sinh viên hiện hành không nộp hồ sơ KYC cựu sinh viên.'
                 );
             }
         });

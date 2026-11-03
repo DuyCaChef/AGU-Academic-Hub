@@ -14,7 +14,7 @@ Route::get('/', function () {
         'laravelVersion' => Application::VERSION,
         'phpVersion'     => PHP_VERSION,
     ]);
-});
+})->name('home');
 
 // Bảng điều khiển người dùng sau khi đăng nhập
 Route::get('/trang-chu', DashboardController::class)

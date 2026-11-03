@@ -39,7 +39,7 @@ class RegisterUserRequest extends FormRequest
     {
         return [
             'ho_ten'   => ['required', 'string', 'max:255'],
-            'mssv'     => ['required', 'string', 'max:50', 'unique:nguoi_dung,mssv'],
+            'mssv'     => ['nullable', 'string', 'max:50', 'unique:nguoi_dung,mssv'],
             'email'    => [
                 'required',
                 'string',
@@ -50,6 +50,26 @@ class RegisterUserRequest extends FormRequest
             ],
             'mat_khau' => ['required', Password::defaults()],
         ];
+    }
+
+    // Không cho phép sinh viên đang học tự đăng ký tài khoản
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator): void {
+            $email = strtolower(trim((string) $this->input('email')));
+            $mssv = strtoupper(trim((string) $this->input('mssv')));
+
+            $isAguStudentEmail = str_ends_with($email, '@student.agu.edu.vn');
+            $isInRawList = ($mssv !== '' && \App\Models\DanhSachSinhVienRaw::where('mssv', $mssv)->exists())
+                || ($email !== '' && \App\Models\DanhSachSinhVienRaw::where('email_sv', $email)->exists());
+
+            if ($isAguStudentEmail || $isInRawList) {
+                $validator->errors()->add(
+                    'email',
+                    'Sinh viên đang học không cần tự đăng ký tài khoản. Vui lòng đăng nhập bằng MSSV hoặc email trường cấp cùng mật khẩu mặc định để kích hoạt tài khoản qua bước đổi mật khẩu lần đầu.'
+                );
+            }
+        });
     }
 
     public function messages(): array

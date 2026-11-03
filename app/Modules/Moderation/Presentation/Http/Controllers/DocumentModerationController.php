@@ -27,30 +27,38 @@ class DocumentModerationController extends Controller
     // Hàng đợi xem danh sách báo cáo vi phạm cần xử lý
     public function indexReports(Request $request, GetReportQueueQuery $query): Response
     {
+        abort_unless($request->user()?->laQuanTriVien() || $request->user()?->laKiemDuyetVien(), 403, 'Bạn không có quyền thực hiện kiểm duyệt.');
+
         $data = $query->execute($request->only(['status', 'reason', 'from', 'to']));
 
         return Inertia::render('Admin/Reports/Index', $data);
     }
 
     // Hàng đợi kiểm tra riêng biệt dành cho các tài liệu bị gắn cờ nguy cơ cao
-    public function reviewQueue(GetReviewQueueQuery $query): Response
+    public function reviewQueue(Request $request, GetReviewQueueQuery $query): Response
     {
+        abort_unless($request->user()?->laQuanTriVien() || $request->user()?->laKiemDuyetVien(), 403, 'Bạn không có quyền thực hiện kiểm duyệt.');
+
         $data = $query->execute();
 
         return Inertia::render('Admin/Documents/ReviewQueue', $data);
     }
 
     // Chi tiết thẩm định tài liệu trong hàng đợi kiểm tra (hỗ trợ cả trashed)
-    public function reviewDocument(int $id, GetReviewDetailQuery $query): Response
+    public function reviewDocument(Request $request, int $id, GetReviewDetailQuery $query): Response
     {
+        abort_unless($request->user()?->laQuanTriVien() || $request->user()?->laKiemDuyetVien(), 403, 'Bạn không có quyền thực hiện kiểm duyệt.');
+
         $data = $query->execute($id);
 
         return Inertia::render('Admin/Documents/ReviewDetail', $data);
     }
 
     // Xem trước nội dung tệp trực tuyến từ ổ đĩa nội bộ (Protected Inline Stream)
-    public function previewDocument(int $id): HttpResponse
+    public function previewDocument(Request $request, int $id): HttpResponse
     {
+        abort_unless($request->user()?->laQuanTriVien() || $request->user()?->laKiemDuyetVien(), 403, 'Bạn không có quyền thực hiện kiểm duyệt.');
+
         $document = TaiLieu::withTrashed()->findOrFail($id);
         $path = $document->duong_dan_tep;
 
@@ -64,6 +72,8 @@ class DocumentModerationController extends Controller
     // Quyết định xử lý tài liệu trong hàng đợi kiểm tra
     public function decideDocument(Request $request, int $id, DecideDocumentReviewAction $action): RedirectResponse
     {
+        abort_unless($request->user()?->laQuanTriVien() || $request->user()?->laKiemDuyetVien(), 403, 'Bạn không có quyền thực hiện kiểm duyệt.');
+
         $data = $request->validate([
             'action'            => ['required', Rule::in(['KEEP', 'RESTORE', 'HIDE', 'DELETE'])],
             'resolution_reason' => ['required', 'string', 'max:2000'],
@@ -75,8 +85,10 @@ class DocumentModerationController extends Controller
     }
 
     // Xem chi tiết một bản ghi báo cáo cụ thể và danh sách báo cáo liên quan cùng tài liệu
-    public function showReport(int $id, GetReportDetailQuery $query): Response
+    public function showReport(Request $request, int $id, GetReportDetailQuery $query): Response
     {
+        abort_unless($request->user()?->laQuanTriVien() || $request->user()?->laKiemDuyetVien(), 403, 'Bạn không có quyền thực hiện kiểm duyệt.');
+
         $data = $query->execute($id);
 
         return Inertia::render('Admin/Reports/Show', $data);
@@ -85,6 +97,8 @@ class DocumentModerationController extends Controller
     // Quyết định xử lý báo cáo: Duyệt ẩn/xóa tài liệu hoặc Bác bỏ báo cáo
     public function resolveReport(Request $request, int $id, ResolveViolationReportAction $action): RedirectResponse
     {
+        abort_unless($request->user()?->laQuanTriVien() || $request->user()?->laKiemDuyetVien(), 403, 'Bạn không có quyền thực hiện kiểm duyệt.');
+
         $data = $request->validate([
             'action'            => ['required', Rule::in(['HIDE', 'DELETE', 'DISMISS'])],
             'resolution_reason' => ['required', 'string', 'max:2000'],
@@ -96,8 +110,10 @@ class DocumentModerationController extends Controller
     }
 
     // Xóa mềm (Archive) bản ghi báo cáo để dọn sạch hàng đợi
-    public function archiveReport(int $id, ArchiveViolationReportAction $action): RedirectResponse
+    public function archiveReport(Request $request, int $id, ArchiveViolationReportAction $action): RedirectResponse
     {
+        abort_unless($request->user()?->laQuanTriVien() || $request->user()?->laKiemDuyetVien(), 403, 'Bạn không có quyền thực hiện kiểm duyệt.');
+
         $action->execute($id);
 
         return back()->with('success', 'Đã lưu trữ báo cáo khỏi hàng đợi.');
@@ -106,6 +122,8 @@ class DocumentModerationController extends Controller
     // Danh sách tài liệu trong thùng rác (Soft Deleted)
     public function deletedDocuments(Request $request, GetDeletedDocumentsQuery $query): Response
     {
+        abort_unless($request->user()?->laQuanTriVien() || $request->user()?->laKiemDuyetVien(), 403, 'Bạn không có quyền xem thùng rác tài liệu.');
+
         $data = $query->execute(
             $request->only(['from', 'to', 'deleted_by', 'source', 'status']),
             $request->user()
@@ -114,9 +132,11 @@ class DocumentModerationController extends Controller
         return Inertia::render('Admin/Documents/Deleted', $data);
     }
 
-    // Khôi phục tài liệu đã xóa mềm
+    // Khôi phục tài liệu đã xóa mềm (Chỉ dành riêng cho Quản trị viên - Admin)
     public function restoreDocument(Request $request, int $id, RestoreDocumentAction $action): RedirectResponse
     {
+        abort_unless($request->user()?->laQuanTriVien(), 403, 'Chỉ Quản trị viên mới có quyền khôi phục tài liệu.');
+
         $document = $action->execute(
             $id,
             $request->boolean('confirm_violation'),
@@ -127,12 +147,14 @@ class DocumentModerationController extends Controller
         return back()->with('success', "Đã khôi phục tài liệu \"{$document->tieu_de}\" thành công.");
     }
 
-    // Xóa vĩnh viễn (Hard Delete / Purge) tài liệu và file vật lý khỏi hệ thống
+    // Xóa vĩnh viễn (Hard Delete / Purge) tài liệu và file vật lý khỏi hệ thống (Chỉ dành riêng cho Admin)
     public function permanentlyDeleteDocument(
         Request $request,
         int $id,
         PermanentlyDeleteDocumentAction $action
     ): RedirectResponse {
+        abort_unless($request->user()?->laQuanTriVien(), 403, 'Chỉ Quản trị viên mới có quyền xóa vĩnh viễn tài liệu.');
+
         $action->execute($id, $request->input('reason'), $request->user());
 
         return back()->with('success', 'Đã xóa vĩnh viễn tài liệu và tệp vật lý.');

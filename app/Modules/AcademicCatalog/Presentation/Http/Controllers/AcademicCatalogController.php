@@ -23,6 +23,8 @@ class AcademicCatalogController extends Controller
     // Hiển thị trang quản trị danh mục đào tạo (Khoa, Chuyên ngành và Môn học)
     public function index(Request $request, GetAcademicCatalogIndexQuery $query): Response
     {
+        abort_unless($request->user()?->laQuanTriVien(), 403, 'Bạn không có quyền quản trị danh mục học thuật.');
+
         $data = $query->execute($request->only(['search', 'ma_khoa', 'trang_thai']));
 
         return Inertia::render('Admin/AcademicCatalog/Index', $data);
@@ -45,8 +47,10 @@ class AcademicCatalogController extends Controller
     }
 
     // Vô hiệu hóa hoặc khôi phục Khoa
-    public function toggleFaculty(int $maKhoa, ManageFacultyAction $action): RedirectResponse
+    public function toggleFaculty(Request $request, int $maKhoa, ManageFacultyAction $action): RedirectResponse
     {
+        abort_unless($request->user()?->laQuanTriVien(), 403, 'Bạn không có quyền quản trị danh mục học thuật.');
+
         $result = $action->toggle($maKhoa);
 
         return back()->with('success', $result['message']);
@@ -69,8 +73,10 @@ class AcademicCatalogController extends Controller
     }
 
     // Vô hiệu hóa hoặc khôi phục Chuyên ngành
-    public function toggleMajor(int $maChuyenNganh, ManageMajorAction $action): RedirectResponse
+    public function toggleMajor(Request $request, int $maChuyenNganh, ManageMajorAction $action): RedirectResponse
     {
+        abort_unless($request->user()?->laQuanTriVien(), 403, 'Bạn không có quyền quản trị danh mục học thuật.');
+
         $result = $action->toggle($maChuyenNganh);
 
         if (!$result['success']) {
@@ -97,8 +103,10 @@ class AcademicCatalogController extends Controller
     }
 
     // Vô hiệu hóa hoặc khôi phục Môn học
-    public function toggleCourse(int $maMonHoc, ManageCourseAction $action): RedirectResponse
+    public function toggleCourse(Request $request, int $maMonHoc, ManageCourseAction $action): RedirectResponse
     {
+        abort_unless($request->user()?->laQuanTriVien(), 403, 'Bạn không có quyền quản trị danh mục học thuật.');
+
         $result = $action->toggle($maMonHoc);
 
         if (!$result['success']) {

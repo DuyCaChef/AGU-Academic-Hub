@@ -4,7 +4,7 @@ import AdminLayout from '@/Layouts/AdminLayout';
 import Pagination from '@/Components/Common/Pagination';
 import { Trash2, RotateCcw, FileText, CheckCircle2 } from 'lucide-react';
 
-export default function DeletedDocumentsIndex({ documents, filters = {}, actors = [], sources = [], statuses = [], canPermanentlyDelete = false, adminDeleteAfterDays = 60, autoPurgeAfterDays = 90 }) {
+export default function DeletedDocumentsIndex({ documents, filters = {}, actors = [], sources = [], statuses = [], canRestore = false, canPermanentlyDelete = false, adminDeleteAfterDays = 60, autoPurgeAfterDays = 90 }) {
     const items = documents?.data || [];
 
     const handleRestore = (doc) => {
@@ -111,13 +111,15 @@ export default function DeletedDocumentsIndex({ documents, filters = {}, actors 
                                                 {doc.ngay_xoa_tam}
                                             </td>
                                             <td className="px-6 py-4 text-right">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => handleRestore(doc)}
-                                                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-colors"
-                                                >
-                                                    <RotateCcw className="w-3.5 h-3.5" /> Khôi phục
-                                                </button>
+                                                {canRestore && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleRestore(doc)}
+                                                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-colors"
+                                                    >
+                                                        <RotateCcw className="w-3.5 h-3.5" /> Khôi phục
+                                                    </button>
+                                                )}
                                                 {canPermanentlyDelete && doc.co_the_xoa_vinh_vien && (
                                                     <button type="button" onClick={() => handlePermanentDelete(doc)} className="ml-2 inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-red-700 bg-red-50 hover:bg-red-100 border border-red-200">
                                                         Xóa vĩnh viễn

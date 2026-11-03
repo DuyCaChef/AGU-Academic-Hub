@@ -170,7 +170,7 @@ class AdminDashboardStatsRepository
 
         return [
             'total' => $total,
-            'active' => TaiLieu::query()->where('trang_thai', 'CONG_KHAI')->count(),
+            'active' => TaiLieu::query()->whereIn('trang_thai', ['DA_DUYET', 'CONG_KHAI'])->count(),
             'totalDownloads' => $downloads,
             'trashed' => $trashed,
         ];
