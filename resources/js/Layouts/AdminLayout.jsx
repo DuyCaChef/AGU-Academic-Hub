@@ -18,6 +18,9 @@ import {
     PanelLeftOpen,
     HardDrive,
     LayoutDashboard,
+    ClipboardList,
+    Settings,
+    UserCheck,
 } from 'lucide-react';
 
 /**
@@ -144,6 +147,30 @@ export default function AdminLayout({ children, title = 'Quản trị hệ thố
             fallbackUrl: '/quan-tri/luu-tru',
             icon: HardDrive,
             desc: 'Theo dõi tài nguyên lưu trữ',
+            adminOnly: true,
+        },
+        {
+            label: 'Nhật ký kiểm toán',
+            routeName: 'admin.audit-logs.index',
+            fallbackUrl: '/quan-tri/nhat-ky-kiem-toan',
+            icon: ClipboardList,
+            desc: 'Truy vết nghiệp vụ quản trị',
+            adminOnly: true,
+        },
+        {
+            label: 'Dữ liệu SV thô',
+            routeName: 'admin.raw-students.index',
+            fallbackUrl: '/quan-tri/sinh-vien-raw',
+            icon: UserCheck,
+            desc: 'Nạp và quản lý raw roster',
+            adminOnly: true,
+        },
+        {
+            label: 'Cấu hình hệ thống',
+            routeName: 'admin.settings.index',
+            fallbackUrl: '/quan-tri/cau-hinh',
+            icon: Settings,
+            desc: 'Tham số vận hành hệ thống',
             adminOnly: true,
         },
     ];

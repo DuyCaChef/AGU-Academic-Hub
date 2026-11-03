@@ -6,6 +6,9 @@ use App\Models\BaoCaoViPham;
 use App\Models\LichSuThungRac;
 use App\Models\NguoiDung;
 use App\Models\TaiLieu;
+use App\Modules\Administration\Domain\Enums\HanhDongKiemToan;
+use App\Modules\Administration\Domain\Enums\LoaiDoiTuongKiemToan;
+use App\Modules\Administration\Domain\Services\AuditLogger;
 use App\Notifications\ViolationReportResolvedNotification;
 use App\Modules\Moderation\Domain\Services\DocumentReportRecalculator;
 use Illuminate\Support\Facades\DB;
@@ -85,6 +88,39 @@ class ResolveViolationReportAction
 
             foreach ($recipients as $recipient) {
                 $recipient->notify(new ViolationReportResolvedNotification($report, $actionLabel));
+            }
+
+            // Ghi nhật ký kiểm toán hành vi xử lý báo cáo
+            app(AuditLogger::class)->log(
+                actor: $actor,
+                action: HanhDongKiemToan::XU_LY_BAO_CAO,
+                targetType: LoaiDoiTuongKiemToan::BAO_CAO_VI_PHAM,
+                targetId: (string) $reportId,
+                description: "Xử lý báo cáo vi phạm #{$reportId} trên tài liệu \"{$document->tieu_de}\": {$actionLabel}. Lý do: {$reason}",
+                oldData: ['trang_thai_xu_ly' => $report->trang_thai_xu_ly],
+                newData: ['trang_thai_xu_ly' => $status, 'hanh_dong' => $action, 'ly_do' => $reason]
+            );
+
+            if ($action === 'HIDE') {
+                app(AuditLogger::class)->log(
+                    actor: $actor,
+                    action: HanhDongKiemToan::AN_TAI_LIEU,
+                    targetType: LoaiDoiTuongKiemToan::TAI_LIEU,
+                    targetId: (string) $document->getKey(),
+                    description: "Tạm ẩn tài liệu \"{$document->tieu_de}\" do có báo cáo vi phạm. Lý do: {$reason}",
+                    oldData: ['trang_thai' => $document->getOriginal('trang_thai')],
+                    newData: ['trang_thai' => 'TAM_AN_KIEM_TRA']
+                );
+            } elseif ($action === 'DELETE') {
+                app(AuditLogger::class)->log(
+                    actor: $actor,
+                    action: HanhDongKiemToan::XOA_MEM_TAI_LIEU,
+                    targetType: LoaiDoiTuongKiemToan::TAI_LIEU,
+                    targetId: (string) $document->getKey(),
+                    description: "Xóa mềm tài liệu \"{$document->tieu_de}\" do có báo cáo vi phạm. Lý do: {$reason}",
+                    oldData: ['deleted_at' => null],
+                    newData: ['deleted_at' => $now->toIso8601String(), 'ly_do_xoa' => $reason]
+                );
             }
 
             return $actionLabel;

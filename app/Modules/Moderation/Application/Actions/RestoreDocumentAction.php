@@ -6,6 +6,9 @@ use App\Models\BaoCaoViPham;
 use App\Models\LichSuThungRac;
 use App\Models\NguoiDung;
 use App\Models\TaiLieu;
+use App\Modules\Administration\Domain\Enums\HanhDongKiemToan;
+use App\Modules\Administration\Domain\Enums\LoaiDoiTuongKiemToan;
+use App\Modules\Administration\Domain\Services\AuditLogger;
 use App\Modules\Moderation\Infrastructure\Persistence\TrashManagementRepository;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -55,6 +58,16 @@ class RestoreDocumentAction
                 'ly_do'              => $reason ?: 'Khôi phục tài liệu từ thùng rác.',
                 'chi_tiet'           => ['co_bao_cao_cho_xu_ly' => $hasActiveViolations],
             ]);
+
+            app(AuditLogger::class)->log(
+                actor: $actor,
+                action: HanhDongKiemToan::KHOI_PHUC_TAI_LIEU,
+                targetType: LoaiDoiTuongKiemToan::TAI_LIEU,
+                targetId: (string) $document->getKey(),
+                description: "Khôi phục tài liệu \"{$document->tieu_de}\" từ thùng rác.",
+                oldData: ['trang_thai' => 'DA_XOA'],
+                newData: ['trang_thai' => $document->trang_thai, 'ly_do' => $reason]
+            );
 
             return $document;
         });

@@ -5,6 +5,9 @@ namespace App\Modules\AcademicCatalog\Application\Actions;
 use App\Models\MonHoc;
 use App\Modules\AcademicCatalog\Domain\Services\AcademicCatalogRuleEvaluator;
 use App\Modules\AcademicCatalog\Infrastructure\Persistence\AcademicCatalogRepository;
+use App\Modules\Administration\Domain\Enums\HanhDongKiemToan;
+use App\Modules\Administration\Domain\Enums\LoaiDoiTuongKiemToan;
+use App\Modules\Administration\Domain\Services\AuditLogger;
 
 class ManageCourseAction
 {
@@ -22,6 +25,18 @@ class ManageCourseAction
         $course = MonHoc::create($validatedData);
         $course->chuyenNganhs()->sync($majorIds);
 
+
+        // Ghi log của việc thêm mới một môn học
+        app(AuditLogger::class)->log(
+            actor: auth()->user(),
+            action: HanhDongKiemToan::THAY_DOI_MON_HOC,
+            targetType: LoaiDoiTuongKiemToan::MON_HOC,
+            targetId: (string) $course->ma_mon_hoc,
+            description: "Thêm mới Môn học \"{$course->ten_mon_hoc}\" ({$course->ma_hoc_phan}).",
+            oldData: null,
+            newData: array_merge($validatedData, ['chuyen_nganh_ids' => $majorIds])
+        );
+
         return $course;
     }
 
@@ -32,8 +47,20 @@ class ManageCourseAction
         $majorIds = $validatedData['ma_chuyen_nganh'] ?? [];
         unset($validatedData['ma_chuyen_nganh']);
 
+        $oldData = $course->only(['ten_mon_hoc', 'ma_hoc_phan', 'so_tin_chi', 'ma_khoa']);
         $course->update($validatedData);
         $course->chuyenNganhs()->sync($majorIds);
+
+        // Ghi log của việc cập nhật môn học
+        app(AuditLogger::class)->log(
+            actor: auth()->user(),
+            action: HanhDongKiemToan::THAY_DOI_MON_HOC,
+            targetType: LoaiDoiTuongKiemToan::MON_HOC,
+            targetId: (string) $maMonHoc,
+            description: "Cập nhật thông tin Môn học \"{$course->ten_mon_hoc}\" ({$course->ma_hoc_phan}).",
+            oldData: $oldData,
+            newData: array_merge($validatedData, ['chuyen_nganh_ids' => $majorIds])
+        );
 
         return $course;
     }
@@ -53,9 +80,21 @@ class ManageCourseAction
             ];
         }
 
-        $course->trashed() ? $course->restore() : $course->delete();
+        $wasTrashed = $course->trashed();
+        $wasTrashed ? $course->restore() : $course->delete();
 
         $message = $course->trashed() ? 'Đã vô hiệu hóa môn học.' : 'Đã kích hoạt lại môn học.';
+
+        // Ghi log của việc thay đổi trạng thái môn học
+        app(AuditLogger::class)->log(
+            actor: auth()->user(),
+            action: HanhDongKiemToan::THAY_DOI_MON_HOC,
+            targetType: LoaiDoiTuongKiemToan::MON_HOC,
+            targetId: (string) $maMonHoc,
+            description: "Thay đổi trạng thái Môn học \"{$course->ten_mon_hoc}\": {$message}",
+            oldData: ['trashed' => $wasTrashed],
+            newData: ['trashed' => $course->trashed()]
+        );
 
         return [
             'success' => true,

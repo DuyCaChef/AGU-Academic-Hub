@@ -4,6 +4,9 @@ namespace App\Modules\Moderation\Application\Actions;
 
 use App\Models\LichSuThungRac;
 use App\Models\NguoiDung;
+use App\Modules\Administration\Domain\Enums\HanhDongKiemToan;
+use App\Modules\Administration\Domain\Enums\LoaiDoiTuongKiemToan;
+use App\Modules\Administration\Domain\Services\AuditLogger;
 use App\Modules\Moderation\Domain\Services\ModerationDecisionEvaluator;
 use App\Modules\Moderation\Infrastructure\Persistence\TrashManagementRepository;
 use Illuminate\Support\Facades\DB;
@@ -34,6 +37,16 @@ class PermanentlyDeleteDocumentAction
                 'ly_do'              => $reason ?: 'Xóa vĩnh viễn sau thời hạn lưu trữ.',
                 'chi_tiet'           => ['duong_dan_tep' => $document->duong_dan_tep],
             ]);
+
+            app(AuditLogger::class)->log(
+                actor: $actor,
+                action: HanhDongKiemToan::XOA_VINH_VIEN_TAI_LIEU,
+                targetType: LoaiDoiTuongKiemToan::TAI_LIEU,
+                targetId: (string) $document->getKey(),
+                description: "Xóa vĩnh viễn tài liệu \"{$document->tieu_de}\" và tệp vật lý. Lý do: {$reason}",
+                oldData: ['tieu_de' => $document->tieu_de, 'duong_dan_tep' => $document->duong_dan_tep],
+                newData: null
+            );
 
             // 2. Xóa tệp vật lý trên đĩa cứng
             Storage::disk('local')->delete($document->duong_dan_tep);
