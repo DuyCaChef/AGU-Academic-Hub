@@ -63,7 +63,7 @@ export default function AdminLayout({ children, title = 'Quản trị hệ thố
     const isItemActive = (routeName, fallbackUrl) => {
         try {
             if (typeof route === 'function' && route().has(routeName)) {
-                return route().current(routeName);
+                return route().current(routeName) || route().current(`${routeName}.*`);
             }
         } catch (e) {}
         if (typeof window !== 'undefined') {
@@ -75,103 +75,128 @@ export default function AdminLayout({ children, title = 'Quản trị hệ thố
         return false;
     };
 
-    // Danh sách các mục điều hướng trong Sidebar Quản trị
-    const navItems = [
+    // Danh mục các cụm menu điều hướng trong Sidebar Quản trị theo nghiệp vụ
+    const navGroups = [
         {
-            label: 'Tổng quan hệ thống',
-            routeName: 'admin.dashboard',
-            fallbackUrl: '/quan-tri',
-            icon: LayoutDashboard,
-            desc: 'Bảng điều khiển và cảnh báo',
-            adminOnly: false,
+            title: 'Tổng quan',
+            items: [
+                {
+                    label: 'Tổng quan hệ thống',
+                    routeName: 'admin.dashboard',
+                    fallbackUrl: '/quan-tri',
+                    icon: LayoutDashboard,
+                    desc: 'Bảng điều khiển và cảnh báo',
+                    adminOnly: false,
+                },
+            ],
         },
         {
-            label: 'Hàng đợi duyệt KYC',
-            routeName: 'admin.kyc.index',
-            fallbackUrl: '/quan-tri/duyet-kyc',
-            icon: ShieldCheck,
-            desc: 'Xác thực thẻ SV / Cựu SV',
-            adminOnly: false, // Cả Mod và Admin đều duyệt được
+            title: 'Người dùng & Xác thực',
+            items: [
+                {
+                    label: 'Quản lý Người dùng',
+                    routeName: 'admin.users.index',
+                    fallbackUrl: '/quan-tri/nguoi-dung',
+                    icon: Users,
+                    desc: 'Danh sách và phân quyền',
+                    adminOnly: true,
+                },
+                {
+                    label: 'Dữ liệu SV thô',
+                    routeName: 'admin.raw-students.index',
+                    fallbackUrl: '/quan-tri/sinh-vien-raw',
+                    icon: UserCheck,
+                    desc: 'Roster sinh viên & nạp CSV',
+                    adminOnly: true,
+                },
+                {
+                    label: 'Hàng đợi duyệt KYC',
+                    routeName: 'admin.kyc.index',
+                    fallbackUrl: '/quan-tri/duyet-kyc',
+                    icon: ShieldCheck,
+                    desc: 'Xác thực thẻ SV / Cựu SV',
+                    adminOnly: false,
+                },
+            ],
         },
         {
-            label: 'Quản lý Người dùng',
-            routeName: 'admin.users.index',
-            fallbackUrl: '/quan-tri/nguoi-dung',
-            icon: Users,
-            desc: 'Danh sách và khóa tài khoản',
-            adminOnly: true, // Dành riêng cho Quản trị viên
+            title: 'Kiểm duyệt & Tài liệu',
+            items: [
+                {
+                    label: 'Hàng đợi Báo cáo',
+                    routeName: 'admin.reports.index',
+                    fallbackUrl: '/quan-tri/bao-cao',
+                    icon: Flag,
+                    desc: 'Xử lý báo cáo vi phạm',
+                    adminOnly: false,
+                },
+                {
+                    label: 'Kiểm tra tài liệu',
+                    routeName: 'admin.documents.review-queue',
+                    fallbackUrl: '/quan-tri/tai-lieu/cho-kiem-tra',
+                    icon: AlertTriangle,
+                    desc: 'Tài liệu có nhiều báo cáo',
+                    adminOnly: false,
+                },
+                {
+                    label: 'Yêu cầu gỡ tài liệu',
+                    routeName: 'admin.documents.removal-requests.index',
+                    fallbackUrl: '/quan-tri/yeu-cau-go-tai-lieu',
+                    icon: FileWarning,
+                    desc: 'Duyệt gỡ tài liệu cộng đồng',
+                    adminOnly: false,
+                },
+                {
+                    label: 'Thùng rác Tài liệu',
+                    routeName: 'admin.documents.deleted',
+                    fallbackUrl: '/quan-tri/tai-lieu/da-xoa',
+                    icon: Trash2,
+                    desc: 'Khôi phục file đã xóa',
+                    adminOnly: false,
+                },
+            ],
         },
         {
-            label: 'Hàng đợi Báo cáo',
-            routeName: 'admin.reports.index',
-            fallbackUrl: '/quan-tri/bao-cao',
-            icon: Flag,
-            desc: 'Xử lý báo cáo vi phạm',
-            adminOnly: false,
+            title: 'Đào tạo & Học thuật',
+            items: [
+                {
+                    label: 'Danh mục học thuật',
+                    routeName: 'admin.catalog.index',
+                    fallbackUrl: '/quan-tri/danh-muc',
+                    icon: BookOpen,
+                    desc: 'Khoa, chuyên ngành, môn học',
+                    adminOnly: true,
+                },
+            ],
         },
         {
-            label: 'Kiểm tra tài liệu',
-            routeName: 'admin.documents.review-queue',
-            fallbackUrl: '/quan-tri/tai-lieu/cho-kiem-tra',
-            icon: AlertTriangle,
-            desc: 'Tài liệu có nhiều báo cáo',
-            adminOnly: false,
-        },
-        {
-            label: 'Yêu cầu gỡ tài liệu',
-            routeName: 'admin.documents.removal-requests.index',
-            fallbackUrl: '/quan-tri/yeu-cau-go-tai-lieu',
-            icon: FileWarning,
-            desc: 'Duyệt gỡ tài liệu cộng đồng',
-            adminOnly: false,
-        },
-        {
-            label: 'Thùng rác Tài liệu',
-            routeName: 'admin.documents.deleted',
-            fallbackUrl: '/quan-tri/tai-lieu/da-xoa',
-            icon: Trash2,
-            desc: 'Khôi phục file đã xóa',
-            adminOnly: true,
-        },
-        {
-            label: 'Danh mục học thuật',
-            routeName: 'admin.catalog.index',
-            fallbackUrl: '/quan-tri/danh-muc',
-            icon: BookOpen,
-            desc: 'Khoa, chuyên ngành, môn học',
-            adminOnly: true,
-        },
-        {
-            label: 'Quản lý lưu trữ',
-            routeName: 'admin.storage.index',
-            fallbackUrl: '/quan-tri/luu-tru',
-            icon: HardDrive,
-            desc: 'Theo dõi tài nguyên lưu trữ',
-            adminOnly: true,
-        },
-        {
-            label: 'Nhật ký kiểm toán',
-            routeName: 'admin.audit-logs.index',
-            fallbackUrl: '/quan-tri/nhat-ky-kiem-toan',
-            icon: ClipboardList,
-            desc: 'Truy vết nghiệp vụ quản trị',
-            adminOnly: true,
-        },
-        {
-            label: 'Dữ liệu SV thô',
-            routeName: 'admin.raw-students.index',
-            fallbackUrl: '/quan-tri/sinh-vien-raw',
-            icon: UserCheck,
-            desc: 'Nạp và quản lý raw roster',
-            adminOnly: true,
-        },
-        {
-            label: 'Cấu hình hệ thống',
-            routeName: 'admin.settings.index',
-            fallbackUrl: '/quan-tri/cau-hinh',
-            icon: Settings,
-            desc: 'Tham số vận hành hệ thống',
-            adminOnly: true,
+            title: 'Hệ thống & Vận hành',
+            items: [
+                {
+                    label: 'Quản lý lưu trữ',
+                    routeName: 'admin.storage.index',
+                    fallbackUrl: '/quan-tri/luu-tru',
+                    icon: HardDrive,
+                    desc: 'Theo dõi tài nguyên lưu trữ',
+                    adminOnly: true,
+                },
+                {
+                    label: 'Nhật ký kiểm toán',
+                    routeName: 'admin.audit-logs.index',
+                    fallbackUrl: '/quan-tri/nhat-ky-kiem-toan',
+                    icon: ClipboardList,
+                    desc: 'Truy vết nghiệp vụ quản trị',
+                    adminOnly: true,
+                },
+                {
+                    label: 'Cấu hình hệ thống',
+                    routeName: 'admin.settings.index',
+                    fallbackUrl: '/quan-tri/cau-hinh',
+                    icon: Settings,
+                    desc: 'Tham số vận hành hệ thống',
+                    adminOnly: true,
+                },
+            ],
         },
     ];
 
@@ -242,50 +267,75 @@ export default function AdminLayout({ children, title = 'Quản trị hệ thố
                         </div>
                     </div>
 
-                    {/* Danh mục menu điều hướng */}
-                    <nav className="px-3 space-y-1">
-                        <div className={`px-3 py-2 text-[11px] font-bold tracking-wider text-slate-400 uppercase ${sidebarCollapsed ? 'lg:hidden' : ''}`}>
-                            Nghiệp vụ Quản trị
-                        </div>
-
-                        {navItems.map((item, index) => {
-                            // Phân quyền: Ẩn các mục dành riêng cho Admin nếu user chỉ là Moderator
-                            if (item.adminOnly && !user?.la_quan_tri) return null;
-
-                            const active = isItemActive(item.routeName, item.fallbackUrl);
-                            const IconComponent = item.icon;
+                    {/* Danh mục menu điều hướng phân theo cụm nghiệp vụ */}
+                    <nav className="px-3 pb-6 space-y-4">
+                        {navGroups.map((group, groupIdx) => {
+                            const visibleItems = group.items.filter(
+                                (item) => !item.adminOnly || user?.la_quan_tri
+                            );
+                            if (visibleItems.length === 0) return null;
 
                             return (
-                                <Link
-                                    key={index}
-                                    href={getSafeRoute(item.routeName, item.fallbackUrl)}
-                                    title={sidebarCollapsed ? `${item.label}: ${item.desc}` : undefined}
-                                    className={`flex items-center rounded-xl py-2.5 text-sm font-medium transition-all group ${
-                                        sidebarCollapsed ? 'gap-3 px-3.5 lg:justify-center lg:gap-0 lg:px-2' : 'gap-3 px-3.5'
-                                    } ${
-                                        active
-                                            ? 'bg-brand-primary text-white shadow-md shadow-brand-primary/20'
-                                            : 'text-slate-300 hover:text-white hover:bg-slate-800/80'
-                                    }`}
-                                >
-                                    <IconComponent
-                                        className={`w-5 h-5 shrink-0 transition-transform group-hover:scale-110 ${
-                                            active ? 'text-white' : 'text-slate-400 group-hover:text-white'
+                                <div key={groupIdx} className="space-y-1">
+                                    {/* Tiêu đề cụm menu khi mở rộng */}
+                                    <div
+                                        className={`px-3 pt-2 pb-1 text-[11px] font-bold tracking-wider text-slate-400 uppercase select-none ${
+                                            sidebarCollapsed ? 'lg:hidden' : 'block'
                                         }`}
-                                    />
-                                    <div className={`flex min-w-0 flex-col ${sidebarCollapsed ? 'lg:hidden' : ''}`}>
-                                        <span className="truncate">{item.label}</span>
-                                        <span
-                                            className={`text-[11px] font-normal truncate ${
-                                                active
-                                                    ? 'text-blue-100'
-                                                    : 'text-slate-400 group-hover:text-slate-300'
-                                            }`}
-                                        >
-                                            {item.desc}
-                                        </span>
+                                    >
+                                        {group.title}
                                     </div>
-                                </Link>
+
+                                    {/* Đường phân cách khi thu gọn sidebar */}
+                                    {groupIdx > 0 && (
+                                        <div
+                                            className={`border-t border-slate-800/80 my-2 mx-1.5 ${
+                                                sidebarCollapsed ? 'hidden lg:block' : 'hidden'
+                                            }`}
+                                        />
+                                    )}
+
+                                    {/* Danh sách các mục trong nhóm */}
+                                    {visibleItems.map((item, itemIdx) => {
+                                        const active = isItemActive(item.routeName, item.fallbackUrl);
+                                        const IconComponent = item.icon;
+
+                                        return (
+                                            <Link
+                                                key={itemIdx}
+                                                href={getSafeRoute(item.routeName, item.fallbackUrl)}
+                                                title={sidebarCollapsed ? `${item.label}: ${item.desc}` : undefined}
+                                                className={`flex items-center rounded-xl py-2 text-sm font-medium transition-all group ${
+                                                    sidebarCollapsed
+                                                        ? 'gap-3 px-3.5 lg:justify-center lg:gap-0 lg:px-2'
+                                                        : 'gap-3 px-3'
+                                                } ${
+                                                    active
+                                                        ? 'bg-brand-primary text-white shadow-md shadow-brand-primary/20'
+                                                        : 'text-slate-300 hover:text-white hover:bg-slate-800/80'
+                                                }`}
+                                            >
+                                                <IconComponent
+                                                    className={`w-5 h-5 shrink-0 transition-transform group-hover:scale-105 ${
+                                                        active ? 'text-white' : 'text-slate-400 group-hover:text-white'
+                                                    }`}
+                                                />
+                                                <div className={`flex min-w-0 flex-col ${sidebarCollapsed ? 'lg:hidden' : ''}`}>
+                                                    <span className="truncate leading-tight">{item.label}</span>
+                                                    <span
+                                                        className={`text-[11px] font-normal truncate mt-0.5 ${
+                                                            active
+                                                                ? 'text-blue-100'
+                                                                : 'text-slate-400 group-hover:text-slate-300'
+                                                        }`}
+                                                    >
+                                                        {item.desc}
+                                                    </span>
+                                                </div>
+                                            </Link>
+                                        );
+                                    })}
+                                </div>
                             );
                         })}
                     </nav>

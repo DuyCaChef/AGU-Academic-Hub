@@ -355,7 +355,7 @@ export default function RawStudentsIndex({ students, filters = {}, faculties = [
                                     value={rawText}
                                     onChange={(e) => setRawText(e.target.value)}
                                     placeholder="DTH215001, Nguyen Van A, dth215001@student.agu.edu.vn, CNTT&#10;DTH215002, Tran Thi B, dth215002@student.agu.edu.vn, SPTOAN"
-                                    className="w-full p-3 font-mono text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+                                    className="w-full p-3 font-mono text-xs rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 hover:border-slate-400 dark:hover:border-slate-500 focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 focus:ring-4 focus:ring-indigo-500/15 dark:focus:ring-indigo-500/30 transition-all duration-200 shadow-sm"
                                     required
                                 />
                             </div>
@@ -395,50 +395,50 @@ export default function RawStudentsIndex({ students, filters = {}, faculties = [
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
-                        <form onSubmit={handleSaveEdit} className="p-6 space-y-3 text-sm">
+                        <form onSubmit={handleSaveEdit} className="p-6 space-y-4 text-sm">
                             <div>
-                                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                                     Họ và tên
                                 </label>
                                 <input
                                     type="text"
                                     value={editForm.ho_ten}
                                     onChange={(e) => setEditForm({ ...editForm, ho_ten: e.target.value })}
-                                    className="w-full py-2 px-3 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white"
+                                    className="w-full py-2.5 px-3.5 text-sm rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 hover:border-slate-400 dark:hover:border-slate-500 focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 focus:ring-4 focus:ring-indigo-500/15 dark:focus:ring-indigo-500/30 transition-all duration-200 shadow-sm"
                                     required
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                                     Email sinh viên
                                 </label>
                                 <input
                                     type="email"
                                     value={editForm.email_sv}
                                     onChange={(e) => setEditForm({ ...editForm, email_sv: e.target.value })}
-                                    className="w-full py-2 px-3 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white"
+                                    className="w-full py-2.5 px-3.5 text-sm rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 hover:border-slate-400 dark:hover:border-slate-500 focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 focus:ring-4 focus:ring-indigo-500/15 dark:focus:ring-indigo-500/30 transition-all duration-200 shadow-sm"
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                                     Mã Khoa
                                 </label>
                                 <input
                                     type="text"
                                     value={editForm.ma_khoa}
                                     onChange={(e) => setEditForm({ ...editForm, ma_khoa: e.target.value })}
-                                    className="w-full py-2 px-3 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white"
+                                    className="w-full py-2.5 px-3.5 text-sm rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 hover:border-slate-400 dark:hover:border-slate-500 focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 focus:ring-4 focus:ring-indigo-500/15 dark:focus:ring-indigo-500/30 transition-all duration-200 shadow-sm"
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                                     Mật khẩu mặc định mới (để trống nếu không đổi)
                                 </label>
                                 <input
                                     type="password"
                                     value={editForm.mat_khau_mac_dinh}
                                     onChange={(e) => setEditForm({ ...editForm, mat_khau_mac_dinh: e.target.value })}
-                                    className="w-full py-2 px-3 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white"
+                                    className="w-full py-2.5 px-3.5 text-sm rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 hover:border-slate-400 dark:hover:border-slate-500 focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 focus:ring-4 focus:ring-indigo-500/15 dark:focus:ring-indigo-500/30 transition-all duration-200 shadow-sm"
                                     placeholder="Tối thiểu 6 ký tự"
                                 />
                             </div>
