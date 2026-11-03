@@ -5,7 +5,7 @@ namespace App\Modules\Moderation\Application\Actions;
 use App\Models\LichSuThungRac;
 use App\Models\NguoiDung;
 use App\Models\YeuCauGoBoTaiLieu;
-use App\Notifications\DocumentRemovalRequestResolvedNotification;
+use App\Modules\Documents\Infrastructure\Notifications\DocumentRemovalRequestResolvedNotification;
 use App\Modules\Moderation\Infrastructure\Persistence\RemovalRequestRepository;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;

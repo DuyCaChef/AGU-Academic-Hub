@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Notifications;
+namespace App\Modules\Moderation\Infrastructure\Notifications;
 
 use App\Models\BaoCaoViPham;
 use Illuminate\Bus\Queueable;
@@ -35,3 +35,4 @@ class ViolationReportResolvedNotification extends Notification
         ]);
     }
 }
+

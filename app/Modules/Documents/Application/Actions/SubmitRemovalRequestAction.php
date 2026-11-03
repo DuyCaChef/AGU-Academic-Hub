@@ -5,7 +5,7 @@ namespace App\Modules\Documents\Application\Actions;
 use App\Models\NguoiDung;
 use App\Models\TaiLieu;
 use App\Models\YeuCauGoBoTaiLieu;
-use App\Notifications\DocumentRemovalRequestSubmittedNotification;
+use App\Modules\Documents\Infrastructure\Notifications\DocumentRemovalRequestSubmittedNotification;
 use App\Modules\Documents\Domain\Services\DocumentAuthorRemovalEvaluator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;

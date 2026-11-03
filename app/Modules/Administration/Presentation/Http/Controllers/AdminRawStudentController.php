@@ -45,7 +45,20 @@ class AdminRawStudentController extends Controller
 
         $result = $action->execute($request->input('records'), $request->user());
 
-        return back()->with('success', "Đã nạp thành công {$result['total']} sinh viên ({$result['created']} thêm mới, {$result['updated']} cập nhật).");
+        $message = "Đã nạp thành công {$result['total']} sinh viên ({$result['created']} thêm mới, {$result['updated']} cập nhật).";
+        $warning = null;
+        if (!empty($result['errors']) || !empty($result['duplicates'])) {
+            $errCount = count($result['errors']);
+            $dupCount = count($result['duplicates']);
+            $warning = "Phát hiện {$errCount} bản ghi lỗi và {$dupCount} bản ghi trùng lặp trong quá trình nạp.";
+        }
+
+        $redirect = back()->with('success', $message);
+        if ($warning) {
+            $redirect->with('warning', $warning);
+        }
+
+        return $redirect;
     }
 
     /**

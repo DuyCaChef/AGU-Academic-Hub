@@ -51,7 +51,7 @@ class IdentityRuleEvaluator
             return [
                 'allowed' => false,
                 'is_pending' => true,
-                'message' => 'Hồ sơ minh chứng cựu sinh viên của bạn đang chờ Quản trị viên đối soát và kích hoạt. Vui lòng quay lại sau.',
+                'message' => 'Hồ sơ cựu sinh viên của bạn đang chờ xử lý. Bạn sẽ được phép đăng nhập sau khi hồ sơ được duyệt.',
             ];
         }
 

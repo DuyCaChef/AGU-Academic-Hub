@@ -8,8 +8,8 @@ use App\Models\YeuCauXacThuc;
 use App\Modules\Administration\Domain\Enums\HanhDongKiemToan;
 use App\Modules\Administration\Domain\Enums\LoaiDoiTuongKiemToan;
 use App\Modules\Administration\Domain\Services\AuditLogger;
-use App\Notifications\KycDecisionNotification;
 use App\Modules\Identity\Domain\Services\AlumniKycRuleEvaluator;
+use App\Modules\Identity\Infrastructure\Notifications\AlumniKycDecisionNotification;
 use App\Modules\Identity\Infrastructure\Persistence\KycRepository;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
@@ -40,9 +40,10 @@ class RejectKycAction
             ]);
 
             // Gửi thông báo từ chối kèm lý do tới người dùng
-            $kyc->nguoiDung->notify(new KycDecisionNotification(
+            $kyc->nguoiDung->notify(new AlumniKycDecisionNotification(
                 'TU_CHOI',
-                'Hồ sơ cựu sinh viên bị từ chối: ' . $reason
+                'Hồ sơ cựu sinh viên bị từ chối: ' . $reason,
+                $reason
             ));
 
             // Ghi nhận nhật ký kiểm toán

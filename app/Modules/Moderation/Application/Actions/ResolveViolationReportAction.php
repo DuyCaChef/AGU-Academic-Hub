@@ -9,7 +9,7 @@ use App\Models\TaiLieu;
 use App\Modules\Administration\Domain\Enums\HanhDongKiemToan;
 use App\Modules\Administration\Domain\Enums\LoaiDoiTuongKiemToan;
 use App\Modules\Administration\Domain\Services\AuditLogger;
-use App\Notifications\ViolationReportResolvedNotification;
+use App\Modules\Moderation\Infrastructure\Notifications\ViolationReportResolvedNotification;
 use App\Modules\Moderation\Domain\Services\DocumentReportRecalculator;
 use Illuminate\Support\Facades\DB;
 

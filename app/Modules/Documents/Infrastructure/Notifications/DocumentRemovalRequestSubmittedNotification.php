@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Notifications;
+namespace App\Modules\Documents\Infrastructure\Notifications;
 
 use App\Models\YeuCauGoBoTaiLieu;
 use Illuminate\Bus\Queueable;
@@ -25,6 +25,7 @@ class DocumentRemovalRequestSubmittedNotification extends Notification
             'message' => "Tác giả yêu cầu gỡ tài liệu \"{$this->request->taiLieu?->tieu_de}\".",
             'removal_request_id' => $this->request->getKey(),
             'document_id' => $this->request->ma_tai_lieu,
+            'url' => route('admin.documents.removal-requests.index'),
         ]);
     }
 }

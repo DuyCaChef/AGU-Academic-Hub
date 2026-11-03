@@ -2,29 +2,12 @@
 
 namespace App\Notifications;
 
-use Illuminate\Notifications\Notification;
+use App\Modules\Identity\Infrastructure\Notifications\AlumniKycDecisionNotification as ModuleNotification;
 
-class KycDecisionNotification extends Notification
+/**
+ * Lớp tương thích ngược cho App\Notifications\KycDecisionNotification.
+ * Toàn bộ logic chính thức nằm tại App\Modules\Identity\Infrastructure\Notifications\AlumniKycDecisionNotification.
+ */
+class KycDecisionNotification extends ModuleNotification
 {
-    public function __construct(
-        private readonly string $decision,
-        private readonly string $message,
-    ) {
-    }
-
-    public function via(object $notifiable): array
-    {
-        return ['database'];
-    }
-
-    public function toDatabase(object $notifiable): array
-    {
-        return [
-            'decision' => $this->decision,
-            'title' => $this->decision === 'DA_DUYET'
-                ? 'Hồ sơ KYC đã được duyệt'
-                : 'Hồ sơ KYC bị từ chối',
-            'message' => $this->message,
-        ];
-    }
 }

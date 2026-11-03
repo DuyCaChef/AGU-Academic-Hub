@@ -10,7 +10,7 @@ use App\Models\DanhSachSinhVienRaw;
 use App\Models\Khoa;
 use App\Models\NguoiDung;
 use App\Models\YeuCauXacThuc;
-use App\Notifications\KycDecisionNotification;
+use App\Modules\Identity\Infrastructure\Notifications\AlumniKycDecisionNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
@@ -107,7 +107,7 @@ class IdentityKycComprehensiveTest extends TestCase
             'nguoi_duyet'         => $admin->ma_nguoi_dung,
         ]);
 
-        Notification::assertSentTo($alumni, KycDecisionNotification::class);
+        Notification::assertSentTo($alumni, AlumniKycDecisionNotification::class);
     }
 
     // Người kiểm duyệt có thể xem trước ảnh minh chứng qua Signed URL

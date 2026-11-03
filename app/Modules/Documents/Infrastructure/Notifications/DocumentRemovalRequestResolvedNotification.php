@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Notifications;
+namespace App\Modules\Documents\Infrastructure\Notifications;
 
 use App\Models\YeuCauGoBoTaiLieu;
 use Illuminate\Bus\Queueable;
@@ -36,3 +36,4 @@ class DocumentRemovalRequestResolvedNotification extends Notification
         ]);
     }
 }
+

@@ -80,6 +80,7 @@ class HandleInertiaRequests extends Middleware {
 
                 // Chia sẻ vai trò toàn cục trực tiếp trong auth
                 'vai_tro' => $user?->vai_tro?->value,
+                'unread_notifications_count' => fn () => $user ? $user->unreadNotifications()->count() : 0,
             ],
 
             // Thông báo Flash Session (Toast notifications)

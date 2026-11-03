@@ -8,7 +8,7 @@ use App\Enums\TrangThaiXacThuc;
 use App\Models\DanhSachSinhVienRaw;
 use App\Models\NguoiDung;
 use App\Models\YeuCauXacThuc;
-use App\Notifications\KycDecisionNotification;
+use App\Modules\Identity\Infrastructure\Notifications\AlumniKycDecisionNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
@@ -110,6 +110,6 @@ class KycQueueTest extends TestCase
             'ma_nguoi_dung' => $alumni->ma_nguoi_dung,
             'diem_kha_dung' => 100,
         ]);
-        Notification::assertSentTo($alumni, KycDecisionNotification::class);
+        Notification::assertSentTo($alumni, AlumniKycDecisionNotification::class);
     }
 }

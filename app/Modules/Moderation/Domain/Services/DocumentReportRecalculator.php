@@ -5,7 +5,8 @@ namespace App\Modules\Moderation\Domain\Services;
 use App\Models\BaoCaoViPham;
 use App\Models\NguoiDung;
 use App\Models\TaiLieu;
-use App\Notifications\DocumentReviewRequiredNotification;
+use App\Modules\Moderation\Infrastructure\Notifications\DocumentReviewRequiredNotification;
+use App\Modules\Moderation\Infrastructure\Notifications\NewViolationReportNotification;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -32,6 +33,15 @@ class DocumentReportRecalculator
                 'ly_do'            => $data['ly_do'],
                 'chi_tiet_loi'     => $data['chi_tiet_loi'] ?? null,
             ]);
+
+            // Gửi thông báo có báo cáo vi phạm mới cho Admin và Moderator
+            $staff = NguoiDung::query()
+                ->whereIn('vai_tro', ['KIEM_DUYET_VIEN', 'QUAN_TRI_VIEN'])
+                ->get();
+
+            foreach ($staff as $recipient) {
+                $recipient->notify(new NewViolationReportNotification($report, $lockedDoc, $reporter));
+            }
 
             $this->recalculate($lockedDoc, true);
 
