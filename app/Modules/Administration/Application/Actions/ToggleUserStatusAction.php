@@ -5,7 +5,10 @@ namespace App\Modules\Administration\Application\Actions;
 use App\Enums\TrangThaiNguoiDung;
 use App\Models\LichSuTrangThaiNguoiDung;
 use App\Models\NguoiDung;
+use App\Modules\Administration\Domain\Enums\HanhDongKiemToan;
+use App\Modules\Administration\Domain\Enums\LoaiDoiTuongKiemToan;
 use App\Modules\Administration\Domain\Services\AdminPermissionRuleEvaluator;
+use App\Modules\Administration\Domain\Services\AuditLogger;
 use App\Modules\Administration\Infrastructure\Persistence\AdminUserRepository;
 use Illuminate\Support\Facades\DB;
 
@@ -56,6 +59,19 @@ class ToggleUserStatusAction
                 'hanh_dong' => $action,
                 'ly_do' => $reason,
             ]);
+
+            $auditAction = $action === 'KHOA' ? HanhDongKiemToan::KHOA_TAI_KHOAN : HanhDongKiemToan::MO_KHOA_TAI_KHOAN;
+            $auditDesc = ($action === 'KHOA' ? 'Khóa' : 'Mở khóa') . " tài khoản của {$user->ho_ten} ({$user->email})." . ($reason ? " Lý do: {$reason}" : '');
+
+            app(AuditLogger::class)->log(
+                actor: $actor,
+                action: $auditAction,
+                targetType: LoaiDoiTuongKiemToan::NGUOI_DUNG,
+                targetId: (string) $user->ma_nguoi_dung,
+                description: $auditDesc,
+                oldData: ['trang_thai' => $user->trang_thai?->value],
+                newData: ['trang_thai' => $newStatus->value, 'ly_do' => $reason]
+            );
 
             $user->update([
                 'trang_thai' => $newStatus,

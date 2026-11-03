@@ -4,6 +4,9 @@ namespace App\Modules\Identity\Presentation\Http\Controllers;
 
 use App\Enums\TrangThaiXacThuc;
 use App\Http\Controllers\Controller;
+use App\Modules\Administration\Domain\Enums\HanhDongKiemToan;
+use App\Modules\Administration\Domain\Enums\LoaiDoiTuongKiemToan;
+use App\Modules\Administration\Domain\Services\AuditLogger;
 use App\Modules\Identity\Application\Actions\ApproveKycAction;
 use App\Modules\Identity\Application\Actions\RejectKycAction;
 use App\Modules\Identity\Application\Actions\SubmitAlumniKycAction;
@@ -75,6 +78,16 @@ class KycController extends Controller
         if (!$storage->exists($kyc->duong_dan_minh_chung)) {
             abort(404, 'Tệp minh chứng không tồn tại trên hệ thống lưu trữ.');
         }
+
+        app(AuditLogger::class)->log(
+            actor: $request->user(),
+            action: HanhDongKiemToan::XEM_HO_SO_KYC,
+            targetType: LoaiDoiTuongKiemToan::YEU_CAU_XAC_THUC,
+            targetId: (string) $ma_xac_thuc,
+            description: "Xem hồ sơ minh chứng KYC cựu sinh viên của {$kyc->nguoiDung?->ho_ten} (Mã KYC: #{$ma_xac_thuc}).",
+            oldData: null,
+            newData: ['ma_nguoi_dung' => $kyc->ma_nguoi_dung, 'duong_dan' => $kyc->duong_dan_minh_chung]
+        );
 
         return $storage->response($kyc->duong_dan_minh_chung, [
             'Content-Type'        => $kyc->loai_tep ?? 'image/jpeg',

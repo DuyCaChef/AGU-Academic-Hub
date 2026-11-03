@@ -3,6 +3,9 @@
 namespace App\Modules\Identity\Presentation\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Administration\Domain\Enums\HanhDongKiemToan;
+use App\Modules\Administration\Domain\Enums\LoaiDoiTuongKiemToan;
+use App\Modules\Administration\Domain\Services\AuditLogger;
 use App\Modules\Identity\Application\Actions\AuthenticateUserAction;
 use App\Modules\Identity\Application\Actions\LogoutUserAction;
 use App\Modules\Identity\Domain\Services\IdentityRuleEvaluator;
@@ -51,12 +54,40 @@ class AuthenticatedSessionController extends Controller
             ? 'admin.dashboard'
             : 'dashboard';
 
+        if ($user->laQuanTriVien() || $user->laKiemDuyetVien()) {
+            app(AuditLogger::class)->log(
+                actor: $user,
+                action: HanhDongKiemToan::DANG_NHAP_ADMIN,
+                targetType: LoaiDoiTuongKiemToan::PHIEN_LAM_VIEC,
+                targetId: (string) $user->ma_nguoi_dung,
+                description: "Quản trị viên {$user->ho_ten} đăng nhập vào hệ thống.",
+                oldData: null,
+                newData: [
+                    'vai_tro' => $user->vai_tro?->value,
+                    'cap_quan_tri' => $user->cap_quan_tri?->value,
+                ]
+            );
+        }
+
         return redirect()->intended(route($defaultRoute, absolute: false));
     }
 
     // Hủy phiên làm việc và đăng xuất người dùng
     public function destroy(Request $request, LogoutUserAction $action): RedirectResponse
     {
+        $user = $request->user();
+        if ($user && ($user->laQuanTriVien() || $user->laKiemDuyetVien())) {
+            app(AuditLogger::class)->log(
+                actor: $user,
+                action: HanhDongKiemToan::DANG_XUAT_ADMIN,
+                targetType: LoaiDoiTuongKiemToan::PHIEN_LAM_VIEC,
+                targetId: (string) $user->ma_nguoi_dung,
+                description: "Quản trị viên {$user->ho_ten} đăng xuất khỏi hệ thống.",
+                oldData: null,
+                newData: null
+            );
+        }
+
         $action->execute($request);
 
         return redirect('/');

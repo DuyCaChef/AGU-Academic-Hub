@@ -6,6 +6,9 @@ use App\Models\BaoCaoViPham;
 use App\Models\LichSuThungRac;
 use App\Models\NguoiDung;
 use App\Models\TaiLieu;
+use App\Modules\Administration\Domain\Enums\HanhDongKiemToan;
+use App\Modules\Administration\Domain\Enums\LoaiDoiTuongKiemToan;
+use App\Modules\Administration\Domain\Services\AuditLogger;
 use Illuminate\Support\Facades\DB;
 
 class DecideDocumentReviewAction
@@ -61,6 +64,24 @@ class DecideDocumentReviewAction
 
             $document->ly_do_trang_thai = "Admin {$actionLabel}: {$reason}";
             $document->save();
+
+            // Ghi nhật ký kiểm toán hành vi quản trị tài liệu
+            $auditAction = match ($action) {
+                'HIDE'    => HanhDongKiemToan::AN_TAI_LIEU,
+                'RESTORE' => HanhDongKiemToan::KHOI_PHUC_TAI_LIEU,
+                'KEEP'    => HanhDongKiemToan::XU_LY_BAO_CAO,
+                default   => HanhDongKiemToan::XOA_MEM_TAI_LIEU,
+            };
+
+            app(AuditLogger::class)->log(
+                actor: $actor,
+                action: $auditAction,
+                targetType: LoaiDoiTuongKiemToan::TAI_LIEU,
+                targetId: (string) $document->getKey(),
+                description: "Kiểm duyệt tài liệu \"{$document->tieu_de}\": {$actionLabel}. Lý do: {$reason}",
+                oldData: ['trang_thai' => $document->getOriginal('trang_thai')],
+                newData: ['trang_thai' => $document->trang_thai, 'action' => $action, 'ly_do' => $reason]
+            );
 
             BaoCaoViPham::query()
                 ->where('ma_tai_lieu', $document->getKey())

@@ -5,7 +5,10 @@ namespace App\Modules\Administration\Application\Actions;
 use App\Enums\TrangThaiNguoiDung;
 use App\Models\LichSuTrangThaiNguoiDung;
 use App\Models\NguoiDung;
+use App\Modules\Administration\Domain\Enums\HanhDongKiemToan;
+use App\Modules\Administration\Domain\Enums\LoaiDoiTuongKiemToan;
 use App\Modules\Administration\Domain\Services\AdminPermissionRuleEvaluator;
+use App\Modules\Administration\Domain\Services\AuditLogger;
 use App\Modules\Administration\Infrastructure\Persistence\AdminUserRepository;
 use Illuminate\Support\Facades\DB;
 
@@ -65,6 +68,16 @@ class RecordUserViolationAction
                     'ly_do' => $reason,
                 ]);
             }
+
+            app(AuditLogger::class)->log(
+                actor: $actor,
+                action: HanhDongKiemToan::GHI_NHAN_VI_PHAM,
+                targetType: LoaiDoiTuongKiemToan::NGUOI_DUNG,
+                targetId: (string) $user->ma_nguoi_dung,
+                description: "Ghi nhận vi phạm cho {$user->ho_ten} ({$user->email}), mức cảnh báo: {$level}, lần thứ {$count}. Lý do: {$reason}",
+                oldData: ['muc_canh_bao' => $user->muc_canh_bao, 'so_lan_vi_pham' => $user->so_lan_vi_pham],
+                newData: ['muc_canh_bao' => $level, 'so_lan_vi_pham' => $count, 'ly_do' => $reason]
+            );
         });
 
         $flashType = $level === 'TAM_KHOA' ? 'warning' : 'success';

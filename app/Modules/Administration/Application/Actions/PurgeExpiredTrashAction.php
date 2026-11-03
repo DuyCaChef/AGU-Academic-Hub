@@ -6,6 +6,9 @@ use App\Models\LichSuThungRac;
 use App\Models\NguoiDung;
 use App\Models\TaiLieu;
 use App\Modules\Administration\Application\Queries\GetStorageOverviewQuery;
+use App\Modules\Administration\Domain\Enums\HanhDongKiemToan;
+use App\Modules\Administration\Domain\Enums\LoaiDoiTuongKiemToan;
+use App\Modules\Administration\Domain\Services\AuditLogger;
 use App\Modules\Administration\Domain\ValueObjects\StorageMetric;
 use App\Modules\Administration\Infrastructure\Storage\PhysicalStorageScanner;
 use Illuminate\Support\Facades\DB;
@@ -68,6 +71,21 @@ class PurgeExpiredTrashAction
 
         // Giai đoạn 3: Xóa cache ngay lập tức để cập nhật số liệu mới trên Dashboard
         $this->overviewQuery->clearCache();
+
+        if ($purgedCount > 0) {
+            app(AuditLogger::class)->log(
+                actor: $actor,
+                action: HanhDongKiemToan::DON_DEP_THUNG_RAC,
+                targetType: LoaiDoiTuongKiemToan::TAI_LIEU,
+                targetId: 'EXPIRED_PURGE',
+                description: "Thanh lọc vĩnh viễn {$purgedCount} tài liệu quá hạn trong thùng rác, giải phóng " . StorageMetric::formatKb($freedKb) . ".",
+                oldData: null,
+                newData: [
+                    'so_tai_lieu_da_xoa' => $purgedCount,
+                    'dung_luong_giai_phong_kb' => round($freedKb, 2),
+                ]
+            );
+        }
 
         return [
             'so_tai_lieu_da_xoa' => $purgedCount,

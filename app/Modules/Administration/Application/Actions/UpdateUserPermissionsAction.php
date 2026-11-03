@@ -6,7 +6,10 @@ use App\Enums\CapQuanTri;
 use App\Enums\VaiTroNguoiDung;
 use App\Models\LichSuPhanQuyenNguoiDung;
 use App\Models\NguoiDung;
+use App\Modules\Administration\Domain\Enums\HanhDongKiemToan;
+use App\Modules\Administration\Domain\Enums\LoaiDoiTuongKiemToan;
 use App\Modules\Administration\Domain\Services\AdminPermissionRuleEvaluator;
+use App\Modules\Administration\Domain\Services\AuditLogger;
 use App\Modules\Administration\Infrastructure\Persistence\AdminUserRepository;
 use Illuminate\Support\Facades\DB;
 
@@ -86,6 +89,25 @@ class UpdateUserPermissionsAction
                 'ma_khoa_moi' => $data['ma_khoa'] ?? null,
                 'ly_do' => $data['ly_do'] ?? null,
             ]);
+
+            app(AuditLogger::class)->log(
+                actor: $actor,
+                action: HanhDongKiemToan::THAY_DOI_VAI_TRO,
+                targetType: LoaiDoiTuongKiemToan::NGUOI_DUNG,
+                targetId: (string) $user->ma_nguoi_dung,
+                description: "Thay đổi vai trò của {$user->ho_ten} thành {$role->value}" . ($adminLevel ? " ({$adminLevel->value})" : "") . ($data['ly_do'] ? ". Lý do: {$data['ly_do']}" : ""),
+                oldData: [
+                    'vai_tro' => $user->vai_tro?->value,
+                    'cap_quan_tri' => $user->cap_quan_tri?->value,
+                    'ma_khoa' => $user->ma_khoa,
+                ],
+                newData: [
+                    'vai_tro' => $role->value,
+                    'cap_quan_tri' => $adminLevel?->value,
+                    'ma_khoa' => $data['ma_khoa'] ?? null,
+                    'ly_do' => $data['ly_do'] ?? null,
+                ]
+            );
 
             $user->update([
                 'vai_tro' => $role,
