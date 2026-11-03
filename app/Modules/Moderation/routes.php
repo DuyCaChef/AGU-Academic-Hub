@@ -37,8 +37,20 @@ Route::middleware(['auth', 'role:KIEM_DUYET_VIEN,QUAN_TRI_VIEN'])
         Route::get('/yeu-cau-go-tai-lieu/{id}', [DocumentRemovalRequestController::class, 'show'])->name('documents.removal-requests.show');
         Route::put('/yeu-cau-go-tai-lieu/{id}/quyet-dinh', [DocumentRemovalRequestController::class, 'decide'])->name('documents.removal-requests.decide');
 
-        // --- Quản lý Thùng rác & Khôi phục (Soft Delete) ---
+        // --- Quản lý Thùng rác & Lịch sử xóa mềm (Xem danh sách) ---
         Route::get('/tai-lieu/da-xoa', [DocumentModerationController::class, 'deletedDocuments'])->name('documents.deleted');
+    });
+
+// =========================================================================
+// 3. THAO TÁC NGUY CƠ CAO TRÊN THÙNG RÁC (CHỈ DÀNH CHO ADMIN)
+// =========================================================================
+Route::middleware(['auth', 'role:QUAN_TRI_VIEN'])
+    ->prefix('quan-tri')
+    ->name('admin.')
+    ->group(function () {
+        // Khôi phục tài liệu đã xóa mềm
         Route::post('/tai-lieu/{id}/khoi-phuc', [DocumentModerationController::class, 'restoreDocument'])->name('documents.restore');
+
+        // Xóa vĩnh viễn tệp và bản ghi tài liệu khỏi hệ thống
         Route::delete('/tai-lieu/{id}/xoa-vinh-vien', [DocumentModerationController::class, 'permanentlyDeleteDocument'])->name('documents.permanent-delete');
     });

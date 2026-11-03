@@ -19,9 +19,11 @@ class RestoreDocumentAction
         protected TrashManagementRepository $repository
     ) {}
 
-    // Khôi phục tài liệu đã xóa mềm từ thùng rác
+    // Khôi phục tài liệu đã xóa mềm từ thùng rác (Chỉ dành cho Admin)
     public function execute(int $documentId, bool $confirmViolation, ?string $reason, NguoiDung $actor): TaiLieu
     {
+        abort_unless($actor->laQuanTriVien(), 403, 'Chỉ Quản trị viên mới có quyền khôi phục tài liệu.');
+
         return DB::transaction(function () use ($documentId, $confirmViolation, $reason, $actor): TaiLieu {
             $document = $this->repository->findTrashedForUpdate($documentId);
 

@@ -24,7 +24,13 @@ class ChangeFirstTimePasswordAction
             $rawStudent->danhDauKichHoat();
         }
 
-        // 3. Gửi thông báo kích hoạt tài khoản sinh viên thành công
+        // 3. Khởi tạo ví điểm ban đầu (100 điểm khả dụng) theo FR-01.3
+        $user->viDiem()->firstOrCreate([], [
+            'diem_kha_dung' => 100,
+            'diem_tam_giu'  => 0,
+        ]);
+
+        // 4. Gửi thông báo kích hoạt tài khoản sinh viên thành công
         $user->notify(new StudentAccountActivatedNotification((string) $user->mssv, (string) $user->ho_ten));
     }
 }

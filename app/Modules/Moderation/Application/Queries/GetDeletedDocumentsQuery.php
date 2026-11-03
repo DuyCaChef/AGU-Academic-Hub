@@ -27,6 +27,7 @@ class GetDeletedDocumentsQuery
             'actors'               => $actors,
             'sources'              => ['TAC_GIA', 'MODERATOR', 'ADMIN', 'SYSTEM'],
             'statuses'             => ['CHO_DUYET', 'DA_DUYET', 'CHO_KIEM_TRA', 'TAM_AN_KIEM_TRA', 'TU_CHOI'],
+            'canRestore'           => $user->laQuanTriVien(),
             'canPermanentlyDelete' => $user->laQuanTriVien(),
             'adminDeleteAfterDays' => config('documents.trash_admin_delete_after_days', 60),
             'autoPurgeAfterDays'   => config('documents.trash_auto_purge_after_days', 90),

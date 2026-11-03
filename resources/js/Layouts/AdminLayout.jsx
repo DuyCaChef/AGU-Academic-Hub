@@ -115,7 +115,7 @@ export default function AdminLayout({ children, title = 'Quản trị hệ thố
                     routeName: 'admin.kyc.index',
                     fallbackUrl: '/quan-tri/duyet-kyc',
                     icon: ShieldCheck,
-                    desc: 'Xác thực thẻ SV / Cựu SV',
+                    desc: 'Xác thực hồ sơ Cựu sinh viên',
                     adminOnly: false,
                 },
             ],

@@ -304,7 +304,7 @@ export default function StudentHeader({
                         </div>
                     ) : (
                         <Link
-                            href={route('auth.login')}
+                            href={route('login')}
                             className="text-sm font-medium text-white rounded-lg px-3 py-2 hover:bg-white/10 transition:colors"
                         >
                             Đăng nhập

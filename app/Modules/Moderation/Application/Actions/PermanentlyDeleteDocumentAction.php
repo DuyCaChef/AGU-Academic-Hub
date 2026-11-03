@@ -22,6 +22,8 @@ class PermanentlyDeleteDocumentAction
     // Xóa vĩnh viễn (Hard Delete / Purge) tài liệu và file vật lý khỏi hệ thống sau 60 ngày
     public function execute(int $documentId, ?string $reason, NguoiDung $actor): void
     {
+        abort_unless($actor->laQuanTriVien(), 403, 'Chỉ Quản trị viên mới có quyền xóa vĩnh viễn tài liệu.');
+
         DB::transaction(function () use ($documentId, $reason, $actor): void {
             $document = $this->repository->findTrashedForUpdate($documentId);
 

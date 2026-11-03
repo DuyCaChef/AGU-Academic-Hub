@@ -102,7 +102,7 @@ Route::middleware('auth')->group(function (): void {
 // =========================================================================
 // 3. QUẢN TRỊ HÀNG ĐỢI DUYỆT KYC (ADMIN & MODERATOR)
 // =========================================================================
-Route::middleware('auth')->group(function (): void {
+Route::middleware(['auth', 'role:KIEM_DUYET_VIEN,QUAN_TRI_VIEN'])->group(function (): void {
     // Alias điều hướng nhanh
     Route::prefix('quan-tri/kyc')->name('kyc.')->group(function (): void {
         Route::get('/', function () {
@@ -110,15 +110,15 @@ Route::middleware('auth')->group(function (): void {
         })->name('queue');
     });
 
-    // Endpoint xem trước file minh chứng nhạy cảm (Private PII) qua Signed URL 30 phút
-    Route::middleware('signed')
-        ->get('/kyc/xem-anh/{ma_xac_thuc}', [KycController::class, 'xemTruocMinhChung'])
-        ->name('kyc.preview');
-
-    // Hàng đợi duyệt và thao tác phê duyệt / từ chối
+    // Hàng đợi duyệt và thao tác phê duyệt / từ chối hồ sơ cựu sinh viên
     Route::prefix('quan-tri')->name('admin.')->group(function (): void {
         Route::get('/duyet-kyc', [KycController::class, 'hangDoiKyc'])->name('kyc.index');
         Route::put('/duyet-kyc/{ma_xac_thuc}/duyet', [KycController::class, 'pheDuyetHoSo'])->name('kyc.approve');
         Route::put('/duyet-kyc/{ma_xac_thuc}/tu-choi', [KycController::class, 'tuChoiHoSo'])->name('kyc.reject');
     });
 });
+
+// Endpoint xem trước file minh chứng nhạy cảm (Private PII) qua Signed URL 30 phút
+Route::middleware(['auth', 'signed'])
+    ->get('/kyc/xem-anh/{ma_xac_thuc}', [KycController::class, 'xemTruocMinhChung'])
+    ->name('kyc.preview');

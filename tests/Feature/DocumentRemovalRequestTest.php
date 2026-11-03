@@ -101,11 +101,19 @@ class DocumentRemovalRequestTest extends TestCase
             'trang_thai_xu_ly' => 'CHO_XU_LY',
         ]);
 
+        // Kiểm duyệt viên không có quyền khôi phục tài liệu (Chỉ dành cho Admin)
         $this->actingAs($moderator)
+            ->post(route('admin.documents.restore', $document), ['confirm_violation' => true])
+            ->assertForbidden();
+
+        // Quản trị viên (Admin) bắt buộc phải xác nhận trước khi khôi phục tài liệu có báo cáo vi phạm
+        $admin = NguoiDung::factory()->admin()->create();
+
+        $this->actingAs($admin)
             ->post(route('admin.documents.restore', $document), [])
             ->assertSessionHasErrors('document');
 
-        $this->actingAs($moderator)
+        $this->actingAs($admin)
             ->post(route('admin.documents.restore', $document), ['confirm_violation' => true])
             ->assertSessionHasNoErrors();
 
