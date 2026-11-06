@@ -41,6 +41,7 @@ class HandleInertiaRequests extends Middleware {
                     'ma_nguoi_dung' => $user->ma_nguoi_dung,
                     'id' =>   $user->id,
                     'ho_ten' => $user->ho_ten,
+                    'name' => $user->ho_ten,
                     'email' => $user->email,
                     'mssv' => $user->mssv,
                     'anh_dai_dien' => $user->anh_dai_dien,
@@ -97,6 +98,11 @@ class HandleInertiaRequests extends Middleware {
                 ...(new Ziggy)->toArray(),
                 'location' => $request->url(),
             ],
+
+            // Danh sách khoa và môn học trực thuộc phục vụ Sidebar sinh viên
+            'faculties' => fn () => \Illuminate\Support\Facades\Schema::hasTable('khoa')
+                ? app(\App\Modules\AcademicCatalog\Application\Queries\GetPublicFacultiesQuery::class)->execute($user)
+                : [],
         ];
     }
 }

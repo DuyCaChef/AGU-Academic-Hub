@@ -308,5 +308,82 @@ class DocumentManagementComprehensiveTest extends TestCase
         $response->assertSessionHas('success');
         $this->assertSame('DA_DUYET', $document->fresh()->trang_thai);
     }
+
+    // Người dùng đã xác thực có thể truy cập trang đăng tải tài liệu (Documents/Create)
+    public function test_authenticated_user_can_view_documents_create_page(): void
+    {
+        $user = NguoiDung::factory()->create();
+
+        $response = $this->actingAs($user)->get(route('documents.create'));
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page->component('Documents/Create')->has('faculties'));
+    }
+
+    // Người dùng đã xác thực có thể truy cập trang chi tiết tài liệu (Documents/Show)
+    public function test_authenticated_user_can_view_document_show_page(): void
+    {
+        $user = NguoiDung::factory()->create();
+        $course = MonHoc::factory()->create();
+
+        $document = TaiLieu::create([
+            'ma_mon_hoc'    => $course->ma_mon_hoc,
+            'ma_nguoi_dang' => $user->getKey(),
+            'tieu_de'       => 'Chi tiet tai lieu hoc phan',
+            'duong_dan_tep' => 'documents/detail.pdf',
+            'dinh_dang_tep' => 'pdf',
+            'dung_luong_kb' => 150,
+            'ma_bam_file'   => hash('sha256', 'detail_test_file'),
+            'luot_tai'      => 0,
+            'luot_thich'    => 0,
+            'trang_thai'    => 'DA_DUYET',
+        ]);
+
+        $response = $this->actingAs($user)->get(route('documents.show', $document->getKey()));
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page->component('Documents/Show')->has('document'));
+    }
+
+    // Người dùng có thể bình chọn (Upvote) tài liệu qua API
+    public function test_user_can_upvote_document_via_ajax(): void
+    {
+        $user = NguoiDung::factory()->create();
+        $course = MonHoc::factory()->create();
+
+        $document = TaiLieu::create([
+            'ma_mon_hoc'    => $course->ma_mon_hoc,
+            'ma_nguoi_dang' => $user->getKey(),
+            'tieu_de'       => 'Tai lieu can upvote',
+            'duong_dan_tep' => 'documents/upvote.pdf',
+            'dinh_dang_tep' => 'pdf',
+            'dung_luong_kb' => 120,
+            'ma_bam_file'   => hash('sha256', 'upvote_test_file'),
+            'luot_tai'      => 0,
+            'luot_thich'    => 0,
+            'trang_thai'    => 'DA_DUYET',
+        ]);
+
+        $response = $this->actingAs($user)->postJson(route('documents.upvote', $document->getKey()));
+
+        $response->assertOk();
+        $response->assertJson([
+            'success' => true,
+            'upvotes' => 1,
+        ]);
+
+        $this->assertEquals(1, $document->fresh()->luot_thich);
+    }
+
+    // Người dùng có thể xem danh sách tài liệu công khai (Documents/Index)
+    public function test_authenticated_user_can_view_documents_index_page(): void
+    {
+        $user = NguoiDung::factory()->create();
+
+        $response = $this->actingAs($user)->get(route('documents.index'));
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page->component('Documents/Index')->has('documents'));
+    }
 }
 

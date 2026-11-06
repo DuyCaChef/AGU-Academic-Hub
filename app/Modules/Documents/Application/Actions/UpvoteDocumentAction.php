@@ -18,9 +18,9 @@ class UpvoteDocumentAction
         $document = $this->repository->findById($documentId);
 
         // Tăng số lượt bình chọn (hoặc lưu liên kết user upvote)
-        $document->increment('luot_binh_chon');
+        $document->increment('luot_thich');
 
-        return (int) $document->luot_binh_chon;
+        return (int) $document->luot_thich;
     }
 }
 

@@ -26,9 +26,7 @@ class MonHoc extends Model
         'mo_ta',
     ];
 
-    /**
-     * Luôn hiển thị mã học phần ở dạng chữ in hoa, kể cả dữ liệu cũ.
-     */
+    // Luôn hiển thị mã học phần ở dạng chữ in hoa, kể cả dữ liệu cũ.
     public function getMaHocPhanAttribute(?string $value): ?string
     {
         return $value === null ? null : mb_strtoupper($value);
@@ -46,10 +44,17 @@ class MonHoc extends Model
         return $this->belongsTo(Khoa::class, 'ma_khoa', 'ma_khoa');
     }
 
-    public function chuyenNganhs(): BelongsToMany
+   public function chuyenNganhs(): BelongsToMany
     {
-        return $this->belongsToMany(ChuyenNganh::class, 'mon_hoc_chuyen_nganh', 'ma_mon_hoc', 'ma_chuyen_nganh')
-            ->withTimestamps();
+        return $this->belongsToMany(
+            ChuyenNganh::class,
+            'mon_hoc_chuyen_nganh',
+            'ma_mon_hoc',
+            'ma_chuyen_nganh',
+            'ma_mon_hoc',
+            'ma_chuyen_nganh'
+        )->withTimestamps()
+        ->whereNull('chuyen_nganh.ngay_xoa_tam');
     }
 
     public function taiLieus(): HasMany

@@ -34,5 +34,14 @@ class FacultyController extends Controller
             'courses' => $courses,
         ]);
     }
-}
 
+    // Lấy danh sách môn học thuộc một chuyên ngành (dạng JSON cho Dynamic Dropdown)
+    public function layDanhSachMonHocTheoChuyenNganh(int $id): JsonResponse
+    {
+        $courses = $this->facultiesQuery->getCoursesByMajorId($id);
+
+        return response()->json([
+            'courses' => $courses,
+        ]);
+    }
+}

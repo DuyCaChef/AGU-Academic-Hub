@@ -4,39 +4,28 @@ namespace App\Http\Controllers;
 
 use App\Models\MonHoc;
 use App\Models\TaiLieu;
-use App\Models\Khoa;
+use App\Modules\AcademicCatalog\Application\Queries\GetPublicFacultiesQuery;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
-    public function __invoke(Request $request)
+    public function __invoke(Request $request, GetPublicFacultiesQuery $facultiesQuery)
     {
-        // lấy user đang login bằng cơ chế xác thực hiện có
+        // Lấy thông tin người dùng đang đăng nhập
         $user = $request->user();
-        $faculties = Khoa::with('monHocs')
-            ->get()
-            ->sortBy(function ($faculty) use ($user) {
-                return $faculty->ma_khoa === $user->ma_khoa ? 0 : 1;
-            })
-            ->values();
-        ;
-        // tính toán các số liệu thống kê
+
+        // Sử dụng Query Class của Module AcademicCatalog để lấy danh sách khoa ưu tiên
+        $faculties = $facultiesQuery->execute($user);
+
+        // Tính toán các số liệu thống kê cá nhân của sinh viên
         $stats = [
-            //đếm tổng môn học theo khoa
-            'totalCourses' => Khoa::where(
-                'ma_khoa',
-                $user->ma_khoa
-            )->count(),
-            // đếm số tài liệu của user
-            'myDocuments' => TaiLieu::where(
-                'ma_nguoi_dang',
-                $user->getKey()
-            )->count(),
-            // điểm uy tín 
-            'trustScore' => $user->diem_uy_tin
+            'totalCourses' => $user->ma_khoa ? MonHoc::where('ma_khoa', $user->ma_khoa)->count() : 0,
+            'myDocuments' => TaiLieu::where('ma_nguoi_dang', $user->getKey())->count(),
+            'trustScore' => $user->diem_uy_tin,
         ];
-        // query tài liệu mới nhất 
+
+        // Truy vấn 3 tài liệu đã kiểm duyệt mới nhất
         $recentDocument = TaiLieu::query()
             ->where('trang_thai', 'DA_DUYET')
             ->with('monHoc')
@@ -48,13 +37,13 @@ class DashboardController extends Controller
                 'tieu_de',
                 'dinh_dang_tep',
                 'phan_loai',
-                'luot_tai',
                 'created_at',
             ]);
+
         return Inertia::render('Dashboard', [
+            'faculties' => $faculties,
             'stats' => $stats,
             'recentDocuments' => $recentDocument,
-            'faculties' => $faculties,
         ]);
     }
 }
