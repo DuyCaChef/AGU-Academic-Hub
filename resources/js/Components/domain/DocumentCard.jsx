@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from '@inertiajs/react';
+import axios from 'axios';
 import {
     FileText,
     Download,
@@ -10,7 +11,11 @@ import {
 } from 'lucide-react';
 
 export default function DocumentCard({ document }) {
-    const isCommunityOwned = document.luot_tai >= 10 || document.luot_thich >= 10;
+    const [upvotes, setUpvotes] = useState(document.luot_thich || 0);
+    const [hasUpvoted, setHasUpvoted] = useState(false);
+    const [isVoting, setIsVoting] = useState(false);
+
+    const isCommunityOwned = (document.luot_tai || 0) >= 10 || upvotes >= 10;
 
     // Badge styling theo loại tài liệu
     const getCategoryBadge = (category) => {
@@ -23,6 +28,27 @@ export default function DocumentCard({ document }) {
                 return 'bg-semantic-info/10 text-semantic-info border-semantic-info/20';
             default:
                 return 'bg-border-default/50 text-text-secondary border-border-default';
+        }
+    };
+
+    // AJAX Upvote Handler
+    const handleToggleUpvote = async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (isVoting) return;
+        setIsVoting(true);
+
+        try {
+            const response = await axios.post(route('documents.upvote', document.ma_tai_lieu));
+            if (response.data && response.data.success) {
+                setUpvotes(response.data.upvotes);
+                setHasUpvoted(true);
+            }
+        } catch (error) {
+            console.error('Error upvoting document from card:', error);
+        } finally {
+            setTimeout(() => setIsVoting(false), 400);
         }
     };
 
@@ -73,15 +99,28 @@ export default function DocumentCard({ document }) {
 
             {/* Footer Thẻ: Lượt tải, Upvote & Nút Xem trước */}
             <div className="pt-3 border-t border-border-default/60 flex items-center justify-between text-xs text-text-secondary">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3">
                     <span className="flex items-center gap-1 font-medium" title="Lượt tải">
                         <Download size={14} className="text-brand-secondary" />
                         {document.luot_tai || 0}
                     </span>
-                    <span className="flex items-center gap-1 font-medium" title="Upvote">
-                        <ThumbsUp size={14} className="text-brand-primary" />
-                        {document.luot_thich || 0}
-                    </span>
+
+                    {/* Interactive Upvote Button */}
+                    <button
+                        type="button"
+                        onClick={handleToggleUpvote}
+                        disabled={isVoting}
+                        className={`flex items-center gap-1 font-medium px-1.5 py-0.5 rounded transition-all ${
+                            hasUpvoted
+                                ? 'text-brand-primary bg-brand-primary/15 font-semibold'
+                                : 'text-text-secondary hover:text-brand-primary hover:bg-surface-page'
+                        }`}
+                        title="Bình chọn tài liệu hữu ích"
+                    >
+                        <ThumbsUp size={14} className={hasUpvoted ? 'fill-brand-primary text-brand-primary' : 'text-brand-primary'} />
+                        <span>{upvotes}</span>
+                    </button>
+
                     <span className="uppercase font-mono font-bold text-[10px] bg-surface-page border border-border-default px-1 rounded">
                         {document.dinh_dang_tep || 'PDF'}
                     </span>

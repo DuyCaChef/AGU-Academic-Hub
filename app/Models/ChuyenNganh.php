@@ -24,9 +24,7 @@ class ChuyenNganh extends Model
         'mo_ta',
     ];
 
-    /**
-     * Luôn hiển thị ký hiệu Chuyên ngành ở dạng chữ in hoa, kể cả dữ liệu cũ.
-     */
+    // Luôn hiển thị ký hiệu Chuyên ngành ở dạng chữ in hoa, kể cả dữ liệu cũ.
     public function getKyHieuNganhAttribute(?string $value): ?string
     {
         return $value === null ? null : mb_strtoupper($value);
@@ -39,7 +37,14 @@ class ChuyenNganh extends Model
 
     public function monHocs(): BelongsToMany
     {
-        return $this->belongsToMany(MonHoc::class, 'mon_hoc_chuyen_nganh', 'ma_chuyen_nganh', 'ma_mon_hoc')
-            ->withTimestamps();
+        return $this->belongsToMany(
+            MonHoc::class,
+            'mon_hoc_chuyen_nganh',
+            'ma_chuyen_nganh',
+            'ma_mon_hoc',
+            'ma_chuyen_nganh',
+            'ma_mon_hoc'
+        )->withTimestamps()
+            ->whereNull('mon_hoc.ngay_xoa_tam');
     }
 }

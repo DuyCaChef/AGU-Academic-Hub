@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Head, Link, router } from "@inertiajs/react";
 import StudentLayout from "@/Layouts/StudentLayout";
 import DocumentCard from "@/Components/domain/DocumentCard";
+import Pagination from "@/Components/Common/Pagination";
 import {
     Search,
     Filter,
@@ -33,10 +34,16 @@ export default function Index({
         return () => clearTimeout(timer);
     }, [search]);
 
+    const getFilterTargetRoute = useCallback(() => {
+        return course
+            ? route("courses.documents", course.ma_hoc_phan)
+            : route("documents.index");
+    }, [course]);
+
     const fetchFilteredData = useCallback(() => {
         setIsLoading(true);
         router.get(
-            route("courses.index"),
+            getFilterTargetRoute(),
             { search, category, sort },
             {
                 preserveState: true,
@@ -44,13 +51,13 @@ export default function Index({
                 onFinish: () => setIsLoading(false),
             },
         );
-    }, [search, category, sort]);
+    }, [getFilterTargetRoute, search, category, sort]);
 
     const handleCategoryChange = (newCat) => {
         setCategory(newCat);
         setIsLoading(true);
         router.get(
-            route("courses.index"),
+            getFilterTargetRoute(),
             { search, category: newCat, sort },
             {
                 preserveState: true,
@@ -198,10 +205,19 @@ export default function Index({
                 </div>
             ) : documents.data && documents.data.length > 0 ? (
                 /* Document Grid */
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {documents.data.map((doc) => (
-                        <DocumentCard key={doc.ma_tai_lieu} document={doc} />
-                    ))}
+                <div className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {documents.data.map((doc) => (
+                            <DocumentCard key={doc.ma_tai_lieu} document={doc} />
+                        ))}
+                    </div>
+
+                    {/* Pagination */}
+                    {documents.links && (
+                        <div className="bg-surface-default border border-border-default rounded-xl overflow-hidden shadow-2xs">
+                            <Pagination links={documents.links} />
+                        </div>
+                    )}
                 </div>
             ) : (
                 /* Empty State */

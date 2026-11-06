@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             TaiLieuSeeder::class,
             BaoCaoViPhamSeeder::class,
             CommunitySeeder::class,
+            DanhSachSinhVienRawSeeder::class,
         ]);
     }
 }

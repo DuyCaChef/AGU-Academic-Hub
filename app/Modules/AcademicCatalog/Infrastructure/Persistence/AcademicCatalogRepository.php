@@ -91,11 +91,83 @@ class AcademicCatalogRepository
         return MonHoc::withTrashed()->findOrFail($maMonHoc);
     }
 
+    // Lấy danh sách Khoa đang hoạt động kèm các môn học trực thuộc còn hiệu lực
+    public function getActiveFacultiesWithCourses(): Collection
+    {
+        return Khoa::query()
+            ->select(['ma_khoa', 'ky_hieu_khoa', 'ten_khoa'])
+            ->with([
+                'monHocs' => fn($query) => $query
+                    ->select(['ma_mon_hoc', 'ma_khoa', 'ma_hoc_phan', 'ten_mon_hoc', 'so_tin_chi'])
+                    ->orderBy('ten_mon_hoc'),
+            ])
+            ->orderBy('ten_khoa')
+            ->get();
+    }
+
+    // Lấy danh sách môn học công khai thuộc một Khoa còn hiệu lực
+    public function getActiveCoursesByFacultyId(int $facultyId): Collection
+    {
+        return MonHoc::query()
+            ->where('ma_khoa', $facultyId)
+            ->whereHas('khoa')
+            ->with(['chuyenNganhs:ma_chuyen_nganh,ky_hieu_nganh,ten_chuyen_nganh'])
+            ->orderBy('ten_mon_hoc')
+            ->get();
+    }
+
+    // Lấy danh sách môn học được sử dụng bởi một Chuyên ngành (quan hệ nhiều-nhiều)
+    public function getActiveCoursesByMajorId(int $majorId): Collection
+    {
+        return MonHoc::query()
+            ->whereHas('khoa')
+            ->whereHas('chuyenNganhs', fn(Builder $query) => $query
+                ->where('chuyen_nganh.ma_chuyen_nganh', $majorId)
+                ->whereHas('khoa')
+            )
+            ->with([
+                'khoa:ma_khoa,ky_hieu_khoa,ten_khoa',
+                'chuyenNganhs:ma_chuyen_nganh,ky_hieu_nganh,ten_chuyen_nganh',
+            ])
+            ->orderBy('ten_mon_hoc')
+            ->get();
+    }
+
+    // Lấy danh sách môn học công khai phân trang có bộ lọc tìm kiếm, khoa và chuyên ngành
+    public function getPublicPaginatedCourses(?string $search = null, ?int $maKhoa = null, ?int $maChuyenNganh = null, int $perPage = 12): LengthAwarePaginator
+    {
+        return MonHoc::query()
+            ->whereHas('khoa')
+            ->when($maKhoa, fn(Builder $query) => $query->where('ma_khoa', $maKhoa))
+            ->when($maChuyenNganh, fn(Builder $query) => $query->whereHas('chuyenNganhs', fn(Builder $majorQuery) => $majorQuery->where('chuyen_nganh.ma_chuyen_nganh', $maChuyenNganh)))
+            ->when($search, fn(Builder $query) => $query->where(function (Builder $subQuery) use ($search): void {
+                $subQuery->where('ma_hoc_phan', 'like', "%{$search}%")
+                    ->orWhere('ten_mon_hoc', 'like', "%{$search}%");
+            }))
+            ->with([
+                'khoa:ma_khoa,ky_hieu_khoa,ten_khoa',
+                'chuyenNganhs:ma_chuyen_nganh,ky_hieu_nganh,ten_chuyen_nganh',
+            ])
+            ->orderBy('ten_mon_hoc')
+            ->paginate($perPage)
+            ->withQueryString();
+    }
+
     // Tìm môn học theo Mã học phần công khai (thuộc Khoa còn hoạt động)
     public function findActiveCourseByCode(string $courseCode): MonHoc
     {
-        return MonHoc::where('ma_hoc_phan', $courseCode)
+        return MonHoc::query()
+            ->where(function (Builder $query) use ($courseCode): void {
+                $query->where('ma_hoc_phan', $courseCode);
+                if (is_numeric($courseCode)) {
+                    $query->orWhere('ma_mon_hoc', (int) $courseCode);
+                }
+            })
             ->whereHas('khoa')
+            ->with([
+                'khoa:ma_khoa,ky_hieu_khoa,ten_khoa',
+                'chuyenNganhs:ma_chuyen_nganh,ky_hieu_nganh,ten_chuyen_nganh',
+            ])
             ->firstOrFail();
     }
 

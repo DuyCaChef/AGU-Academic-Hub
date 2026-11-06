@@ -24,7 +24,7 @@ export default function FacultyCourseTree({ faculities = [] }) {
                 </p>
             ) : (
                 faculities.map((khoa) => (
-                    <div key={khoa.makhoa}>
+                    <div key={khoa.ma_khoa}>
                         <button type="button"
                             onClick={() => toggleFaculty(khoa.ma_khoa)}
                             className="flex w-full items-center justify-between rounded-lg p-2 text-left hover:bg-gray-100"
@@ -46,7 +46,7 @@ export default function FacultyCourseTree({ faculities = [] }) {
                                     khoa.mon_hocs.map(mon => (
                                         <Link key={mon.ma_mon_hoc}
                                             href={route("courses.show",
-                                                mon.ma_mon_hoc,
+                                                mon.ma_hoc_phan,
                                             )
                                             }
                                             className="block rounded-lg p-2 text-sm hover:bg-gray-100"

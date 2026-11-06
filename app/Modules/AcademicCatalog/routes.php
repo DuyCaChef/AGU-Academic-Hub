@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('khoa')->name('faculties.')->group(function () {
     Route::get('/', [FacultyController::class, 'index'])->name('index');
     Route::get('/{id}/mon-hoc', [FacultyController::class, 'layDanhSachMonHoc'])->name('courses');
+    Route::get('/chuyen-nganh/{id}/mon-hoc', [FacultyController::class, 'layDanhSachMonHocTheoChuyenNganh'])->name('majors.courses');
 });
 
 // Danh mục Môn học

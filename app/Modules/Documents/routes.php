@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\Route;
 // LUỒNG QUẢN LÝ TÀI LIỆU (YÊU CẦU ĐĂNG NHẬP & XÁC THỰC)
 // =========================================================================
 Route::middleware(['auth', 'verified'])->prefix('tai-lieu')->name('documents.')->group(function () {
+    // Danh sách tài liệu công khai
+    Route::get('/', [DocumentController::class, 'index'])->name('index');
+
     // Giao diện form tải tài liệu lên
     Route::get('/dang-tai', [DocumentController::class, 'create'])->name('create');
 

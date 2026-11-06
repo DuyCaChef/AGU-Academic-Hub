@@ -47,9 +47,8 @@ class DocumentController extends Controller
     {
         $faculties = Khoa::with('monHocs')->get();
 
-        return Inertia::render('Documents/Index', [
-            'faculties'    => $faculties,
-            'isUploadMode' => true,
+        return Inertia::render('Documents/Create', [
+            'faculties' => $faculties,
         ]);
     }
 
@@ -108,7 +107,7 @@ class DocumentController extends Controller
     {
         $document = $query->execute($id);
 
-        return Inertia::render('Documents/Index', [
+        return Inertia::render('Documents/Show', [
             'document' => $document,
         ]);
     }
