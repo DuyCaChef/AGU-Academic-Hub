@@ -22,6 +22,9 @@ Route::middleware(['auth', 'verified'])->prefix('tai-lieu')->name('documents.')-
     // Tải lên phiên bản mới cho tài liệu đã có
     Route::post('/{id}/tao-phien-ban', [DocumentController::class, 'createVersion'])->name('create-version');
 
+    // Danh sách tài liệu của người dùng hiện tại (cho picker)
+    Route::get('/cua-toi', [DocumentController::class, 'myDocuments'])->name('my-documents');
+
     // Xem thông tin chi tiết tài liệu
     Route::get('/{id}', [DocumentController::class, 'show'])->name('show');
 

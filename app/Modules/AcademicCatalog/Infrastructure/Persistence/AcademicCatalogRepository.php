@@ -96,10 +96,14 @@ class AcademicCatalogRepository
     {
         return Khoa::query()
             ->select(['ma_khoa', 'ky_hieu_khoa', 'ten_khoa'])
+            ->withCount(['monHocs', 'chuyenNganhs'])
             ->with([
                 'monHocs' => fn($query) => $query
                     ->select(['ma_mon_hoc', 'ma_khoa', 'ma_hoc_phan', 'ten_mon_hoc', 'so_tin_chi'])
                     ->orderBy('ten_mon_hoc'),
+                'chuyenNganhs' => fn($query) => $query
+                    ->select(['ma_chuyen_nganh', 'ma_khoa', 'ky_hieu_nganh', 'ten_chuyen_nganh'])
+                    ->orderBy('ten_chuyen_nganh'),
             ])
             ->orderBy('ten_khoa')
             ->get();

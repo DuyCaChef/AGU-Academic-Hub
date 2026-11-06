@@ -27,7 +27,7 @@ class PublicAcademicCatalogTest extends TestCase
 
         $response->assertOk();
         $response->assertInertia(fn (Assert $page) => $page
-            ->component('Dashboard')
+            ->component('Faculties/Index')
             ->has('faculties', 2)
             ->where('faculties.0.ma_khoa', $khoaB->ma_khoa)
         );
@@ -57,8 +57,9 @@ class PublicAcademicCatalogTest extends TestCase
 
         $response->assertOk();
         $response->assertInertia(fn (Assert $page) => $page
-            ->component('Documents/Index')
+            ->component('Courses/Index')
             ->has('faculties')
+            ->has('courses')
             ->has('filters')
         );
     }
@@ -76,7 +77,7 @@ class PublicAcademicCatalogTest extends TestCase
 
         $response->assertOk();
         $response->assertInertia(fn (Assert $page) => $page
-            ->component('Documents/Index')
+            ->component('Courses/Show')
             ->where('course.ma_hoc_phan', 'COS201')
         );
     }
@@ -219,17 +220,16 @@ class PublicAcademicCatalogTest extends TestCase
         $responseByCode = $this->get(route('courses.show', 'COS501'));
         $responseByCode->assertOk();
         $responseByCode->assertInertia(fn (Assert $page) => $page
-            ->component('Documents/Index')
+            ->component('Courses/Show')
             ->where('course.ma_hoc_phan', 'COS501')
             ->has('faculties')
-            ->has('documents.data', 1)
         );
 
         // Tra cứu linh hoạt bằng ID số nguyên (phòng thủ khi client gọi ID)
         $responseById = $this->get(route('courses.show', (string) $course->ma_mon_hoc));
         $responseById->assertOk();
         $responseById->assertInertia(fn (Assert $page) => $page
-            ->component('Documents/Index')
+            ->component('Courses/Show')
             ->where('course.ma_hoc_phan', 'COS501')
         );
     }

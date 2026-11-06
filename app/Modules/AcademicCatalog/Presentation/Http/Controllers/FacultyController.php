@@ -15,12 +15,12 @@ class FacultyController extends Controller
         protected GetPublicFacultiesQuery $facultiesQuery
     ) {}
 
-    // Hiển thị danh sách Khoa và Môn học phục vụ sinh viên trên Dashboard
+    // Hiển thị danh sách Khoa đào tạo của AGU
     public function index(Request $request): Response
     {
         $faculties = $this->facultiesQuery->execute($request->user());
 
-        return Inertia::render('Dashboard', [
+        return Inertia::render('Faculties/Index', [
             'faculties' => $faculties,
         ]);
     }

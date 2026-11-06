@@ -158,9 +158,9 @@ export default function Dashboard() {
                             </h1>
 
                             <p className="mt-3 max-w-2xl text-sm leading-6 text-blue-100 sm:text-base">
-                                Khám phá tài liệu học tập, tìm kiếm môn học
-                                và chia sẻ kiến thức cùng cộng đồng sinh viên Trường
-                                Đại học An Giang.
+                                {user?.vai_tro === "CUU_SINH_VIEN"
+                                    ? "Khám phá tài liệu học tập, tra cứu môn học và đồng hành chia sẻ kiến thức cùng cộng đồng sinh viên Trường Đại học An Giang."
+                                    : "Khám phá tài liệu học tập, tìm kiếm môn học và chia sẻ kiến thức cùng cộng đồng sinh viên Trường Đại học An Giang."}
                             </p>
 
                             <div className="mt-6 flex flex-wrap gap-3">
@@ -202,10 +202,16 @@ export default function Dashboard() {
 
                                 <div className="min-w-0">
                                     <p className="text-[11px] font-medium uppercase tracking-wide text-blue-100">
-                                        Hồ sơ sinh viên
+                                        {user?.vai_tro === "CUU_SINH_VIEN"
+                                            ? "Hồ sơ Cựu sinh viên"
+                                            : "Hồ sơ sinh viên"}
                                     </p>
                                     <p className="mt-1 font-bold leading-5 text-white">
-                                        {user?.mssv || user?.ma_sinh_vien || "AGU Student"}
+                                        {user?.mssv ||
+                                            user?.ma_sinh_vien ||
+                                            (user?.vai_tro === "CUU_SINH_VIEN"
+                                                ? "Cựu sinh viên AGU"
+                                                : "Sinh viên AGU")}
                                     </p>
                                     <p className="mt-1 text-xs text-blue-100">
                                         Trường Đại học An Giang
@@ -216,9 +222,9 @@ export default function Dashboard() {
                             {/* Ví điểm Bounty shortcut */}
                             {user?.vi_diem && (
                                 <Link
-                                    href={route("document-requests.index")}
+                                    href={route("wallet.index")}
                                     className="mt-3 flex items-center justify-between rounded-xl bg-white/15 hover:bg-white/25 px-3 py-2 transition text-xs font-semibold"
-                                    title="Xem thị trường săn thưởng và ví điểm"
+                                    title="Xem chi tiết số dư và lịch sử biến động ví điểm"
                                 >
                                     <span className="flex items-center gap-1.5 text-blue-100">
                                         <Coins size={14} className="text-amber-300" />
@@ -329,105 +335,123 @@ export default function Dashboard() {
                     <SectionTitle
                         action={
                             <Link
-                                href={route("courses.index")}
-                                className="inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-blue-800 hover:text-blue-600"
+                                href={route("documents.index")}
+                                className="inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-blue-800 hover:text-blue-600 hover:underline"
                             >
-                                Khám phá kho học tập
+                                Xem tất cả tài liệu
                                 <ArrowRight size={16} />
                             </Link>
                         }
                     >
                         <span className="flex flex-wrap items-center gap-2">
                             Tài liệu học tập mới
-                            <span className="rounded-full bg-indigo-100 px-2.5 py-1 text-[10px] font-semibold text-slate-600">
-                                Mẫu giao diện
-                            </span>
                         </span>
                     </SectionTitle>
 
                     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                        {recentDocuments.map((doc) => {
-                            const fileType = (
-                                doc.dinh_dang_tep || "FILE"
-                            ).toUpperCase();
-                            const typeColor =
-                                fileType === "PDF"
-                                    ? "bg-red-100 text-red-700"
-                                    : ["PPT", "PPTX"].includes(fileType)
-                                        ? "bg-orange-100 text-orange-800"
-                                        : ["DOC", "DOCX"].includes(fileType)
-                                            ? "bg-blue-100 text-blue-700"
-                                            : "bg-indigo-100 text-indigo-700";
+                        {recentDocuments && recentDocuments.length > 0 ? (
+                            recentDocuments.map((doc) => {
+                                const fileType = (
+                                    doc.dinh_dang_tep || "FILE"
+                                ).toUpperCase();
+                                const typeColor =
+                                    fileType === "PDF"
+                                        ? "bg-red-100 text-red-700"
+                                        : ["PPT", "PPTX"].includes(fileType)
+                                            ? "bg-orange-100 text-orange-800"
+                                            : ["DOC", "DOCX"].includes(fileType)
+                                                ? "bg-blue-100 text-blue-700"
+                                                : "bg-indigo-100 text-indigo-700";
 
-                            const courseLabel = [
-                                doc.mon_hoc?.ma_hoc_phan,
-                                doc.mon_hoc?.ten_mon_hoc,
-                            ]
-                                .filter(Boolean)
-                                .join(" • ") || "Chưa có thông tin môn học";
+                                const courseLabel = [
+                                    doc.mon_hoc?.ma_hoc_phan,
+                                    doc.mon_hoc?.ten_mon_hoc,
+                                ]
+                                    .filter(Boolean)
+                                    .join(" • ") || "Chưa có thông tin môn học";
 
-                            const createdDate = doc.created_at
-                                ? new Date(doc.created_at).toLocaleDateString("vi-VN")
-                                : "Chưa có ngày đăng";
+                                const createdDate = doc.created_at
+                                    ? new Date(doc.created_at).toLocaleDateString("vi-VN")
+                                    : "Chưa có ngày đăng";
 
-                            return (
-                                <article
-                                    key={doc.ma_tai_lieu}
-                                    className="flex flex-col rounded-xl border border-slate-100 bg-white p-5 shadow-sm transition hover:shadow-md"
-                                >
-                                    <div className="flex items-center justify-between gap-3">
-                                        <span
-                                            className={`rounded px-2 py-1 text-[11px] font-bold ${typeColor}`}
-                                        >
-                                            {fileType}
-                                        </span>
+                                return (
+                                    <article
+                                        key={doc.ma_tai_lieu}
+                                        className="group relative flex flex-col justify-between rounded-xl border border-slate-100 bg-white p-5 shadow-xs transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md"
+                                    >
+                                        <div>
+                                            <div className="flex items-center justify-between gap-3">
+                                                <span
+                                                    className={`rounded px-2.5 py-1 text-[11px] font-bold ${typeColor}`}
+                                                >
+                                                    {fileType}
+                                                </span>
 
-                                        <span className="max-w-[70%] truncate rounded bg-blue-100 px-2 py-1 text-[11px] font-medium text-blue-800">
-                                            {courseLabel}
-                                        </span>
-                                    </div>
+                                                <span className="max-w-[70%] truncate rounded bg-blue-50 px-2.5 py-1 text-[11px] font-medium text-blue-800 border border-blue-100">
+                                                    {courseLabel}
+                                                </span>
+                                            </div>
 
-                                    <h3 className="mt-4 min-h-[3.5rem] text-base font-bold leading-6 text-slate-900">
-                                        {doc.tieu_de}
-                                    </h3>
-
-                                    <div className="mt-4 flex items-center justify-between gap-2 rounded-xl bg-indigo-50 p-3">
-                                        <div className="min-w-0">
-                                            <p className="text-xs text-slate-600">
-                                                {createdDate}
-                                            </p>
-
-                                            <p className="mt-1 flex items-center gap-1 text-[11px] font-medium text-teal-700">
-                                                <ShieldCheck size={13} />
-                                                Đã kiểm duyệt
-                                            </p>
-                                            <p className="mt-1 text-xs text-slate-500">
-                                                Lượt tải: {doc.luot_tai ?? 0}
-                                            </p>
+                                            <h3 className="mt-4 min-h-[3.5rem] text-base font-bold leading-6 text-slate-900 group-hover:text-[#005baa] transition-colors line-clamp-2">
+                                                <Link
+                                                    href={route("documents.show", doc.ma_tai_lieu)}
+                                                    className="focus:outline-none"
+                                                    title={doc.tieu_de}
+                                                >
+                                                    {doc.tieu_de}
+                                                </Link>
+                                            </h3>
                                         </div>
 
-                                        <span
-                                            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-slate-400 shadow-sm"
-                                            title="Thông tin tài liệu"
-                                        >
-                                            <Download size={17} />
-                                        </span>
-                                    </div>
-                                </article>
-                            );
-                        })}
-                        <div className="col-span-full rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center">
-                            <FileText
-                                size={32}
-                                className="mx-auto text-slate-400"
-                            />
-                            <p className="mt-3 font-semibold text-slate-700">
-                                Chưa có tài liệu học tập
-                            </p>
-                            <p className="mt-1 text-sm text-slate-500">
-                                Các tài liệu đã được kiểm duyệt sẽ hiển thị tại đây.
-                            </p>
-                        </div>
+                                        <div className="mt-4 flex items-center justify-between gap-2 rounded-xl bg-slate-50 p-3 border border-slate-100">
+                                            <div className="min-w-0">
+                                                <p className="text-xs text-slate-500">
+                                                    {createdDate}
+                                                </p>
+
+                                                <p className="mt-1 flex items-center gap-1 text-[11px] font-medium text-teal-700">
+                                                    <ShieldCheck size={13} />
+                                                    Đã kiểm duyệt
+                                                </p>
+                                                <p className="mt-0.5 text-xs text-slate-500">
+                                                    Lượt tải: {doc.luot_tai ?? 0}
+                                                </p>
+                                            </div>
+
+                                            <a
+                                                href={route("documents.download", doc.ma_tai_lieu)}
+                                                className="relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-[#005baa] hover:bg-blue-50 border border-slate-200 shadow-xs transition-colors"
+                                                title="Tải tệp về máy"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                <Download size={16} />
+                                            </a>
+                                        </div>
+                                    </article>
+                                );
+                            })
+                        ) : (
+                            <div className="col-span-full rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center">
+                                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-50 text-slate-400 mb-3">
+                                    <FileText size={30} />
+                                </div>
+                                <h3 className="text-base font-bold text-slate-800">
+                                    Chưa có tài liệu học tập mới
+                                </h3>
+                                <p className="mt-1 text-sm text-slate-500 max-w-md mx-auto">
+                                    Các tài liệu học tập sau khi được kiểm duyệt sẽ hiển thị tại đây. Bạn có thể là người đầu tiên chia sẻ tài liệu hữu ích!
+                                </p>
+                                <div className="mt-5">
+                                    <Link
+                                        href={route("documents.create")}
+                                        className="inline-flex items-center gap-2 rounded-xl bg-[#005baa] px-4 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-blue-700 transition-colors"
+                                    >
+                                        <Upload size={14} />
+                                        Đăng tài liệu ngay
+                                    </Link>
+                                </div>
+                            </div>
+                        )}
 
                     </div>
                 </section>

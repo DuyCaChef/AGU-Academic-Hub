@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import StudentLayout from '@/Layouts/StudentLayout';
 import CreateRequestModal from '@/Components/Wishlist/CreateRequestModal';
+import Pagination from '@/Components/Common/Pagination';
 import {
     Coins,
     Plus,
@@ -290,32 +291,7 @@ export default function WishlistIndex({ requests, filters = {}, courses = [] }) 
 
                         {/* Phân Trang (Pagination) */}
                         {paginationLinks.length > 3 && (
-                            <div className="flex items-center justify-center gap-1 pt-4">
-                                {paginationLinks.map((link, idx) => {
-                                    if (!link.url) {
-                                        return (
-                                            <span
-                                                key={idx}
-                                                className="px-3 py-1.5 text-xs text-slate-400 rounded-lg border border-slate-200 bg-slate-50"
-                                                dangerouslySetInnerHTML={{ __html: link.label }}
-                                            />
-                                        );
-                                    }
-                                    return (
-                                        <Link
-                                            key={idx}
-                                            href={link.url}
-                                            preserveScroll
-                                            className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors ${
-                                                link.active
-                                                    ? 'bg-[#005baa] text-white border-[#005baa]'
-                                                    : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
-                                            }`}
-                                            dangerouslySetInnerHTML={{ __html: link.label }}
-                                        />
-                                    );
-                                })}
-                            </div>
+                            <Pagination links={paginationLinks} className="border-t border-slate-100 mt-6" />
                         )}
                     </div>
                 ) : (

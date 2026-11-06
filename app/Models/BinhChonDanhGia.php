@@ -17,13 +17,28 @@ class BinhChonDanhGia extends Model
         'ma_danh_gia',
         'ma_nguoi_dung',
         'huu_ich',
+        'loai_binh_chon',
+        'vote_type',
     ];
 
     protected function casts(): array
     {
         return [
             'huu_ich' => 'boolean',
+            'loai_binh_chon' => 'integer',
         ];
+    }
+
+    // Accessor & Mutator cho vote_type (tương thích tiếng Anh / tiếng Việt)
+    public function getVoteTypeAttribute(): int
+    {
+        return (int) ($this->attributes['loai_binh_chon'] ?? 1);
+    }
+
+    public function setVoteTypeAttribute($value): void
+    {
+        $this->attributes['loai_binh_chon'] = (int) $value;
+        $this->attributes['huu_ich'] = ((int) $value === 1);
     }
 
     public function danhGia(): BelongsTo

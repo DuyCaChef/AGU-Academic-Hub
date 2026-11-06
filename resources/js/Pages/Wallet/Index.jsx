@@ -15,7 +15,8 @@ import {
     CheckCircle2,
     AlertCircle,
     RotateCcw,
-    ExternalLink
+    ExternalLink,
+    Filter
 } from 'lucide-react';
 
 export default function WalletIndex({
@@ -39,44 +40,53 @@ export default function WalletIndex({
 
     const handleFilterChange = (type) => {
         setActiveFilter(type);
-        if (typeof route === 'function' && route().has('wallet.index')) {
-            router.get(
-                route('wallet.index'),
-                { type },
-                { preserveState: true, preserveScroll: true }
-            );
-        }
+        router.get(
+            route('wallet.index'),
+            { type },
+            { preserveState: true, preserveScroll: true }
+        );
     };
 
-    // Helper format nhãn giao dịch
-    const getTransactionBadge = (type) => {
+    // Helper format nhãn giao dịch dựa trên LoaiGiaoDichDiem backend
+    const getTransactionBadge = (type, tx) => {
         switch (type) {
+            case 'CONG_DIEM':
             case 'TRA_THUONG_BOUNTY':
             case 'NHAN_THUONG_BOUNTY':
                 return {
-                    label: 'Nhận thưởng Bounty',
-                    isPlus: true,
+                    label: tx?.ten_loai_giao_dich || 'Cộng điểm thưởng',
                     className: 'bg-emerald-50 text-emerald-700 border-emerald-200',
                     icon: ArrowDownLeft,
                 };
-            case 'DONG_BANG_BOUNTY':
-                return {
-                    label: 'Treo thưởng Bounty',
-                    isPlus: false,
-                    className: 'bg-amber-50 text-amber-700 border-amber-200',
-                    icon: Lock,
-                };
+            case 'HOAN_TRA':
             case 'HOAN_DIEM_BOUNTY':
                 return {
-                    label: 'Hoàn điểm hủy Bounty',
-                    isPlus: true,
+                    label: tx?.ten_loai_giao_dich || 'Hoàn trả điểm',
                     className: 'bg-blue-50 text-blue-700 border-blue-200',
                     icon: RotateCcw,
                 };
+            case 'TAM_GIU':
+            case 'DONG_BANG_BOUNTY':
+                return {
+                    label: tx?.ten_loai_giao_dich || 'Tạm giữ điểm Bounty',
+                    className: 'bg-amber-50 text-amber-700 border-amber-200',
+                    icon: Lock,
+                };
+            case 'GIAI_PHONG':
+                return {
+                    label: tx?.ten_loai_giao_dich || 'Giải phóng điểm tạm giữ',
+                    className: 'bg-purple-50 text-purple-700 border-purple-200',
+                    icon: CheckCircle2,
+                };
+            case 'SU_DUNG':
+                return {
+                    label: tx?.ten_loai_giao_dich || 'Sử dụng điểm ví',
+                    className: 'bg-rose-50 text-rose-700 border-rose-200',
+                    icon: ArrowUpRight,
+                };
             default:
                 return {
-                    label: 'Biến động ví',
-                    isPlus: null,
+                    label: tx?.ten_loai_giao_dich || 'Biến động ví',
                     className: 'bg-slate-50 text-slate-700 border-slate-200',
                     icon: History,
                 };
@@ -108,7 +118,7 @@ export default function WalletIndex({
 
                         <div className="flex flex-wrap gap-3 shrink-0">
                             <Link
-                                href={typeof route === 'function' && route().has('document-requests.index') ? route('document-requests.index') : '/yeu-cau-tai-lieu'}
+                                href={route('document-requests.index')}
                                 className="inline-flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold px-4 py-2.5 rounded-xl text-sm shadow-xs transition active:scale-95"
                             >
                                 <Coins size={17} />
@@ -116,7 +126,7 @@ export default function WalletIndex({
                             </Link>
 
                             <Link
-                                href={typeof route === 'function' && route().has('courses.index') ? route('courses.index') : '/mon-hoc'}
+                                href={route('courses.index')}
                                 className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white font-semibold px-4 py-2.5 rounded-xl text-sm border border-white/15 transition"
                             >
                                 <Sparkles size={17} />
@@ -214,7 +224,7 @@ export default function WalletIndex({
                             {[
                                 { id: 'ALL', label: 'Tất cả' },
                                 { id: 'REWARD', label: 'Nhận thưởng (+)' },
-                                { id: 'FROZEN', label: 'Đóng băng (-)' },
+                                { id: 'FROZEN', label: 'Đóng băng / Chi tiêu (-)' },
                             ].map((tab) => (
                                 <button
                                     key={tab.id}
@@ -241,41 +251,47 @@ export default function WalletIndex({
                                         <th className="py-3.5 px-4 sm:px-6">Thời gian</th>
                                         <th className="py-3.5 px-4">Loại giao dịch</th>
                                         <th className="py-3.5 px-4">Diễn giải</th>
-                                        <th className="py-3.5 px-4 text-right">Biến động</th>
-                                        <th className="py-3.5 px-4 sm:px-6 text-right">Số dư sau</th>
+                                        <th className="py-3.5 px-4 text-right">Khả dụng</th>
+                                        <th className="py-3.5 px-4 sm:px-6 text-right">Tạm giữ</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
                                     {transactionList.map((tx) => {
-                                        const badge = getTransactionBadge(tx.loai_giao_dich);
+                                        const badge = getTransactionBadge(tx.loai_giao_dich, tx);
                                         const BadgeIcon = badge.icon;
+                                        const dateStr = tx.thoi_gian_tao || tx.created_at;
+
                                         return (
                                             <tr key={tx.ma_giao_dich || tx.id} className="hover:bg-slate-50/60 transition-colors">
                                                 <td className="py-3.5 px-4 sm:px-6 text-slate-500 whitespace-nowrap">
-                                                    {tx.created_at ? new Date(tx.created_at).toLocaleString('vi-VN') : '—'}
+                                                    {dateStr ? new Date(dateStr).toLocaleString('vi-VN') : '—'}
                                                 </td>
                                                 <td className="py-3.5 px-4 whitespace-nowrap">
                                                     <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold border ${badge.className}`}>
                                                         <BadgeIcon size={12} />
-                                                        {tx.ten_loai_giao_dich || badge.label}
+                                                        {badge.label}
                                                     </span>
                                                 </td>
                                                 <td className="py-3.5 px-4 text-slate-700 max-w-xs truncate">
                                                     {tx.mo_ta || 'Giao dịch điểm hệ thống'}
                                                 </td>
                                                 <td className="py-3.5 px-4 text-right whitespace-nowrap font-bold">
-                                                    {badge.isPlus === true && (
-                                                        <span className="text-emerald-600">+{tx.so_diem} pts</span>
-                                                    )}
-                                                    {badge.isPlus === false && (
-                                                        <span className="text-rose-600">-{tx.so_diem} pts</span>
-                                                    )}
-                                                    {badge.isPlus === null && (
-                                                        <span className="text-slate-800">{tx.so_diem} pts</span>
+                                                    {tx.thay_doi_kha_dung > 0 ? (
+                                                        <span className="text-emerald-600">+{tx.thay_doi_kha_dung} pts</span>
+                                                    ) : tx.thay_doi_kha_dung < 0 ? (
+                                                        <span className="text-rose-600">{tx.thay_doi_kha_dung} pts</span>
+                                                    ) : (
+                                                        <span className="text-slate-400">0 pts</span>
                                                     )}
                                                 </td>
-                                                <td className="py-3.5 px-4 sm:px-6 text-right whitespace-nowrap font-semibold text-slate-900">
-                                                    {tx.so_du_sau !== undefined ? `${tx.so_du_sau} pts` : '—'}
+                                                <td className="py-3.5 px-4 sm:px-6 text-right whitespace-nowrap font-semibold">
+                                                    {tx.thay_doi_tam_giu > 0 ? (
+                                                        <span className="text-amber-600">+{tx.thay_doi_tam_giu} pts</span>
+                                                    ) : tx.thay_doi_tam_giu < 0 ? (
+                                                        <span className="text-slate-600">{tx.thay_doi_tam_giu} pts</span>
+                                                    ) : (
+                                                        <span className="text-slate-400">0 pts</span>
+                                                    )}
                                                 </td>
                                             </tr>
                                         );
@@ -303,7 +319,7 @@ export default function WalletIndex({
                             </div>
                             <div className="pt-2">
                                 <Link
-                                    href={typeof route === 'function' && route().has('document-requests.index') ? route('document-requests.index') : '/yeu-cau-tai-lieu'}
+                                    href={route('document-requests.index')}
                                     className="inline-flex items-center gap-2 bg-[#005baa] hover:bg-blue-800 text-white font-semibold text-xs px-4 py-2.5 rounded-xl transition shadow-xs"
                                 >
                                     Khám phá thị trường săn thưởng &rarr;
@@ -316,4 +332,3 @@ export default function WalletIndex({
         </StudentLayout>
     );
 }
-

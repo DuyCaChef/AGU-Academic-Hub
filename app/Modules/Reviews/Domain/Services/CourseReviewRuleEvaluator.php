@@ -2,6 +2,7 @@
 
 namespace App\Modules\Reviews\Domain\Services;
 
+use App\Enums\TrangThaiDanhGiaMonHoc;
 use App\Enums\VaiTroNguoiDung;
 use App\Models\DanhGiaMonHoc;
 use App\Models\NguoiDung;
@@ -37,10 +38,20 @@ class CourseReviewRuleEvaluator
         return $isAuthor || $isAdminOrMod;
     }
 
-    // Kiểm tra quyền bình chọn hữu ích (không được tự vote bài của chính mình)
+    // Kiểm tra quyền bình chọn (không được tự vote bài của chính mình, bài phải hợp lệ)
     public function canVoteHelpful(?NguoiDung $user, DanhGiaMonHoc $review): bool
     {
+        return $this->canVote($user, $review);
+    }
+
+    public function canVote(?NguoiDung $user, DanhGiaMonHoc $review): bool
+    {
         if (!$user) {
+            return false;
+        }
+
+        // Không cho phép bình chọn nếu bài bị xóa mềm hoặc không ở trạng thái ĐÃ DUYỆT
+        if ($review->trashed() || ($review->trang_thai !== TrangThaiDanhGiaMonHoc::DA_DUYET && $review->trang_thai !== 'DA_DUYET')) {
             return false;
         }
 
@@ -48,4 +59,3 @@ class CourseReviewRuleEvaluator
         return ($review->ma_nguoi_dung !== $userId && $review->ma_nguoi_danh_gia !== $userId);
     }
 }
-
