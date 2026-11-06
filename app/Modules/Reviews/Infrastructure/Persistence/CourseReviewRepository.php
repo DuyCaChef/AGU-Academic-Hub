@@ -2,6 +2,7 @@
 
 namespace App\Modules\Reviews\Infrastructure\Persistence;
 
+use App\Enums\TrangThaiDanhGiaMonHoc;
 use App\Models\BaoCaoDanhGia;
 use App\Models\BinhChonDanhGia;
 use App\Models\DanhGiaMonHoc;
@@ -20,15 +21,20 @@ class CourseReviewRepository
     }
 
     // Tìm bài đánh giá theo ID
-    public function findReviewById(int $maDanhGia): DanhGiaMonHoc
+    public function findReviewById(int $maDanhGia, bool $withTrashed = false): DanhGiaMonHoc
     {
-        return DanhGiaMonHoc::findOrFail($maDanhGia);
+        $query = DanhGiaMonHoc::query();
+        if ($withTrashed) {
+            $query->withTrashed();
+        }
+        return $query->findOrFail($maDanhGia);
     }
 
     // Tính toán thống kê điểm trung bình 3 tiêu chí của môn học
     public function getCourseReviewStats(int $courseId): array
     {
-        $stats = DanhGiaMonHoc::where('ma_mon_hoc', $courseId)
+        $stats = DanhGiaMonHoc::daDuyet()
+            ->where('ma_mon_hoc', $courseId)
             ->selectRaw('
                 COUNT(*) as tong_so_danh_gia,
                 AVG(diem_do_kho) as avg_do_kho,
@@ -54,11 +60,20 @@ class CourseReviewRepository
         ];
     }
 
-    // Lấy danh sách đánh giá phân trang kèm thông tin người dùng và khoa
+    // Lấy danh sách đánh giá phân trang kèm thông tin người dùng và thống kê bình chọn
     public function getPaginatedReviews(int $courseId, int $perPage = 10): LengthAwarePaginator
     {
-        return DanhGiaMonHoc::with(['nguoiDung.khoa'])
-            ->withCount('binhChons')
+        return DanhGiaMonHoc::daDuyet()
+            ->with(['nguoiDung.khoa', 'binhChons'])
+            ->withCount([
+                'binhChons',
+                'binhChons as upvotes_count' => function ($query) {
+                    $query->where('loai_binh_chon', 1);
+                },
+                'binhChons as downvotes_count' => function ($query) {
+                    $query->where('loai_binh_chon', -1);
+                },
+            ])
             ->where('ma_mon_hoc', $courseId)
             ->orderBy('ma_danh_gia', 'desc')
             ->paginate($perPage);
@@ -82,26 +97,84 @@ class CourseReviewRepository
         return (bool) $review->delete();
     }
 
-    // Chuyển đổi trạng thái bình chọn hữu ích (vote/unvote)
-    // Trả về true nếu đã vote, false nếu bỏ vote
-    public function toggleHelpfulVote(int $reviewId, int $userId): bool
+    // Thực hiện bình chọn cộng đồng (Upvote +1 / Downvote -1 / Hủy vote / Đổi hướng vote)
+    public function castCommunityVote(int $reviewId, int $userId, int $voteType): array
     {
-        $daVote = BinhChonDanhGia::where('ma_danh_gia', $reviewId)
+        $targetVote = $voteType === -1 ? -1 : 1;
+
+        $existingVote = BinhChonDanhGia::where('ma_danh_gia', $reviewId)
             ->where('ma_nguoi_dung', $userId)
             ->first();
 
-        if ($daVote) {
-            $daVote->delete();
-            return false;
+        $action = 'voted';
+        $myVote = $targetVote;
+        $message = $targetVote === 1 ? 'Đã ghi nhận Upvote.' : 'Đã ghi nhận Downvote.';
+
+        if ($existingVote) {
+            $currentVote = (int) ($existingVote->loai_binh_chon ?? ($existingVote->huu_ich ? 1 : -1));
+
+            if ($currentVote === $targetVote) {
+                // Nhấp lại cùng loại -> Hủy bình chọn
+                $existingVote->delete();
+                $action = 'cancelled';
+                $myVote = null;
+                $message = $targetVote === 1 ? 'Đã hủy Upvote.' : 'Đã hủy Downvote.';
+            } else {
+                // Khác loại -> Đổi hướng bình chọn
+                $existingVote->update([
+                    'loai_binh_chon' => $targetVote,
+                    'huu_ich'        => ($targetVote === 1),
+                ]);
+                $action = 'switched';
+                $myVote = $targetVote;
+                $message = $targetVote === 1 ? 'Đã chuyển sang Upvote.' : 'Đã chuyển sang Downvote.';
+            }
+        } else {
+            // Chưa vote -> Tạo mới
+            BinhChonDanhGia::create([
+                'ma_danh_gia'    => $reviewId,
+                'ma_nguoi_dung'  => $userId,
+                'loai_binh_chon' => $targetVote,
+                'huu_ich'        => ($targetVote === 1),
+            ]);
         }
 
-        BinhChonDanhGia::create([
-            'ma_danh_gia'   => $reviewId,
-            'ma_nguoi_dung' => $userId,
-            'huu_ich'       => true,
-        ]);
+        $scores = $this->getReviewVoteScores($reviewId);
 
-        return true;
+        return [
+            'status'          => 'success',
+            'action'          => $action,
+            'message'         => $message,
+            'my_vote'         => $myVote,
+            'review_score'    => $scores['review_score'],
+            'upvotes_count'   => $scores['upvotes_count'],
+            'downvotes_count' => $scores['downvotes_count'],
+        ];
+    }
+
+    // Tính toán tổng điểm cộng đồng và số lượng Upvote / Downvote của 1 bài đánh giá
+    public function getReviewVoteScores(int $reviewId): array
+    {
+        $upvotes = BinhChonDanhGia::where('ma_danh_gia', $reviewId)
+            ->where('loai_binh_chon', 1)
+            ->count();
+
+        $downvotes = BinhChonDanhGia::where('ma_danh_gia', $reviewId)
+            ->where('loai_binh_chon', -1)
+            ->count();
+
+        return [
+            'upvotes_count'   => $upvotes,
+            'downvotes_count' => $downvotes,
+            'review_score'    => $upvotes - $downvotes,
+        ];
+    }
+
+    // Chuyển đổi trạng thái bình chọn hữu ích (tương thích ngược với method cũ)
+    public function toggleHelpfulVote(int $reviewId, int $userId): bool
+    {
+        $result = $this->castCommunityVote($reviewId, $userId, 1);
+        return $result['action'] !== 'cancelled';
     }
 
     // Ghi nhận hoặc cập nhật báo cáo vi phạm
@@ -120,4 +193,3 @@ class CourseReviewRepository
         );
     }
 }
-

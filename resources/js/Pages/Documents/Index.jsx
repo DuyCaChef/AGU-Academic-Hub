@@ -18,9 +18,10 @@ export default function Index({
     filters = {},
     course = null,
 }) {
-    const [search, setSearch] = useState(filters.search || "");
-    const [category, setCategory] = useState(filters.category || "ALL");
-    const [sort, setSort] = useState(filters.sort || "latest");
+    const safeFilters = (!Array.isArray(filters) && filters && typeof filters === "object") ? filters : {};
+    const [search, setSearch] = useState(typeof safeFilters.search === "string" ? safeFilters.search : "");
+    const [category, setCategory] = useState(typeof safeFilters.category === "string" && safeFilters.category ? safeFilters.category : "ALL");
+    const [sort, setSort] = useState(typeof safeFilters.sort === "string" && safeFilters.sort ? safeFilters.sort : "latest");
     const [isLoading, setIsLoading] = useState(false);
 
     // Debounced Search Handler (300ms)

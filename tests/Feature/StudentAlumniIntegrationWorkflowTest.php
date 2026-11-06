@@ -119,14 +119,13 @@ class StudentAlumniIntegrationWorkflowTest extends TestCase
                 ->has('faculties')
             );
 
-        // 3. Môn học và Tài liệu liên quan
+        // 3. Môn học
         $this->actingAs($this->student)
             ->get(route('courses.show', $this->course->ma_hoc_phan))
             ->assertOk()
             ->assertInertia(fn ($page) => $page
-                ->component('Documents/Index')
+                ->component('Courses/Show')
                 ->has('course')
-                ->has('documents')
             );
 
         // 4. Chi tiết Tài liệu

@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 // Chuyển đổi đối tượng DanhGiaMonHoc sang định dạng hiển thị công khai
-// Áp dụng nguyên tắc ẨN DANH 2 LỚP: Tuyệt đối che giấu ma_nguoi_danh_gia
+// Áp dụng nguyên tắc ẨN DANH 2 LỚP: Tuyệt đối che giấu ma_nguoi_danh_gia / ma_nguoi_dung
 class CourseReviewResource extends JsonResource
 {
     public function toArray(Request $request): array
@@ -24,16 +24,34 @@ class CourseReviewResource extends JsonResource
         // Tính điểm trung bình cộng 3 tiêu chí
         $diemTrungBinh = round(($this->diem_do_kho + $this->diem_thuc_tien + $workloadScore) / 3, 1);
 
-        $votedByMe = false;
-        if ($userId) {
-            if ($this->relationLoaded('binhChons')) {
-                $votedByMe = $this->binhChons->contains('ma_nguoi_dung', $userId);
-            } else {
-                $votedByMe = $this->binhChons()->where('ma_nguoi_dung', $userId)->exists();
+        // Tính toán các chỉ số Community Voting
+        $upvotesCount = 0;
+        $downvotesCount = 0;
+        $myVote = null;
+
+        if ($this->relationLoaded('binhChons')) {
+            $upvotesCount = $this->binhChons->where('loai_binh_chon', 1)->count();
+            $downvotesCount = $this->binhChons->where('loai_binh_chon', -1)->count();
+            if ($userId) {
+                $userVoteRecord = $this->binhChons->firstWhere('ma_nguoi_dung', $userId);
+                if ($userVoteRecord) {
+                    $myVote = (int) ($userVoteRecord->loai_binh_chon ?? ($userVoteRecord->huu_ich ? 1 : -1));
+                }
+            }
+        } else {
+            $upvotesCount = (int) ($this->upvotes_count ?? $this->binhChons()->where('loai_binh_chon', 1)->count());
+            $downvotesCount = (int) ($this->downvotes_count ?? $this->binhChons()->where('loai_binh_chon', -1)->count());
+            if ($userId) {
+                $userVoteRecord = $this->binhChons()->where('ma_nguoi_dung', $userId)->first();
+                if ($userVoteRecord) {
+                    $myVote = (int) ($userVoteRecord->loai_binh_chon ?? ($userVoteRecord->huu_ich ? 1 : -1));
+                }
             }
         }
 
-        $helpfulVotesCount = $this->binh_chons_count ?? ($this->relationLoaded('binhChons') ? $this->binhChons->count() : $this->binhChons()->count());
+        $reviewScore = $upvotesCount - $downvotesCount;
+        $isUpvoted = $myVote === 1;
+        $isDownvoted = $myVote === -1;
 
         $authorInfo = $this->xayDungThongTinTacGia($isAuthor, $isAnon);
 
@@ -59,13 +77,28 @@ class CourseReviewResource extends JsonResource
             'ngay_tao'            => $this->created_at?->format('d/m/Y'),
             'created_at'          => $this->created_at?->format('d/m/Y'),
             'ngay_cap_nhat'       => $this->updated_at?->format('d/m/Y'),
-            'so_luot_huu_ich'     => $helpfulVotesCount,
-            'helpful_votes_count' => $helpfulVotesCount,
-            'is_voted_by_me'      => $votedByMe,
+            
+            // Chỉ số Community Voting (Phase 3B2)
+            'review_score'        => $reviewScore,
+            'diem_cong_dong'      => $reviewScore,
+            'upvotes_count'       => $upvotesCount,
+            'so_luot_upvote'      => $upvotesCount,
+            'downvotes_count'     => $downvotesCount,
+            'so_luot_downvote'    => $downvotesCount,
+            'my_vote'             => $myVote,
+            'user_vote'           => $myVote,
+            'is_upvoted'          => $isUpvoted,
+            'is_downvoted'        => $isDownvoted,
+
+            // Tương thích ngược với hệ thống Helpful Vote cũ
+            'so_luot_huu_ich'     => $upvotesCount,
+            'helpful_votes_count' => $upvotesCount,
+            'is_voted_by_me'      => $isUpvoted,
 
             // Cờ cho phép giao diện hiển thị nút Sửa/Xóa (chỉ tác giả mới thấy)
             'co_quyen_chinh_sua'  => $isAuthor,
             'can_modify'          => $isAuthor,
+            'is_my_review'        => $isAuthor,
 
             // ẨN DANH 2 LỚP: Tuyệt đối không để lộ ma_nguoi_dung ra ngoài
             'tac_gia'             => $authorInfo,
@@ -110,4 +143,3 @@ class CourseReviewResource extends JsonResource
         ];
     }
 }
-

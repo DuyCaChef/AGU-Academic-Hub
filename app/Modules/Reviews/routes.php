@@ -22,7 +22,11 @@ Route::middleware('auth')->group(function (): void {
         Route::delete('/{ma_danh_gia}', [CourseReviewController::class, 'destroy'])
             ->name('destroy');
 
-        // Đánh giá review hữu ích
+        // Bình chọn cộng đồng Upvote / Downvote (Phase 3B2)
+        Route::post('/{ma_danh_gia}/vote', [CourseReviewController::class, 'binhChonCongDong'])
+            ->name('vote');
+
+        // Đánh giá review hữu ích (Tương thích ngược)
         Route::post('/{ma_danh_gia}/huu-ich', [CourseReviewController::class, 'binhChonHuuIch'])
             ->name('helpful');
 

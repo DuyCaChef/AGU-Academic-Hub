@@ -18,25 +18,26 @@ class DashboardController extends Controller
         // Sử dụng Query Class của Module AcademicCatalog để lấy danh sách khoa ưu tiên
         $faculties = $facultiesQuery->execute($user);
 
-        // Tính toán các số liệu thống kê cá nhân của sinh viên
+        // Tính toán các số liệu thống kê cá nhân của sinh viên / cựu sinh viên
         $stats = [
-            'totalCourses' => $user->ma_khoa ? MonHoc::where('ma_khoa', $user->ma_khoa)->count() : 0,
+            'totalCourses' => $user->ma_khoa ? MonHoc::where('ma_khoa', $user->ma_khoa)->count() : MonHoc::count(),
             'myDocuments' => TaiLieu::where('ma_nguoi_dang', $user->getKey())->count(),
             'trustScore' => $user->diem_uy_tin,
         ];
 
-        // Truy vấn 3 tài liệu đã kiểm duyệt mới nhất
+        // Truy vấn tối đa 6 tài liệu đã kiểm duyệt mới nhất
         $recentDocument = TaiLieu::query()
             ->where('trang_thai', 'DA_DUYET')
-            ->with('monHoc')
+            ->with(['monHoc:ma_mon_hoc,ma_hoc_phan,ten_mon_hoc'])
             ->latest()
-            ->take(3)
+            ->take(6)
             ->get([
                 'ma_tai_lieu',
                 'ma_mon_hoc',
                 'tieu_de',
                 'dinh_dang_tep',
                 'phan_loai',
+                'luot_tai',
                 'created_at',
             ]);
 

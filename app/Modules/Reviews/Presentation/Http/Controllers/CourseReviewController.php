@@ -65,10 +65,31 @@ class CourseReviewController extends Controller
         return back()->with('success', 'Đã xóa bài đánh giá thành công.');
     }
 
-    // Tương tác bình chọn hữu ích (POST /danh-gia/{ma_danh_gia}/huu-ich)
-    public function binhChonHuuIch(Request $request, int $ma_danh_gia, ToggleHelpfulVoteAction $action): RedirectResponse
+    // Bình chọn cộng đồng Upvote (+1) / Downvote (-1) (POST /danh-gia/{ma_danh_gia}/vote)
+    public function binhChonCongDong(Request $request, int $ma_danh_gia, ToggleHelpfulVoteAction $action): JsonResponse|RedirectResponse
+    {
+        $voteType = (int) $request->input('vote_type', $request->input('loai_binh_chon', 1));
+        $result = $action->vote($request->user(), $ma_danh_gia, $voteType);
+
+        if ($request->wantsJson()) {
+            $status = $result['status'] ?? 'info';
+            $statusCode = $status === 'warning' ? 403 : 200;
+            return response()->json($result, $statusCode);
+        }
+
+        return back()->with($result['status'], $result['message']);
+    }
+
+    // Tương tác bình chọn hữu ích (POST /danh-gia/{ma_danh_gia}/huu-ich) - Tương thích ngược
+    public function binhChonHuuIch(Request $request, int $ma_danh_gia, ToggleHelpfulVoteAction $action): JsonResponse|RedirectResponse
     {
         $result = $action->execute($request->user(), $ma_danh_gia);
+
+        if ($request->wantsJson()) {
+            $status = $result['status'] ?? 'info';
+            $statusCode = $status === 'warning' ? 403 : 200;
+            return response()->json($result, $statusCode);
+        }
 
         return back()->with($result['status'], $result['message']);
     }
@@ -86,4 +107,3 @@ class CourseReviewController extends Controller
         return back()->with('success', 'Báo cáo vi phạm đã được gửi tới Ban Kiểm duyệt.');
     }
 }
-
