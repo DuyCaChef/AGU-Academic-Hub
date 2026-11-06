@@ -27,7 +27,7 @@ class PublicAcademicCatalogTest extends TestCase
 
         $response->assertOk();
         $response->assertInertia(fn (Assert $page) => $page
-            ->component('Dashboard')
+            ->component('Faculties/Index')
             ->has('faculties', 2)
             ->where('faculties.0.ma_khoa', $khoaB->ma_khoa)
         );

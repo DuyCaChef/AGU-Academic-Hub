@@ -250,17 +250,27 @@ export default function StudentHeader({
                                         type="button"
                                         role='menuitem'
                                         onClick={() => {
-                                            setIsUserMenuOpen(false);
-                                            setIsProfileModalOpen(true);
+                                             setIsUserMenuOpen(false);
+                                             setIsProfileModalOpen(true);
                                         }}
-                                        className='flex w-full items-center gap-3 px-4 py-3
+                                        className='flex w-full items-center gap-3 px-4 py-2.5
                                         text-left text-sm text-text-secondary 
                                         transition-colors hover:bg-surface-page 
                                         hover:text-brand-primary
                                         '
                                     >
-                                        <User size={16} /> Hồ sơ cá nhân
+                                        <User size={16} /> Xem hồ sơ nhanh
                                     </button>
+
+                                    {/* Chỉnh sửa hồ sơ & Bảo mật */}
+                                    <Link
+                                        href={route('profile.edit')}
+                                        role='menuitem'
+                                        onClick={() => setIsUserMenuOpen(false)}
+                                        className='flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-text-secondary transition-colors hover:bg-surface-page hover:text-brand-primary'
+                                    >
+                                        <ShieldCheck size={16} className="text-emerald-600" /> Thiết lập tài khoản
+                                    </Link>
 
                                     {/* Săn thưởng tài liệu */}
                                     <Link
@@ -375,13 +385,18 @@ export default function StudentHeader({
                                 </div>
                             </div>
                         </div>
-                        <div className="flex justify-end border-t border-border-default
-                px-6 py-4">
+                        <div className="flex items-center justify-between border-t border-border-default px-6 py-4">
+                            <Link
+                                href={route('profile.edit')}
+                                onClick={() => setIsProfileModalOpen(false)}
+                                className="text-xs font-semibold text-brand-primary hover:underline flex items-center gap-1"
+                            >
+                                <span>Chỉnh sửa hồ sơ & Bảo mật &rarr;</span>
+                            </Link>
                             <button
                                 type="button"
                                 onClick={() => setIsProfileModalOpen(false)}
-                                className="rounded-lg bg-brand-primary px-4 py-2
-                        text-sm font-medium text-white hover:opacity-90"
+                                className="rounded-lg bg-surface-page border border-border-default px-4 py-2 text-sm font-medium text-text-primary hover:bg-border-default/40"
                             >
                                 Đóng
                             </button>

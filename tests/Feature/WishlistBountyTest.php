@@ -159,4 +159,71 @@ class WishlistBountyTest extends TestCase
         $this->assertEquals(100, $userA->viDiem->fresh()->diem_kha_dung);
         $this->assertEquals(0, $userA->viDiem->fresh()->diem_tam_giu);
     }
+
+    // Kiểm tra trang ví điểm hiển thị đầy đủ props wallet và transactions
+    public function test_authenticated_user_can_view_wallet_index_with_data_and_transactions(): void
+    {
+        $khoa = Khoa::create(['ten_khoa' => 'Khoa Su Pham', 'ky_hieu_khoa' => 'SP']);
+        $user = NguoiDung::factory()->create(['ma_khoa' => $khoa->ma_khoa]);
+
+        $response = $this->actingAs($user)->get(route('wallet.index'));
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->component('Wallet/Index')
+            ->has('wallet')
+            ->has('transactions')
+            ->has('filters')
+            ->where('wallet.diem_kha_dung', 100)
+            ->where('wallet.diem_tam_giu', 0)
+        );
+    }
+
+    // Kiểm tra bộ lọc giao dịch ví theo loại
+    public function test_wallet_index_filters_transactions_by_type(): void
+    {
+        $khoa = Khoa::create(['ten_khoa' => 'Khoa Su Pham', 'ky_hieu_khoa' => 'SP']);
+        $user = NguoiDung::factory()->create(['ma_khoa' => $khoa->ma_khoa]);
+
+        // Tạo 1 giao dịch tạm giữ
+        $this->reputationService->dongBangDiemBounty($user, 30);
+
+        $response = $this->actingAs($user)->get(route('wallet.index', ['type' => 'FROZEN']));
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->component('Wallet/Index')
+            ->where('filters.type', 'FROZEN')
+            ->has('transactions.data', 1)
+        );
+    }
+
+    // Kiểm tra API lấy tài liệu cá nhân phục vụ Document Picker
+    public function test_authenticated_user_can_get_my_documents(): void
+    {
+        $khoa = Khoa::create(['ten_khoa' => 'Khoa Kinh Te', 'ky_hieu_khoa' => 'KT']);
+        $user = NguoiDung::factory()->create(['ma_khoa' => $khoa->ma_khoa]);
+        $monHoc = MonHoc::factory()->create(['ma_khoa' => $khoa->ma_khoa]);
+
+        TaiLieu::create([
+            'ma_mon_hoc'    => $monHoc->ma_mon_hoc,
+            'ma_nguoi_dang' => $user->getKey(),
+            'tieu_de'       => 'Tai lieu cua toi de nop bounty',
+            'duong_dan_tep' => 'documents/my_doc.pdf',
+            'dinh_dang_tep' => 'pdf',
+            'dung_luong_kb' => 100,
+            'ma_bam_file'   => hash('sha256', 'my_doc_content'),
+            'phan_loai'     => 'BAI_GIANG',
+            'luot_tai'      => 0,
+            'trang_thai'    => 'DA_DUYET',
+        ]);
+
+        $response = $this->actingAs($user)->getJson(route('documents.my-documents'));
+
+        $response->assertOk();
+        $response->assertJsonCount(1);
+        $response->assertJsonFragment([
+            'tieu_de' => 'Tai lieu cua toi de nop bounty',
+        ]);
+    }
 }

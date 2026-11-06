@@ -180,4 +180,17 @@ class DocumentController extends Controller
 
         return back()->with('success', 'Đã gửi yêu cầu gỡ tài liệu đến hàng đợi xét duyệt.');
     }
+
+    // Danh sách tài liệu hợp lệ của người dùng hiện tại (phục vụ chọn nhanh khi đóng góp Bounty)
+    public function myDocuments(Request $request): JsonResponse
+    {
+        $documents = TaiLieu::query()
+            ->where('ma_nguoi_dang', $request->user()->getKey())
+            ->where('trang_thai', 'DA_DUYET')
+            ->with('monHoc:ma_mon_hoc,ten_mon_hoc,ma_hoc_phan')
+            ->latest('ma_tai_lieu')
+            ->get(['ma_tai_lieu', 'tieu_de', 'phan_loai', 'ma_mon_hoc', 'dinh_dang_tep', 'dung_luong_kb']);
+
+        return response()->json($documents);
+    }
 }

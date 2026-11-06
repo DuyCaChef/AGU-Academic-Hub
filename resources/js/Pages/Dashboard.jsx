@@ -216,9 +216,9 @@ export default function Dashboard() {
                             {/* Ví điểm Bounty shortcut */}
                             {user?.vi_diem && (
                                 <Link
-                                    href={route("document-requests.index")}
+                                    href={route("wallet.index")}
                                     className="mt-3 flex items-center justify-between rounded-xl bg-white/15 hover:bg-white/25 px-3 py-2 transition text-xs font-semibold"
-                                    title="Xem thị trường săn thưởng và ví điểm"
+                                    title="Xem chi tiết số dư và lịch sử biến động ví điểm"
                                 >
                                     <span className="flex items-center gap-1.5 text-blue-100">
                                         <Coins size={14} className="text-amber-300" />

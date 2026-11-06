@@ -99,7 +99,7 @@ export default function StudentSidebar({
                 {/* danh sach khoa va mon hoc */}
                 <div className="flex-1 overflow-y-auto p-4">
                     <FacultyCourseTree
-                        faculities={faculties}
+                        faculties={faculties}
                     />
                 </div>
                 {/* footer sidebar */}
