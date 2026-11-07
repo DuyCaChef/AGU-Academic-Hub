@@ -60,6 +60,10 @@ class WishlistBountyController extends Controller
     {
         $docRequest = $action->execute($request->user(), $request->validated());
 
+        if ($request->input('redirect_to') === 'back' || $request->has('redirect_back')) {
+            return back()->with('success', "Đã tạo yêu cầu tìm tài liệu và đóng băng {$docRequest->diem_thuong} điểm thưởng.");
+        }
+
         return redirect()->route('document-requests.index')
             ->with('success', "Đã tạo yêu cầu tìm tài liệu và đóng băng {$docRequest->diem_thuong} điểm thưởng.");
     }
@@ -95,6 +99,10 @@ class WishlistBountyController extends Controller
 
         if (!$result['success']) {
             return back()->with('error', $result['message']);
+        }
+
+        if ($request->input('redirect_to') === 'back' || $request->has('redirect_back')) {
+            return back()->with('success', $result['message']);
         }
 
         return redirect()->route('document-requests.index')

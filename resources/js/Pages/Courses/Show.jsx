@@ -4,6 +4,8 @@ import StudentLayout from "@/Layouts/StudentLayout";
 import DocumentCard from "@/Components/domain/DocumentCard";
 import Pagination from "@/Components/Common/Pagination";
 import CreateReviewModal from "@/Components/Reviews/CreateReviewModal";
+import CreateRequestModal from "@/Components/Wishlist/CreateRequestModal";
+import FulfillRequestModal from "@/Components/Wishlist/FulfillRequestModal";
 import {
     BookOpen,
     ArrowLeft,
@@ -34,6 +36,16 @@ import {
     CheckCircle2,
     BarChart3,
     Clock,
+    Coins,
+    Award,
+    Plus,
+    Tag,
+    Inbox,
+    ExternalLink,
+    Send,
+    HelpCircle,
+    UserCheck,
+    CheckCircle,
 } from "lucide-react";
 
 // Error Boundary bảo vệ trang tránh lỗi trắng trang khi render runtime
@@ -64,7 +76,7 @@ class CourseDetailErrorBoundary extends Component {
                             Đã xảy ra lỗi khi hiển thị môn học
                         </h2>
                         <p className="mt-2 text-xs text-slate-600 leading-relaxed">
-                            Hệ thống gặp sự cố khi xử lý dữ liệu môn học hoặc danh sách đánh giá/tài liệu. Vui lòng thử tải lại trang hoặc quay về kho môn học.
+                            Hệ thống gặp sự cố khi xử lý dữ liệu môn học hoặc danh sách đánh giá/tài liệu/yêu cầu. Vui lòng thử tải lại trang hoặc quay về kho môn học.
                         </p>
                         <div className="mt-6 flex items-center justify-center gap-3">
                             <button
@@ -95,21 +107,26 @@ function CourseShowInner({
     documents = { data: [], total: 0, links: [] },
     reviews = { data: [], total: 0, links: [] },
     thong_ke = {},
+    wishlist_requests = { data: [], total: 0, links: [] },
     filters = {},
 }) {
     const pageProps = usePage().props;
     const currentUser = pageProps?.auth?.user || null;
+    const availablePoints = currentUser?.vi_diem?.diem_kha_dung || 0;
 
     // 1. CHUẨN HÓA DỮ LIỆU ĐẦU VÀO
     const safeFilters = (!Array.isArray(filters) && filters && typeof filters === "object") ? filters : {};
     const safeDocuments = documents || { data: [], total: 0, links: [] };
     const safeReviews = reviews || { data: [], total: 0, links: [] };
+    const safeWishlists = wishlist_requests || { data: [], total: 0, links: [] };
     const safeStats = thong_ke || {};
 
     const initialSearch = typeof safeFilters.search === "string" ? safeFilters.search : "";
     const initialCategory = typeof safeFilters.category === "string" && safeFilters.category ? safeFilters.category : "ALL";
     const initialSort = typeof safeFilters.sort === "string" && safeFilters.sort ? safeFilters.sort : "latest";
-    const initialTab = safeFilters.tab === "reviews" ? "reviews" : "documents";
+    const initialTab = safeFilters.tab === "wishlist"
+        ? "wishlist"
+        : (safeFilters.tab === "reviews" ? "reviews" : "documents");
 
     // 2. KHỞI TẠO TẤT CẢ REACT HOOKS Ở ĐẦU COMPONENT
     const [activeTab, setActiveTab] = useState(initialTab);
@@ -117,26 +134,44 @@ function CourseShowInner({
     const [category, setCategory] = useState(initialCategory);
     const [sort, setSort] = useState(initialSort);
     const [isLoading, setIsLoading] = useState(false);
+
+    // Reviews & Voting states (Phase 3B2)
     const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
     const [votingIds, setVotingIds] = useState(new Set());
     const [localReviewScores, setLocalReviewScores] = useState({});
 
-    // Kích hoạt truy vấn lọc & phân trang tài liệu tới backend
+    // Wishlist & Bounty states (Phase 3B3)
+    const [isWishlistModalOpen, setIsWishlistModalOpen] = useState(false);
+    const [isFulfillModalOpen, setIsFulfillModalOpen] = useState(false);
+    const [selectedWishlistId, setSelectedWishlistId] = useState(null);
+    const [wishlistStatus, setWishlistStatus] = useState(safeFilters.wishlist_status || "TAT_CA");
+    const [wishlistCategory, setWishlistCategory] = useState(safeFilters.wishlist_category || "ALL");
+    const [wishlistSort, setWishlistSort] = useState(safeFilters.wishlist_sort || "moi_nhat");
+
+    // Kích hoạt truy vấn lọc & phân trang tới backend
     const applyFilters = useCallback(
         (newFilters = {}) => {
             if (!course?.ma_hoc_phan) return;
+
+            const targetTab = newFilters.tab || activeTab;
 
             const queryParams = {
                 search: typeof newFilters.search === "string" ? newFilters.search : search,
                 category: typeof newFilters.category === "string" ? newFilters.category : category,
                 sort: typeof newFilters.sort === "string" ? newFilters.sort : sort,
-                tab: activeTab,
+                tab: targetTab,
+                wishlist_status: typeof newFilters.wishlist_status === "string" ? newFilters.wishlist_status : wishlistStatus,
+                wishlist_category: typeof newFilters.wishlist_category === "string" ? newFilters.wishlist_category : wishlistCategory,
+                wishlist_sort: typeof newFilters.wishlist_sort === "string" ? newFilters.wishlist_sort : wishlistSort,
             };
 
             if (!queryParams.search) delete queryParams.search;
             if (!queryParams.category || queryParams.category === "ALL") delete queryParams.category;
             if (!queryParams.sort || queryParams.sort === "latest") delete queryParams.sort;
             if (queryParams.tab === "documents") delete queryParams.tab;
+            if (!queryParams.wishlist_status || queryParams.wishlist_status === "TAT_CA") delete queryParams.wishlist_status;
+            if (!queryParams.wishlist_category || queryParams.wishlist_category === "ALL") delete queryParams.wishlist_category;
+            if (!queryParams.wishlist_sort || queryParams.wishlist_sort === "moi_nhat") delete queryParams.wishlist_sort;
 
             setIsLoading(true);
             router.get(
@@ -149,10 +184,10 @@ function CourseShowInner({
                 }
             );
         },
-        [course?.ma_hoc_phan, search, category, sort, activeTab]
+        [course?.ma_hoc_phan, search, category, sort, activeTab, wishlistStatus, wishlistCategory, wishlistSort]
     );
 
-    // Debounced search khi người dùng gõ từ khóa
+    // Debounced search cho tài liệu
     useEffect(() => {
         const timer = setTimeout(() => {
             const currentFilterSearch = typeof safeFilters.search === "string" ? safeFilters.search : "";
@@ -180,7 +215,24 @@ function CourseShowInner({
         applyFilters({ search: "" });
     };
 
-    // Tương tác Community Voting: Upvote (+1) / Downvote (-1)
+    // Tương tác bộ lọc Wishlist
+    const handleWishlistStatusChange = (status) => {
+        setWishlistStatus(status);
+        applyFilters({ wishlist_status: status, tab: "wishlist" });
+    };
+
+    const handleWishlistCategoryChange = (cat) => {
+        setWishlistCategory(cat);
+        applyFilters({ wishlist_category: cat, tab: "wishlist" });
+    };
+
+    const handleWishlistSortChange = (e) => {
+        const val = e.target.value;
+        setWishlistSort(val);
+        applyFilters({ wishlist_sort: val, tab: "wishlist" });
+    };
+
+    // Tương tác Community Voting (Phase 3B2)
     const handleCommunityVote = (reviewItem, targetVote) => {
         if (!currentUser) {
             router.visit(route("login"));
@@ -199,7 +251,6 @@ function CourseShowInner({
 
         setVotingIds((prev) => new Set(prev).add(revId));
 
-        // Lấy trạng thái hiện tại (ưu tiên local state nếu vừa vote)
         const currentData = localReviewScores[revId] || {
             my_vote: reviewItem.my_vote,
             review_score: reviewItem.review_score ?? 0,
@@ -214,7 +265,6 @@ function CourseShowInner({
         let nextDownvotes = currentData.downvotes_count;
 
         if (currentVote === targetVote) {
-            // Hủy vote
             nextVote = null;
             if (targetVote === 1) {
                 nextScore -= 1;
@@ -224,7 +274,6 @@ function CourseShowInner({
                 nextDownvotes = Math.max(0, nextDownvotes - 1);
             }
         } else if (currentVote === null || currentVote === undefined) {
-            // Vote mới
             nextVote = targetVote;
             if (targetVote === 1) {
                 nextScore += 1;
@@ -234,7 +283,6 @@ function CourseShowInner({
                 nextDownvotes += 1;
             }
         } else {
-            // Đổi hướng vote
             nextVote = targetVote;
             if (targetVote === 1) {
                 nextScore += 2;
@@ -247,7 +295,6 @@ function CourseShowInner({
             }
         }
 
-        // Cập nhật Optimistic UI ngay lập tức
         setLocalReviewScores((prev) => ({
             ...prev,
             [revId]: {
@@ -276,7 +323,6 @@ function CourseShowInner({
                     });
                 },
                 onError: () => {
-                    // Revert nếu có lỗi
                     setLocalReviewScores((prev) => {
                         const next = { ...prev };
                         delete next[revId];
@@ -316,6 +362,29 @@ function CourseShowInner({
                 onSuccess: () => alert("Đã gửi báo cáo vi phạm tới Ban Kiểm duyệt."),
             }
         );
+    };
+
+    // Hủy yêu cầu tài liệu Wishlist & Hoàn điểm (Phase 3B3)
+    const handleCancelWishlist = (requestId) => {
+        if (!confirm("Bạn có chắc chắn muốn hủy yêu cầu này? Điểm tạm giữ sẽ được hoàn lại 100% vào ví của bạn.")) {
+            return;
+        }
+
+        router.delete(route("document-requests.destroy", requestId), {
+            data: { redirect_to: "back" },
+            preserveScroll: true,
+            preserveState: true,
+        });
+    };
+
+    // Mở modal đóng góp tài liệu phản hồi (Phase 3B3)
+    const handleOpenFulfillModal = (requestId) => {
+        if (!currentUser) {
+            router.visit(route("login"));
+            return;
+        }
+        setSelectedWishlistId(requestId);
+        setIsFulfillModalOpen(true);
     };
 
     // 3. XỬ LÝ TRƯỜNG HỢP KHÔNG CÓ DỮ LIỆU MÔN HỌC
@@ -375,6 +444,39 @@ function CourseShowInner({
         ? safeReviews.total
         : (typeof safeStats.tong_so_danh_gia === "number" ? safeStats.tong_so_danh_gia : reviewList.length);
     const reviewPaginationLinks = Array.isArray(safeReviews.links) ? safeReviews.links : [];
+
+    // Trích xuất danh sách yêu cầu tài liệu Wishlist
+    const wishlistList = Array.isArray(safeWishlists)
+        ? safeWishlists
+        : (Array.isArray(safeWishlists.data) ? safeWishlists.data : []);
+    const totalWishlists = typeof safeWishlists.total === "number"
+        ? safeWishlists.total
+        : wishlistList.length;
+    const wishlistPaginationLinks = Array.isArray(safeWishlists.links) ? safeWishlists.links : [];
+
+    const getWishlistCategoryBadge = (cat) => {
+        const map = {
+            DE_THI: { label: "Đề thi", bg: "bg-indigo-50 text-indigo-700 border-indigo-200" },
+            BAI_GIANG: { label: "Bài giảng", bg: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+            DO_AN: { label: "Đồ án", bg: "bg-purple-50 text-purple-700 border-purple-200" },
+            BAI_TAP: { label: "Bài tập", bg: "bg-amber-50 text-amber-700 border-amber-200" },
+            KHAC: { label: "Khác", bg: "bg-slate-100 text-slate-700 border-slate-200" },
+        };
+        return map[cat] || { label: "Tài liệu", bg: "bg-slate-100 text-slate-700 border-slate-200" };
+    };
+
+    const getWishlistStatusBadge = (status) => {
+        if (status === "MO") {
+            return { label: "Đang tìm kiếm", bg: "bg-blue-50 text-[#005baa] border-blue-200" };
+        }
+        if (status === "DA_HOAN_THANH") {
+            return { label: "Đã có tài liệu", bg: "bg-emerald-50 text-emerald-700 border-emerald-200" };
+        }
+        if (status === "DA_HUY") {
+            return { label: "Đã hủy", bg: "bg-slate-100 text-slate-500 border-slate-200" };
+        }
+        return { label: status, bg: "bg-slate-100 text-slate-600 border-slate-200" };
+    };
 
     return (
         <StudentLayout title={`${course.ma_hoc_phan} - ${course.ten_mon_hoc}`}>
@@ -447,7 +549,7 @@ function CourseShowInner({
                             {course.ten_mon_hoc}
                         </h1>
                         <p className="mt-2 text-xs sm:text-sm text-slate-600 leading-relaxed max-w-4xl">
-                            {course.mo_ta || "Học phần chính thức thuộc chương trình đào tạo của Trường Đại học An Giang. Sinh viên có thể tra cứu tài liệu học tập và tham khảo đánh giá khách quan từ cộng đồng sinh viên các khóa trước."}
+                            {course.mo_ta || "Học phần chính thức thuộc chương trình đào tạo của Trường Đại học An Giang. Sinh viên có thể tra cứu tài liệu học tập, tham khảo đánh giá khách quan và gửi yêu cầu tìm tài liệu có treo thưởng Bounty."}
                         </p>
                     </div>
                 </section>
@@ -499,12 +601,13 @@ function CourseShowInner({
                     )}
                 </section>
 
-                {/* 4. TABS ĐIỀU HƯỚNG CHÍNH: TÀI LIỆU vs ĐÁNH GIÁ (PHASE 3B1 + PHASE 3B2) */}
-                <div className="flex items-center gap-2 border-b border-slate-200/80 pb-0">
+                {/* 4. TABS ĐIỀU HƯỚNG CHÍNH: TÀI LIỆU | ĐÁNH GIÁ | WISHLIST (PHASE 3B1 + 3B2 + 3B3) */}
+                <div className="flex items-center gap-1 sm:gap-2 border-b border-slate-200/80 pb-0 overflow-x-auto">
+                    {/* Tab 1: Tài liệu */}
                     <button
                         type="button"
                         onClick={() => setActiveTab("documents")}
-                        className={`relative pb-3.5 px-4 text-xs sm:text-sm font-bold flex items-center gap-2 transition-all ${
+                        className={`relative pb-3.5 px-3 sm:px-4 text-xs sm:text-sm font-bold flex items-center gap-2 transition-all shrink-0 ${
                             activeTab === "documents"
                                 ? "text-[#005baa] border-b-2 border-[#005baa]"
                                 : "text-slate-500 hover:text-slate-900 border-b-2 border-transparent"
@@ -519,10 +622,11 @@ function CourseShowInner({
                         </span>
                     </button>
 
+                    {/* Tab 2: Đánh giá */}
                     <button
                         type="button"
                         onClick={() => setActiveTab("reviews")}
-                        className={`relative pb-3.5 px-4 text-xs sm:text-sm font-bold flex items-center gap-2 transition-all ${
+                        className={`relative pb-3.5 px-3 sm:px-4 text-xs sm:text-sm font-bold flex items-center gap-2 transition-all shrink-0 ${
                             activeTab === "reviews"
                                 ? "text-[#005baa] border-b-2 border-[#005baa]"
                                 : "text-slate-500 hover:text-slate-900 border-b-2 border-transparent"
@@ -536,12 +640,30 @@ function CourseShowInner({
                             {totalReviews}
                         </span>
                     </button>
+
+                    {/* Tab 3: Wishlist / Yêu cầu tìm tài liệu (Phase 3B3) */}
+                    <button
+                        type="button"
+                        onClick={() => setActiveTab("wishlist")}
+                        className={`relative pb-3.5 px-3 sm:px-4 text-xs sm:text-sm font-bold flex items-center gap-2 transition-all shrink-0 ${
+                            activeTab === "wishlist"
+                                ? "text-[#005baa] border-b-2 border-[#005baa]"
+                                : "text-slate-500 hover:text-slate-900 border-b-2 border-transparent"
+                        }`}
+                    >
+                        <Coins size={16} className={activeTab === "wishlist" ? "text-amber-500" : ""} />
+                        <span>Yêu Cầu Tìm Tài Liệu</span>
+                        <span className={`text-[11px] font-mono px-2 py-0.5 rounded-full ${
+                            activeTab === "wishlist" ? "bg-amber-100 text-amber-800" : "bg-slate-100 text-slate-600"
+                        }`}>
+                            {totalWishlists}
+                        </span>
+                    </button>
                 </div>
 
                 {/* 5A. TAB TÀI LIỆU HỌC TẬP (PHASE 3B1) */}
                 {activeTab === "documents" && (
                     <section className="rounded-2xl border border-slate-200/80 bg-white p-6 sm:p-7 shadow-xs space-y-6">
-                        {/* Header khu vực tài liệu & CTA Tải lên */}
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
                             <div className="flex items-center gap-3">
                                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-[#005baa]">
@@ -703,7 +825,6 @@ function CourseShowInner({
                 {/* 5B. TAB ĐÁNH GIÁ MÔN HỌC & COMMUNITY VOTING (PHASE 3B2) */}
                 {activeTab === "reviews" && (
                     <section className="space-y-6">
-                        {/* 1. Header Khối Thống kê 3 tiêu chí & CTA Viết đánh giá */}
                         <div className="bg-white rounded-2xl border border-slate-200/80 p-6 sm:p-7 shadow-xs space-y-6">
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
                                 <div>
@@ -738,7 +859,6 @@ function CourseShowInner({
 
                             {/* Khối thống kê 3 tiêu chí */}
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-                                {/* Điểm tổng quan */}
                                 <div className="p-4 rounded-xl border border-amber-200/80 bg-amber-50/40 flex flex-col justify-between">
                                     <div className="flex items-center justify-between">
                                         <span className="text-xs font-semibold text-amber-900">Điểm tổng quan</span>
@@ -753,7 +873,6 @@ function CourseShowInner({
                                     <p className="text-[11px] text-amber-800/80 mt-1">Trung bình cộng 3 tiêu chí</p>
                                 </div>
 
-                                {/* Độ khó */}
                                 <div className="p-4 rounded-xl border border-slate-200/80 bg-slate-50/50 flex flex-col justify-between">
                                     <div className="flex items-center justify-between">
                                         <span className="text-xs font-semibold text-slate-700">Độ khó</span>
@@ -768,7 +887,6 @@ function CourseShowInner({
                                     <p className="text-[11px] text-slate-500 mt-1">1: Dễ qua – 5: Rất khó</p>
                                 </div>
 
-                                {/* Tính thực tiễn */}
                                 <div className="p-4 rounded-xl border border-slate-200/80 bg-slate-50/50 flex flex-col justify-between">
                                     <div className="flex items-center justify-between">
                                         <span className="text-xs font-semibold text-slate-700">Tính thực tiễn</span>
@@ -783,10 +901,9 @@ function CourseShowInner({
                                     <p className="text-[11px] text-slate-500 mt-1">1: Lý thuyết – 5: Thực hành cao</p>
                                 </div>
 
-                                {/* Khối lượng học tập */}
                                 <div className="p-4 rounded-xl border border-slate-200/80 bg-slate-50/50 flex flex-col justify-between">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-xs font-semibold text-slate-700">Khối lượng & Deadline</span>
+                                        <span className="text-xs font-semibold text-slate-700">Khối lượng học tập</span>
                                         <Clock size={16} className="text-blue-600" />
                                     </div>
                                     <div className="mt-3">
@@ -800,7 +917,7 @@ function CourseShowInner({
                             </div>
                         </div>
 
-                        {/* 2. Danh sách Bài đánh giá & Community Voting */}
+                        {/* Danh sách Bài đánh giá */}
                         <div className="space-y-4">
                             {reviewList.length > 0 ? (
                                 reviewList.map((review) => {
@@ -814,7 +931,6 @@ function CourseShowInner({
                                     const dateFormatted = review.ngay_tao || review.created_at || "Gần đây";
                                     const academicTerm = review.hoc_ky || review.academic_term || "";
 
-                                    // Lấy điểm và vote từ local state nếu có cập nhật tức thời
                                     const voteData = localReviewScores[revId] || {
                                         my_vote: review.my_vote,
                                         review_score: review.review_score ?? 0,
@@ -832,7 +948,6 @@ function CourseShowInner({
                                             key={revId}
                                             className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs hover:border-slate-300 transition-colors space-y-4"
                                         >
-                                            {/* Header review: Tác giả & Badges */}
                                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center font-bold text-xs shrink-0 border border-slate-200/70">
@@ -868,7 +983,6 @@ function CourseShowInner({
                                                     </div>
                                                 </div>
 
-                                                {/* Điểm 3 tiêu chí */}
                                                 <div className="flex flex-wrap items-center gap-2">
                                                     <span className="text-xs bg-slate-50 text-slate-700 px-2.5 py-1 rounded-lg font-medium border border-slate-200">
                                                         Độ khó: <strong className="text-rose-600">{review.diem_do_kho || review.difficulty_score}★</strong>
@@ -882,16 +996,12 @@ function CourseShowInner({
                                                 </div>
                                             </div>
 
-                                            {/* Nội dung nhận xét */}
                                             <p className="text-xs sm:text-sm text-slate-800 leading-relaxed whitespace-pre-line">
                                                 {content}
                                             </p>
 
-                                            {/* Footer tương tác: Community Voting Toolbar */}
                                             <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-slate-100">
-                                                {/* Khối Upvote / Downvote / Review Score */}
                                                 <div className="flex items-center gap-1.5 bg-slate-50 p-1 rounded-xl border border-slate-200 self-start">
-                                                    {/* Nút Upvote */}
                                                     <button
                                                         type="button"
                                                         onClick={() => handleCommunityVote(review, 1)}
@@ -907,7 +1017,6 @@ function CourseShowInner({
                                                         <span>Thích</span>
                                                     </button>
 
-                                                    {/* Điểm cộng đồng Review Score */}
                                                     <span
                                                         className={`px-2.5 py-1 text-xs font-mono font-extrabold rounded-md ${
                                                             reviewScore > 0
@@ -921,7 +1030,6 @@ function CourseShowInner({
                                                         {reviewScore > 0 ? `+${reviewScore}` : reviewScore}
                                                     </span>
 
-                                                    {/* Nút Downvote */}
                                                     <button
                                                         type="button"
                                                         onClick={() => handleCommunityVote(review, -1)}
@@ -938,7 +1046,6 @@ function CourseShowInner({
                                                     </button>
                                                 </div>
 
-                                                {/* Thao tác tác giả & Báo cáo */}
                                                 <div className="flex items-center gap-2 text-xs">
                                                     {isAuthor ? (
                                                         <button
@@ -967,7 +1074,6 @@ function CourseShowInner({
                                     );
                                 })
                             ) : (
-                                /* Empty State khi chưa có đánh giá nào */
                                 <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 p-8 sm:p-12 text-center">
                                     <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 mb-3">
                                         <MessageSquarePlus size={28} />
@@ -997,10 +1103,289 @@ function CourseShowInner({
                                 </div>
                             )}
 
-                            {/* Phân trang danh sách đánh giá */}
                             {reviewPaginationLinks.length > 3 && (
                                 <Pagination
                                     links={reviewPaginationLinks}
+                                    className="pt-4 border-t border-slate-100"
+                                />
+                            )}
+                        </div>
+                    </section>
+                )}
+
+                {/* 5C. TAB YÊU CẦU TÀI LIỆU (WISHLIST & BOUNTY) (PHASE 3B3) */}
+                {activeTab === "wishlist" && (
+                    <section className="space-y-6">
+                        {/* 1. Header Banner & CTA Tạo yêu cầu */}
+                        <div className="bg-gradient-to-r from-[#005baa] to-[#008f88] rounded-2xl p-6 text-white shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                            <div>
+                                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/15 backdrop-blur-md rounded-full text-xs font-semibold tracking-wide mb-2">
+                                    <Coins size={14} className="text-amber-300" />
+                                    <span>Treo Thưởng Bounty Cho Môn Học Này</span>
+                                </div>
+                                <h2 className="text-xl sm:text-2xl font-extrabold">
+                                    Yêu Cầu Tìm Tài Liệu Học Phần
+                                </h2>
+                                <p className="text-xs sm:text-sm text-blue-100 mt-1 max-w-xl leading-relaxed">
+                                    Bạn chưa tìm thấy đề thi cũ, slide bài giảng hay bài tập của môn học này? Hãy tạo yêu cầu và treo thưởng Bounty để bạn bè cùng khóa hỗ trợ!
+                                </p>
+                            </div>
+
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full md:w-auto shrink-0">
+                                {currentUser && (
+                                    <div className="px-4 py-2 bg-white/10 backdrop-blur-md rounded-xl border border-white/20 text-xs flex items-center gap-2">
+                                        <Coins size={15} className="text-amber-300" />
+                                        <span>Ví khả dụng: <strong className="text-amber-300 text-sm font-mono">{availablePoints}</strong> điểm</span>
+                                    </div>
+                                )}
+
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        if (!currentUser) {
+                                            router.visit(route("login"));
+                                            return;
+                                        }
+                                        setIsWishlistModalOpen(true);
+                                    }}
+                                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-amber-400 text-slate-950 hover:bg-amber-300 transition-colors shadow-sm w-full sm:w-auto"
+                                >
+                                    <Plus size={15} />
+                                    <span>Tạo yêu cầu tài liệu</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* 2. Toolbar & Bộ lọc Wishlist */}
+                        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs space-y-4">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                {/* Lọc trạng thái */}
+                                <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl overflow-x-auto">
+                                    {[
+                                        { key: "TAT_CA", label: "Tất cả" },
+                                        { key: "MO", label: "Đang tìm kiếm" },
+                                        { key: "DA_HOAN_THANH", label: "Đã có tài liệu" },
+                                    ].map((st) => (
+                                        <button
+                                            key={st.key}
+                                            type="button"
+                                            onClick={() => handleWishlistStatusChange(st.key)}
+                                            className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all shrink-0 ${
+                                                wishlistStatus === st.key
+                                                    ? "bg-white text-[#005baa] shadow-2xs"
+                                                    : "text-slate-600 hover:text-slate-900"
+                                            }`}
+                                        >
+                                            {st.label}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {/* Lọc phân loại & Sắp xếp */}
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    <select
+                                        value={wishlistCategory}
+                                        onChange={(e) => handleWishlistCategoryChange(e.target.value)}
+                                        className="text-xs font-medium border border-slate-200 rounded-xl px-3 py-1.5 bg-white text-slate-700 focus:border-[#005baa] focus:ring-1 focus:ring-[#005baa]"
+                                    >
+                                        <option value="ALL">Tất cả phân loại</option>
+                                        <option value="DE_THI">Đề thi / Kiểm tra</option>
+                                        <option value="BAI_GIANG">Slide / Bài giảng</option>
+                                        <option value="DO_AN">Đồ án / Source code</option>
+                                        <option value="BAI_TAP">Bài tập / Lời giải</option>
+                                        <option value="KHAC">Khác</option>
+                                    </select>
+
+                                    <select
+                                        value={wishlistSort}
+                                        onChange={handleWishlistSortChange}
+                                        className="text-xs font-medium border border-slate-200 rounded-xl px-3 py-1.5 bg-white text-slate-700 focus:border-[#005baa] focus:ring-1 focus:ring-[#005baa]"
+                                    >
+                                        <option value="moi_nhat">Mới nhất</option>
+                                        <option value="diem_cao">Điểm thưởng cao</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* 3. Danh sách Yêu cầu tài liệu Wishlist */}
+                        <div className="space-y-4">
+                            {wishlistList.length > 0 ? (
+                                wishlistList.map((req) => {
+                                    const reqId = req.ma_yeu_cau;
+                                    const creator = req.nguoi_tao || req.nguoiTao || {};
+                                    const creatorName = creator.ho_ten || "Thành viên AGU";
+                                    const creatorReputation = creator.diem_uy_tin ?? 0;
+                                    const isCreator = currentUser && (currentUser.ma_nguoi_dung === (req.ma_nguoi_tao || creator.ma_nguoi_dung));
+                                    const categoryBadge = getWishlistCategoryBadge(req.phan_loai);
+                                    const statusBadge = getWishlistStatusBadge(req.trang_thai);
+                                    const isClosed = req.trang_thai === "DA_HOAN_THANH" || req.trang_thai === "DA_HUY";
+                                    const dateFormatted = req.created_at
+                                        ? new Date(req.created_at).toLocaleDateString("vi-VN", {
+                                              year: "numeric",
+                                              month: "short",
+                                              day: "numeric",
+                                          })
+                                        : "Gần đây";
+
+                                    return (
+                                        <div
+                                            key={reqId}
+                                            className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs hover:border-slate-300 transition-colors space-y-4"
+                                        >
+                                            {/* Header Card: Badges & Bounty */}
+                                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+                                                <div className="flex items-center gap-2 flex-wrap">
+                                                    <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${categoryBadge.bg}`}>
+                                                        {categoryBadge.label}
+                                                    </span>
+
+                                                    <span className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full border ${statusBadge.bg}`}>
+                                                        {statusBadge.label}
+                                                    </span>
+
+                                                    {req.ten_giang_vien && (
+                                                        <span className="text-xs text-slate-500 font-medium">
+                                                            GV: <strong className="text-slate-700">{req.ten_giang_vien}</strong>
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                {/* Điểm thưởng Bounty Badge */}
+                                                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-50 text-amber-800 border border-amber-200/90 font-mono font-extrabold text-xs shadow-2xs self-start sm:self-auto">
+                                                    <Coins size={14} className="text-amber-500" />
+                                                    <span>+{req.diem_thuong} Bounty</span>
+                                                </div>
+                                            </div>
+
+                                            {/* Tiêu đề & Mô tả */}
+                                            <div>
+                                                <h3 className="text-base font-bold text-slate-900 leading-snug">
+                                                    {req.tieu_de}
+                                                </h3>
+                                                {req.mo_ta && (
+                                                    <p className="mt-1.5 text-xs sm:text-sm text-slate-600 leading-relaxed whitespace-pre-line">
+                                                        {req.mo_ta}
+                                                    </p>
+                                                )}
+                                            </div>
+
+                                            {/* Tài liệu đáp ứng nếu đã hoàn thành */}
+                                            {req.trang_thai === "DA_HOAN_THANH" && req.tai_lieu_dap_ung && (
+                                                <div className="p-3 bg-emerald-50/70 border border-emerald-200 rounded-xl flex items-center justify-between gap-3">
+                                                    <div className="flex items-center gap-2 min-w-0">
+                                                        <CheckCircle size={16} className="text-emerald-600 shrink-0" />
+                                                        <span className="text-xs font-semibold text-emerald-900 truncate">
+                                                            Tài liệu đã được duyệt: <strong>{req.tai_lieu_dap_ung.tieu_de}</strong>
+                                                        </span>
+                                                    </div>
+                                                    <Link
+                                                        href={route("documents.show", req.tai_lieu_dap_ung.ma_tai_lieu)}
+                                                        className="text-xs font-bold text-emerald-700 hover:text-emerald-800 flex items-center gap-1 shrink-0"
+                                                    >
+                                                        <span>Xem tài liệu</span>
+                                                        <ExternalLink size={12} />
+                                                    </Link>
+                                                </div>
+                                            )}
+
+                                            {/* Footer tương tác & Thông tin người yêu cầu */}
+                                            <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-slate-100 text-xs">
+                                                <div className="flex items-center gap-2.5">
+                                                    <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center font-bold text-[11px] shrink-0 border border-slate-200">
+                                                        {creator.anh_dai_dien ? (
+                                                            <img src={creator.anh_dai_dien} alt={creatorName} className="w-full h-full rounded-full object-cover" />
+                                                        ) : (
+                                                            creatorName.charAt(0).toUpperCase() || "A"
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        <div className="flex items-center gap-1.5">
+                                                            <span className="font-semibold text-slate-800">
+                                                                {creatorName}
+                                                            </span>
+                                                            {isCreator && (
+                                                                <span className="text-[10px] font-semibold text-blue-700 bg-blue-50 px-1.5 py-0.2 rounded border border-blue-200">
+                                                                    Bạn
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        <span className="text-[11px] text-slate-400">
+                                                            Đăng ngày {dateFormatted} • {req.dap_ungs_count || 0} phản hồi
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                {/* Action buttons */}
+                                                <div className="flex items-center gap-2 self-start sm:self-auto">
+                                                    <Link
+                                                        href={route("document-requests.show", reqId)}
+                                                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 transition-colors shadow-2xs"
+                                                    >
+                                                        <span>Chi tiết</span>
+                                                        <ExternalLink size={12} />
+                                                    </Link>
+
+                                                    {req.trang_thai === "MO" && !isCreator && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleOpenFulfillModal(reqId)}
+                                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-[#005baa] text-white hover:bg-blue-800 transition-colors shadow-2xs"
+                                                        >
+                                                            <Upload size={13} />
+                                                            <span>Đóng góp tài liệu</span>
+                                                        </button>
+                                                    )}
+
+                                                    {req.trang_thai === "MO" && (isCreator || currentUser?.la_quan_tri) && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleCancelWishlist(reqId)}
+                                                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-colors"
+                                                            title="Hủy yêu cầu và hoàn lại 100% điểm vào ví"
+                                                        >
+                                                            <Trash2 size={13} />
+                                                            <span>Hủy yêu cầu</span>
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })
+                            ) : (
+                                <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 p-8 sm:p-12 text-center">
+                                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 mb-3">
+                                        <Coins size={28} />
+                                    </div>
+                                    <h3 className="text-base font-bold text-slate-800">
+                                        Chưa có yêu cầu tài liệu nào cho học phần này
+                                    </h3>
+                                    <p className="mt-1.5 text-xs text-slate-500 max-w-md mx-auto leading-relaxed">
+                                        Bạn đang cần tìm đề thi các năm trước, đề cương chi tiết hay bài tập lớn? Hãy tạo yêu cầu và treo thưởng Bounty ngay để các bạn sinh viên hỗ trợ.
+                                    </p>
+                                    <div className="mt-5">
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                if (!currentUser) {
+                                                    router.visit(route("login"));
+                                                    return;
+                                                }
+                                                setIsWishlistModalOpen(true);
+                                            }}
+                                            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-[#005baa] text-white hover:bg-blue-700 transition-colors shadow-xs"
+                                        >
+                                            <Plus size={14} />
+                                            <span>Tạo yêu cầu đầu tiên</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {wishlistPaginationLinks.length > 3 && (
+                                <Pagination
+                                    links={wishlistPaginationLinks}
                                     className="pt-4 border-t border-slate-100"
                                 />
                             )}
@@ -1033,6 +1418,20 @@ function CourseShowInner({
                 isOpen={isReviewModalOpen}
                 onClose={() => setIsReviewModalOpen(false)}
                 course={course}
+            />
+
+            {/* Modal Tạo yêu cầu tìm tài liệu (Phase 3B3) */}
+            <CreateRequestModal
+                isOpen={isWishlistModalOpen}
+                onClose={() => setIsWishlistModalOpen(false)}
+                defaultCourse={course}
+            />
+
+            {/* Modal Đóng góp tài liệu săn thưởng (Phase 3B3) */}
+            <FulfillRequestModal
+                isOpen={isFulfillModalOpen}
+                onClose={() => setIsFulfillModalOpen(false)}
+                requestId={selectedWishlistId}
             />
         </StudentLayout>
     );
