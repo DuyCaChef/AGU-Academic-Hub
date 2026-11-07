@@ -25,6 +25,7 @@ class GetAdminDashboardOverviewQuery
 
         $pendingKyc = $kycStats['pending'];
         $pendingReports = $this->statsRepository->getPendingReportsCount();
+        $pendingReviewReports = $this->statsRepository->getPendingReviewReportsCount();
         $documentsToReview = $this->statsRepository->getDocumentsToReviewCount();
         $pendingRemovalRequests = $this->statsRepository->getPendingRemovalRequestsCount();
         $trashedDocuments = $this->statsRepository->getTrashedDocumentsCount();
@@ -46,6 +47,7 @@ class GetAdminDashboardOverviewQuery
             // Các trường gốc giữ nguyên tính tương thích ngược với API/Test hiện tại
             'pendingKyc' => $pendingKyc,
             'pendingReports' => $pendingReports,
+            'pendingReviewReports' => $pendingReviewReports,
             'documentsToReview' => $documentsToReview,
             'pendingRemovalRequests' => $pendingRemovalRequests,
             'totalUsers' => $userStats['total'],
@@ -58,6 +60,7 @@ class GetAdminDashboardOverviewQuery
             'kyc' => $kycStats,
             'moderation' => [
                 'pendingReports' => $pendingReports,
+                'pendingReviewReports' => $pendingReviewReports,
                 'documentsToReview' => $documentsToReview,
                 'pendingRemovalRequests' => $pendingRemovalRequests,
                 'trashedDocuments' => $trashedDocuments,

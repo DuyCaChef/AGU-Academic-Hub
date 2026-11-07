@@ -15,8 +15,10 @@ class ReportReviewRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'ly_do'    => ['required', 'string'],
-            'chi_tiet' => ['nullable', 'string', 'max:500'],
+            'ly_do'          => ['required', 'string'],
+            'loai_doi_tuong' => ['nullable', 'string', 'in:MON_HOC,GIANG_VIEN'],
+            'ten_giang_vien' => ['nullable', 'string', 'max:191'],
+            'chi_tiet'       => ['nullable', 'string', 'max:500'],
         ];
     }
 

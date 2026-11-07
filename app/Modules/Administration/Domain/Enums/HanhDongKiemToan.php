@@ -31,6 +31,11 @@ enum HanhDongKiemToan: string
     case KHOI_PHUC_TAI_LIEU = 'KHOI_PHUC_TAI_LIEU';
     case XOA_VINH_VIEN_TAI_LIEU = 'XOA_VINH_VIEN_TAI_LIEU';
 
+    // Kiểm duyệt Đánh giá môn học
+    case XU_LY_BAO_CAO_DANH_GIA = 'XU_LY_BAO_CAO_DANH_GIA';
+    case AN_DANH_GIA = 'AN_DANH_GIA';
+    case XOA_DANH_GIA = 'XOA_DANH_GIA';
+
     // Danh mục học thuật
     case THAY_DOI_KHOA = 'THAY_DOI_KHOA';
     case THAY_DOI_CHUYEN_NGANH = 'THAY_DOI_CHUYEN_NGANH';
@@ -55,11 +60,14 @@ enum HanhDongKiemToan: string
             self::MO_KHOA_TAI_KHOAN => 'Mở khóa tài khoản',
             self::THAY_DOI_VAI_TRO => 'Thay đổi vai trò / Phân quyền',
             self::GHI_NHAN_VI_PHAM => 'Ghi nhận vi phạm người dùng',
-            self::XU_LY_BAO_CAO => 'Xử lý báo cáo vi phạm',
+            self::XU_LY_BAO_CAO => 'Xử lý báo cáo vi phạm tài liệu',
             self::AN_TAI_LIEU => 'Tạm ẩn tài liệu',
             self::XOA_MEM_TAI_LIEU => 'Xóa mềm tài liệu',
             self::KHOI_PHUC_TAI_LIEU => 'Khôi phục tài liệu',
             self::XOA_VINH_VIEN_TAI_LIEU => 'Xóa vĩnh viễn tài liệu',
+            self::XU_LY_BAO_CAO_DANH_GIA => 'Xử lý báo cáo đánh giá môn học',
+            self::AN_DANH_GIA => 'Tạm ẩn đánh giá môn học',
+            self::XOA_DANH_GIA => 'Xóa đánh giá môn học',
             self::THAY_DOI_KHOA => 'Thay đổi danh mục Khoa',
             self::THAY_DOI_CHUYEN_NGANH => 'Thay đổi Chuyên ngành',
             self::THAY_DOI_MON_HOC => 'Thay đổi Môn học',
@@ -73,8 +81,8 @@ enum HanhDongKiemToan: string
         return match ($this) {
             self::DANG_NHAP_ADMIN, self::DANG_XUAT_ADMIN => 'blue',
             self::DUYET_KYC, self::MO_KHOA_TAI_KHOAN, self::KHOI_PHUC_TAI_LIEU => 'emerald',
-            self::TU_CHOI_KYC, self::KHOA_TAI_KHOAN, self::XOA_MEM_TAI_LIEU, self::XOA_VINH_VIEN_TAI_LIEU, self::XOA_SINH_VIEN_RAW => 'rose',
-            self::AN_TAI_LIEU, self::GHI_NHAN_VI_PHAM, self::XU_LY_BAO_CAO => 'amber',
+            self::TU_CHOI_KYC, self::KHOA_TAI_KHOAN, self::XOA_MEM_TAI_LIEU, self::XOA_VINH_VIEN_TAI_LIEU, self::XOA_SINH_VIEN_RAW, self::XOA_DANH_GIA => 'rose',
+            self::AN_TAI_LIEU, self::GHI_NHAN_VI_PHAM, self::XU_LY_BAO_CAO, self::XU_LY_BAO_CAO_DANH_GIA, self::AN_DANH_GIA => 'amber',
             self::NAP_SINH_VIEN_RAW, self::CAP_NHAT_SINH_VIEN_RAW => 'indigo',
             self::THAY_DOI_VAI_TRO, self::THAY_DOI_CAU_HINH => 'purple',
             self::THAY_DOI_KHOA, self::THAY_DOI_CHUYEN_NGANH, self::THAY_DOI_MON_HOC => 'teal',

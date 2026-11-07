@@ -3,6 +3,7 @@
 use App\Modules\Moderation\Presentation\Http\Controllers\DocumentModerationController;
 use App\Modules\Moderation\Presentation\Http\Controllers\DocumentRemovalRequestController;
 use App\Modules\Moderation\Presentation\Http\Controllers\DocumentReportController;
+use App\Modules\Moderation\Presentation\Http\Controllers\ReviewModerationController;
 use Illuminate\Support\Facades\Route;
 
 // =========================================================================
@@ -20,11 +21,22 @@ Route::middleware(['auth', 'role:KIEM_DUYET_VIEN,QUAN_TRI_VIEN'])
     ->prefix('quan-tri')
     ->name('admin.')
     ->group(function () {
-        // --- Hàng đợi Báo cáo vi phạm (Report Queue) ---
+        // --- Hàng đợi Báo cáo vi phạm tài liệu (Tự động chuyển hướng về Hàng đợi Báo cáo Thống nhất) ---
         Route::get('/bao-cao', [DocumentModerationController::class, 'indexReports'])->name('reports.index');
-        Route::get('/bao-cao/{id}', [DocumentModerationController::class, 'showReport'])->name('reports.show');
-        Route::put('/bao-cao/{id}/giai-quyet', [DocumentModerationController::class, 'resolveReport'])->name('reports.resolve');
-        Route::delete('/bao-cao/{id}', [DocumentModerationController::class, 'archiveReport'])->name('reports.archive');
+
+        // --- Xem & Giải quyết Báo cáo vi phạm tài liệu chi tiết (/quan-tri/bao-cao-tai-lieu/{id}) ---
+        Route::get('/bao-cao-tai-lieu/{id}', [DocumentModerationController::class, 'showReport'])->name('reports.show');
+        Route::put('/bao-cao-tai-lieu/{id}/giai-quyet', [DocumentModerationController::class, 'resolveReport'])->name('reports.resolve');
+        Route::delete('/bao-cao-tai-lieu/{id}', [DocumentModerationController::class, 'archiveReport'])->name('reports.archive');
+
+        // Chuyển hướng tương thích ngược từ URL cũ /quan-tri/bao-cao/{id} sang /quan-tri/bao-cao-tai-lieu/{id}
+        Route::get('/bao-cao/{id}', fn($id) => redirect()->route('admin.reports.show', $id));
+
+        // --- Hàng đợi Báo cáo đánh giá môn học (Course Review Report Queue) ---
+        Route::get('/bao-cao-danh-gia', [ReviewModerationController::class, 'index'])->name('review-reports.index');
+        Route::get('/bao-cao-danh-gia/{id}', [ReviewModerationController::class, 'show'])->name('review-reports.show');
+        Route::put('/bao-cao-danh-gia/{id}/giai-quyet', [ReviewModerationController::class, 'resolve'])->name('review-reports.resolve');
+        Route::delete('/bao-cao-danh-gia/{id}', [ReviewModerationController::class, 'archive'])->name('review-reports.archive');
 
         // --- Hàng đợi Kiểm tra tài liệu nguy cơ cao ---
         Route::get('/tai-lieu/cho-kiem-tra', [DocumentModerationController::class, 'reviewQueue'])->name('documents.review-queue');

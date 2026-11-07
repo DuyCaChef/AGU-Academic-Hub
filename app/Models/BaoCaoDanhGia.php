@@ -5,16 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class BaoCaoDanhGia extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'bao_cao_danh_gia';
     protected $primaryKey = 'ma_bao_cao';
 
     protected $fillable = [
         'ma_danh_gia',
+        'loai_doi_tuong',
+        'ten_giang_vien',
         'ma_nguoi_bao_cao',
         'ly_do',
         'chi_tiet',

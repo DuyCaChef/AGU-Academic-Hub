@@ -22,6 +22,7 @@ import {
     ClipboardList,
     Settings,
     UserCheck,
+    MessageSquareWarning,
 } from 'lucide-react';
 
 /**
@@ -124,11 +125,11 @@ export default function AdminLayout({ children, title = 'Quản trị hệ thố
             title: 'Kiểm duyệt & Tài liệu',
             items: [
                 {
-                    label: 'Hàng đợi Báo cáo',
-                    routeName: 'admin.reports.index',
-                    fallbackUrl: '/quan-tri/bao-cao',
-                    icon: Flag,
-                    desc: 'Xử lý báo cáo vi phạm',
+                    label: 'Báo cáo Vi phạm',
+                    routeName: 'admin.review-reports.index',
+                    fallbackUrl: '/quan-tri/bao-cao-danh-gia',
+                    icon: MessageSquareWarning,
+                    desc: 'Xử lý vi phạm đánh giá & tài liệu',
                     adminOnly: false,
                 },
                 {

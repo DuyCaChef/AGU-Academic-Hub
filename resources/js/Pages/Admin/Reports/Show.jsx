@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
-import { ArrowLeft, ExternalLink, FileText, User } from 'lucide-react';
+import { ArrowLeft, Clock, ExternalLink, FileText, Info as InfoIcon, User } from 'lucide-react';
 
 const actions = [
     {
@@ -38,6 +38,17 @@ export default function ReportShow({ report, relatedReports = [] }) {
     const [reasonError, setReasonError] = useState('');
     const [processing, setProcessing] = useState(false);
 
+    const formatDate = (dateString) => {
+        if (!dateString) return '—';
+        return new Date(dateString).toLocaleDateString('vi-VN', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+        });
+    };
+
     const resolve = (action) => {
         if (!reason.trim()) {
             setReasonError('Vui lòng nhập lý do và căn cứ xử lý.');
@@ -58,7 +69,10 @@ export default function ReportShow({ report, relatedReports = [] }) {
         <AdminLayout title="Chi tiết báo cáo vi phạm">
             <Head title={`Báo cáo #${report.ma_bao_cao} - AGU Hub Admin`} />
             <div className="space-y-6">
-                <Link href={route('admin.reports.index')} className="inline-flex items-center gap-2 text-sm font-semibold text-[#005baa] hover:underline"><ArrowLeft className="h-4 w-4" />Quay lại hàng đợi</Link>
+                <Link href={route('admin.review-reports.index', { type: 'TAI_LIEU' })} className="inline-flex items-center gap-2 text-sm font-semibold text-[#005baa] hover:underline">
+                    <ArrowLeft className="h-4 w-4" />
+                    Quay lại hàng đợi báo cáo vi phạm
+                </Link>
                 <div className="grid gap-6 lg:grid-cols-3">
                     <section className="space-y-6 lg:col-span-2">
                         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
@@ -80,9 +94,25 @@ export default function ReportShow({ report, relatedReports = [] }) {
                     <section className="h-fit rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
                         <h2 className="text-base font-bold text-slate-900">Ghi nhận xử lý</h2>
                         {report.trang_thai_xu_ly !== 'CHO_XU_LY' && (
-                            <p className="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-800">
-                                Báo cáo đã có kết quả. Thao tác mới sẽ thay thế quyết định trước đó.
-                            </p>
+                            <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50/70 p-3.5 text-xs text-amber-900 space-y-2">
+                                <div className="font-bold flex items-center gap-1.5 text-amber-950">
+                                    <InfoIcon size={15} className="text-amber-700" />
+                                    <span>Báo cáo này đã có kết quả xử lý</span>
+                                </div>
+                                <div>Người xử lý: <strong>{report.nguoi_xu_ly?.ho_ten || 'Ban Kiểm duyệt'}</strong></div>
+                                <div>Thời gian: <strong>{formatDate(report.xu_ly_luc)}</strong></div>
+                                {report.ly_do_xu_ly && (
+                                    <div className="mt-1.5 rounded-lg bg-white/80 p-2.5 border border-amber-200">
+                                        <span className="font-semibold text-slate-600 block text-[11px] uppercase">Ghi chú & Căn cứ xử lý:</span>
+                                        <span className="italic text-slate-800 text-xs mt-0.5 block whitespace-pre-wrap">
+                                            "{report.ly_do_xu_ly}"
+                                        </span>
+                                    </div>
+                                )}
+                                <p className="pt-1 text-[11px] text-amber-700">
+                                    Thao tác đưa ra quyết định mới bên dưới sẽ thay thế quyết định trước đó.
+                                </p>
+                            </div>
                         )}
                         <div className="mt-4">
                             <label htmlFor="resolution-reason" className="block text-sm font-semibold text-slate-800">
@@ -129,7 +159,7 @@ export default function ReportShow({ report, relatedReports = [] }) {
                                 </button>
                             ))}
                         </div>
-                        {report.nguoi_xu_ly && <p className="mt-4 text-xs text-slate-500">Đã xử lý bởi {report.nguoi_xu_ly.ho_ten} lúc {report.xu_ly_luc}</p>}
+
                     </section>
                 </div>
             </div>

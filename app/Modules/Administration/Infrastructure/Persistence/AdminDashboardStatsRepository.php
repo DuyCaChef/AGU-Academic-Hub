@@ -6,6 +6,7 @@ use App\Enums\LoaiXacThuc;
 use App\Enums\TrangThaiNguoiDung;
 use App\Enums\TrangThaiXacThuc;
 use App\Enums\VaiTroNguoiDung;
+use App\Models\BaoCaoDanhGia;
 use App\Models\BaoCaoViPham;
 use App\Models\ChuyenNganh;
 use App\Models\DanhSachSinhVienRaw;
@@ -61,6 +62,14 @@ class AdminDashboardStatsRepository
     {
         return BaoCaoViPham::query()
             ->where('trang_thai_xu_ly', 'CHO_XU_LY')
+            ->count();
+    }
+
+    // Đếm số lượng báo cáo đánh giá môn học đang chờ xử lý
+    public function getPendingReviewReportsCount(): int
+    {
+        return BaoCaoDanhGia::query()
+            ->where('trang_thai', 'CHO_XU_LY')
             ->count();
     }
 
