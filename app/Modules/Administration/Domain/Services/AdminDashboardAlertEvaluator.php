@@ -51,7 +51,7 @@ class AdminDashboardAlertEvaluator
                 'message' => "Có {$pendingReports} báo cáo vi phạm nội dung đang chờ kiểm duyệt viên xử lý để đảm bảo môi trường học thuật.",
                 'count' => $pendingReports,
                 'actionLabel' => 'Xử lý báo cáo',
-                'actionRoute' => 'admin.reports.index',
+                'actionRoute' => 'admin.review-reports.index',
             ];
         }
 

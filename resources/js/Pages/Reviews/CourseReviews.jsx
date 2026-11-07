@@ -15,7 +15,9 @@ import {
     BarChart3,
     ChevronRight,
     FileText,
-    ArrowLeft
+    ArrowLeft,
+    Flag,
+    X,
 } from 'lucide-react';
 
 export default function CourseReviews({ course, mon_hoc, stats, thong_ke, reviews }) {
@@ -39,6 +41,63 @@ export default function CourseReviews({ course, mon_hoc, stats, thong_ke, review
 
     const reviewItems = reviews?.data || reviews || [];
     const paginationLinks = reviews?.links || [];
+
+    // State Báo cáo vi phạm đánh giá
+    const [reportModalReview, setReportModalReview] = useState(null);
+    const [reportTargetType, setReportTargetType] = useState('MON_HOC');
+    const [reportLecturerName, setReportLecturerName] = useState('');
+    const [reportReason, setReportReason] = useState('NGON_TU_KICH_DONG');
+    const [reportDetail, setReportDetail] = useState('');
+    const [isSubmittingReport, setIsSubmittingReport] = useState(false);
+    const [reportError, setReportError] = useState('');
+
+    const handleOpenReportModal = (review) => {
+        if (!auth?.user) {
+            router.visit(route('login'));
+            return;
+        }
+        setReportModalReview(review);
+        setReportTargetType('MON_HOC');
+        setReportLecturerName('');
+        setReportReason('NGON_TU_KICH_DONG');
+        setReportDetail('');
+        setReportError('');
+    };
+
+    const handleSubmitReport = (e) => {
+        e.preventDefault();
+        if (!reportModalReview) return;
+
+        setIsSubmittingReport(true);
+        setReportError('');
+
+        const revId = reportModalReview.id || reportModalReview.ma_danh_gia;
+        const reportUrl = typeof route === 'function' && route().has('reviews.report')
+            ? route('reviews.report', revId)
+            : `/danh-gia/${revId}/bao-cao`;
+
+        router.post(
+            reportUrl,
+            {
+                ly_do: reportReason,
+                loai_doi_tuong: reportTargetType,
+                ten_giang_vien: reportLecturerName,
+                chi_tiet: reportDetail,
+            },
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setReportModalReview(null);
+                    setReportDetail('');
+                    setReportLecturerName('');
+                },
+                onError: (errs) => {
+                    setReportError(errs.report || errs.ly_do || 'Có lỗi xảy ra khi gửi báo cáo.');
+                },
+                onFinish: () => setIsSubmittingReport(false),
+            }
+        );
+    };
 
     // Tương tác nút Bình chọn Hữu ích
     const handleToggleHelpful = (reviewId) => {
@@ -330,10 +389,20 @@ export default function CourseReviews({ course, mon_hoc, stats, thong_ke, review
                                                 <span>Hữu ích ({helpfulCount})</span>
                                             </button>
 
-                                            {(review.can_modify || review.co_quyen_chinh_sua) && (
+                                            {(review.can_modify || review.co_quyen_chinh_sua) ? (
                                                 <span className="text-xs text-slate-400 italic">
                                                     Bài viết của bạn
                                                 </span>
+                                            ) : (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleOpenReportModal(review)}
+                                                    className="inline-flex items-center gap-1 text-slate-400 hover:text-rose-600 transition-colors ml-auto py-1 px-2 rounded hover:bg-rose-50"
+                                                    title="Báo cáo vi phạm tiêu chuẩn cộng đồng"
+                                                >
+                                                    <Flag size={12} />
+                                                    <span>Báo cáo</span>
+                                                </button>
                                             )}
                                         </div>
                                     </div>
@@ -355,6 +424,152 @@ export default function CourseReviews({ course, mon_hoc, stats, thong_ke, review
                 onClose={() => setIsModalOpen(false)}
                 course={currentCourse}
             />
+
+            {/* Modal Báo cáo vi phạm bài đánh giá */}
+            {reportModalReview && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
+                    <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
+                        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                            <div className="flex items-center gap-2 text-rose-600 font-bold text-base">
+                                <Flag size={18} />
+                                <h3>Báo cáo vi phạm đánh giá</h3>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setReportModalReview(null)}
+                                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                            >
+                                <X size={18} />
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleSubmitReport} className="mt-4 space-y-4">
+                            {/* Phân loại đối tượng phản ánh */}
+                            <div>
+                                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                                    Đối tượng vi phạm <span className="text-rose-600">*</span>
+                                </label>
+                                <div className="mt-1.5 grid grid-cols-2 gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setReportTargetType('MON_HOC')}
+                                        className={`flex items-center justify-center gap-1.5 rounded-xl border p-2 text-xs font-semibold transition-all ${
+                                            reportTargetType === 'MON_HOC'
+                                                ? 'border-indigo-600 bg-indigo-50 text-indigo-700 shadow-xs'
+                                                : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                                        }`}
+                                    >
+                                        <BookOpen size={14} />
+                                        <span>Môn học / Học phần</span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setReportTargetType('GIANG_VIEN')}
+                                        className={`flex items-center justify-center gap-1.5 rounded-xl border p-2 text-xs font-semibold transition-all ${
+                                            reportTargetType === 'GIANG_VIEN'
+                                                ? 'border-amber-600 bg-amber-50 text-amber-800 shadow-xs'
+                                                : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                                        }`}
+                                    >
+                                        <User size={14} />
+                                        <span>Giảng viên giảng dạy</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Tên giảng viên nếu chọn đối tượng Giảng viên */}
+                            {reportTargetType === 'GIANG_VIEN' && (
+                                <div>
+                                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                                        Tên giảng viên bị ảnh hưởng (tùy chọn)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={reportLecturerName}
+                                        onChange={(e) => setReportLecturerName(e.target.value)}
+                                        placeholder="VD: TS. Nguyễn Văn A..."
+                                        className="mt-1 w-full rounded-xl border border-slate-200 p-2 text-xs focus:border-brand-primary focus:ring-1 focus:ring-brand-primary"
+                                    />
+                                </div>
+                            )}
+
+                            <div>
+                                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                                    Lý do báo cáo vi phạm <span className="text-rose-600">*</span>
+                                </label>
+                                <div className="mt-2 space-y-2">
+                                    {[
+                                        { value: 'NGON_TU_KICH_DONG', label: 'Ngôn từ kích động / xúc phạm / thô tục' },
+                                        { value: 'BOI_NHO', label: 'Bôi nhọ / Vu khống giảng viên hoặc nhà trường' },
+                                        { value: 'QUAY_ROI', label: 'Quấy rối / Công kích sinh viên khác' },
+                                        { value: 'SPAM', label: 'Spam / Rao vặt / Quảng cáo' },
+                                        { value: 'KHAC', label: 'Lý do khác' },
+                                    ].map((opt) => (
+                                        <label
+                                            key={opt.value}
+                                            className={`flex items-center gap-3 rounded-xl border p-2.5 text-xs cursor-pointer transition-colors ${
+                                                reportReason === opt.value
+                                                    ? 'border-brand-primary bg-brand-primary/5 text-brand-primary font-semibold'
+                                                    : 'border-slate-200 hover:bg-slate-50 text-slate-700'
+                                            }`}
+                                        >
+                                            <input
+                                                type="radio"
+                                                name="report_reason"
+                                                value={opt.value}
+                                                checked={reportReason === opt.value}
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    setReportReason(val);
+                                                    if (val === 'BOI_NHO') {
+                                                        setReportTargetType('GIANG_VIEN');
+                                                    }
+                                                }}
+                                                className="text-brand-primary focus:ring-brand-primary h-4 w-4"
+                                            />
+                                            <span>{opt.label}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                                    Chi tiết phản ánh (tùy chọn)
+                                </label>
+                                <textarea
+                                    rows={3}
+                                    value={reportDetail}
+                                    onChange={(e) => setReportDetail(e.target.value)}
+                                    placeholder="Cung cấp thêm ngữ cảnh vi phạm để Ban kiểm duyệt thẩm định..."
+                                    className="mt-1.5 w-full rounded-xl border border-slate-200 p-2.5 text-xs focus:border-brand-primary focus:ring-1 focus:ring-brand-primary"
+                                />
+                            </div>
+
+                            {reportError && (
+                                <p className="text-xs text-rose-600">{reportError}</p>
+                            )}
+
+                            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                                <button
+                                    type="button"
+                                    onClick={() => setReportModalReview(null)}
+                                    className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                                >
+                                    Hủy bỏ
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={isSubmittingReport}
+                                    className="rounded-xl bg-rose-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-rose-700 disabled:opacity-50"
+                                >
+                                    {isSubmittingReport ? 'Đang gửi...' : 'Gửi báo cáo vi phạm'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </StudentLayout>
     );
 }

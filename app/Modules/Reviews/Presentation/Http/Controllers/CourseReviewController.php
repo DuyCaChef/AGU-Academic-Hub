@@ -101,7 +101,9 @@ class CourseReviewController extends Controller
             $request->user(),
             $ma_danh_gia,
             $request->input('ly_do'),
-            $request->input('chi_tiet')
+            $request->input('chi_tiet'),
+            $request->input('loai_doi_tuong'),
+            $request->input('ten_giang_vien')
         );
 
         return back()->with('success', 'Báo cáo vi phạm đã được gửi tới Ban Kiểm duyệt.');

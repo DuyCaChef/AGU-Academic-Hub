@@ -95,8 +95,8 @@ class AdminRouteAuthorizationTest extends TestCase
     public function test_violation_report_routes_accessible_by_admin_and_moderator(): void
     {
         $this->actingAs($this->student)->get(route('admin.reports.index'))->assertForbidden();
-        $this->actingAs($this->moderator)->get(route('admin.reports.index'))->assertOk();
-        $this->actingAs($this->admin)->get(route('admin.reports.index'))->assertOk();
+        $this->actingAs($this->moderator)->get(route('admin.reports.index'))->assertRedirect(route('admin.review-reports.index', ['type' => 'TAI_LIEU']));
+        $this->actingAs($this->admin)->get(route('admin.reports.index'))->assertRedirect(route('admin.review-reports.index', ['type' => 'TAI_LIEU']));
     }
 
     // 5. Route Khôi phục tài liệu và Xóa vĩnh viễn: chỉ dành riêng cho Admin, Moderator bị chặn 403

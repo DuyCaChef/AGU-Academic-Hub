@@ -11,7 +11,6 @@ use App\Modules\Moderation\Application\Actions\ResolveViolationReportAction;
 use App\Modules\Moderation\Application\Actions\RestoreDocumentAction;
 use App\Modules\Moderation\Application\Queries\GetDeletedDocumentsQuery;
 use App\Modules\Moderation\Application\Queries\GetReportDetailQuery;
-use App\Modules\Moderation\Application\Queries\GetReportQueueQuery;
 use App\Modules\Moderation\Application\Queries\GetReviewDetailQuery;
 use App\Modules\Moderation\Application\Queries\GetReviewQueueQuery;
 use Illuminate\Http\RedirectResponse;
@@ -24,14 +23,12 @@ use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
 class DocumentModerationController extends Controller
 {
-    // Hàng đợi xem danh sách báo cáo vi phạm cần xử lý
-    public function indexReports(Request $request, GetReportQueueQuery $query): Response
+    // Chuyển hướng hàng đợi báo cáo tài liệu cũ về Hàng đợi Báo cáo Thống nhất (/quan-tri/bao-cao-danh-gia?type=TAI_LIEU)
+    public function indexReports(Request $request): RedirectResponse
     {
         abort_unless($request->user()?->laQuanTriVien() || $request->user()?->laKiemDuyetVien(), 403, 'Bạn không có quyền thực hiện kiểm duyệt.');
 
-        $data = $query->execute($request->only(['status', 'reason', 'from', 'to']));
-
-        return Inertia::render('Admin/Reports/Index', $data);
+        return redirect()->route('admin.review-reports.index', ['type' => 'TAI_LIEU']);
     }
 
     // Hàng đợi kiểm tra riêng biệt dành cho các tài liệu bị gắn cờ nguy cơ cao

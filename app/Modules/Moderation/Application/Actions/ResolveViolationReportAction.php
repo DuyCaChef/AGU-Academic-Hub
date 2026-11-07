@@ -58,12 +58,15 @@ class ResolveViolationReportAction
                 ]);
             }
 
-            // 2. Cập nhật các bản ghi báo cáo
+            // 2. Cập nhật các bản ghi báo cáo (bao gồm báo cáo hiện tại và các báo cáo chờ duyệt cùng tài liệu)
             $reportsToResolve = ($action === 'DISMISS')
                 ? collect([$report])
                 : BaoCaoViPham::with('nguoiBaoCao')
                     ->where('ma_tai_lieu', $report->ma_tai_lieu)
-                    ->where('trang_thai_xu_ly', 'CHO_XU_LY')
+                    ->where(function ($q) use ($report) {
+                        $q->where('trang_thai_xu_ly', 'CHO_XU_LY')
+                          ->orWhere('ma_bao_cao', $report->ma_bao_cao);
+                    })
                     ->get();
 
             foreach ($reportsToResolve as $relatedReport) {
