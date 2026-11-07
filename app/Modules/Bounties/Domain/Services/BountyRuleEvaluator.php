@@ -31,6 +31,44 @@ class BountyRuleEvaluator
         return ['allowed' => true];
     }
 
+    // Đánh giá tính hợp lệ và quyền sở hữu của tài liệu khi nộp phản hồi
+    public function canFulfillWithDocument(NguoiDung $user, YeuCauTaiLieu $yeuCau, ?\App\Models\TaiLieu $document): array
+    {
+        if (!$document || $document->trashed()) {
+            return [
+                'allowed' => false,
+                'message' => 'Tài liệu này không tồn tại hoặc đã bị xóa.',
+            ];
+        }
+
+        // Chỉ cho phép người sở hữu tài liệu nộp
+        if ($document->ma_nguoi_dang !== $user->ma_nguoi_dung) {
+            return [
+                'allowed' => false,
+                'message' => 'Bạn chỉ có thể đóng góp tài liệu do chính bạn đăng tải.',
+            ];
+        }
+
+        // Chỉ tài liệu đã được duyệt mới được dùng để giải quyết yêu cầu
+        $isApproved = ($document->trang_thai === 'DA_DUYET' || $document->trang_thai === \App\Enums\TrangThaiTaiLieu::DA_DUYET);
+        if (!$isApproved) {
+            return [
+                'allowed' => false,
+                'message' => 'Chỉ có thể đóng góp tài liệu đã được phê duyệt và đang hoạt động.',
+            ];
+        }
+
+        // Tài liệu phải thuộc cùng môn học với yêu cầu Bounty
+        if ($document->ma_mon_hoc !== $yeuCau->ma_mon_hoc) {
+            return [
+                'allowed' => false,
+                'message' => 'Tài liệu đóng góp phải thuộc cùng môn học với yêu cầu tìm kiếm.',
+            ];
+        }
+
+        return ['allowed' => true];
+    }
+
     // Đánh giá quyền xác nhận giải ngân (Chính chủ hoặc Quản trị viên / Kiểm duyệt viên)
     public function canConfirm(NguoiDung $user, YeuCauTaiLieu $yeuCau): bool
     {

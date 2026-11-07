@@ -71,7 +71,7 @@ class WishlistBountyRepository
             'nguoiTao:ma_nguoi_dung,ho_ten,mssv,anh_dai_dien,diem_uy_tin',
             'taiLieuDapUng',
             'dapUngs.nguoiDongGop:ma_nguoi_dung,ho_ten,mssv,anh_dai_dien,diem_uy_tin',
-            'dapUngs.taiLieu:ma_tai_lieu,tieu_de,ten_tep_goc,dung_luong_byte,loai_tep,luot_tai',
+            'dapUngs.taiLieu:ma_tai_lieu,tieu_de,duong_dan_tep,dinh_dang_tep,dung_luong_kb,phan_loai,luot_tai,trang_thai',
         ])->findOrFail($maYeuCau);
     }
 
@@ -98,7 +98,7 @@ class WishlistBountyRepository
     // Tìm bài nộp phản hồi cụ thể theo yêu cầu
     public function findSubmission(int $maYeuCau, int $maDapUng): DapUngYeuCauTaiLieu
     {
-        return DapUngYeuCauTaiLieu::with(['nguoiDongGop'])
+        return DapUngYeuCauTaiLieu::with(['nguoiDongGop', 'taiLieu'])
             ->where('ma_yeu_cau', $maYeuCau)
             ->findOrFail($maDapUng);
     }

@@ -1432,6 +1432,7 @@ function CourseShowInner({
                 isOpen={isFulfillModalOpen}
                 onClose={() => setIsFulfillModalOpen(false)}
                 requestId={selectedWishlistId}
+                course={course}
             />
         </StudentLayout>
     );

@@ -36,6 +36,14 @@ class ConfirmBountyFulfillmentAction
 
         $dapUng = $this->bountyRepository->findSubmission($yeuCau->ma_yeu_cau, $maDapUng);
 
+        // Bảo vệ điểm thưởng: Tài liệu đóng góp bắt buộc phải được Ban kiểm duyệt phê duyệt trước khi giải ngân
+        if ($dapUng->taiLieu && $dapUng->taiLieu->trang_thai !== 'DA_DUYET' && $dapUng->taiLieu->trang_thai !== \App\Enums\TrangThaiTaiLieu::DA_DUYET) {
+            return [
+                'success' => false,
+                'message' => 'Tài liệu đóng góp này chưa được Ban kiểm duyệt phê duyệt, chưa thể xác nhận giải ngân điểm.',
+            ];
+        }
+
         DB::transaction(function () use ($yeuCau, $dapUng, $user) {
             // 1. Giải ngân điểm qua ReputationEvaluator
             $this->reputationEvaluator->giaiNganDiemBounty($yeuCau, $dapUng->nguoiDongGop);
