@@ -18,6 +18,7 @@ class WishlistBountyRepository
         $query = YeuCauTaiLieu::whereHas('monHoc.khoa')->with([
             'monHoc:ma_mon_hoc,ma_hoc_phan,ten_mon_hoc',
             'nguoiTao:ma_nguoi_dung,ho_ten,mssv,anh_dai_dien,diem_uy_tin',
+            'taiLieuDapUng:ma_tai_lieu,tieu_de',
         ])->withCount('dapUngs');
 
         // Lọc theo trạng thái (mặc định: MO)

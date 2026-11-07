@@ -45,17 +45,32 @@ class CourseController extends Controller
         $reviewsQuery = app(GetCourseReviewsQuery::class);
         $reviewData = $reviewsQuery->execute($request, $course->ma_hoc_phan);
 
+        // Lấy danh sách yêu cầu tài liệu thuộc môn học này (Phase 3B3)
+        $wishlistRepo = app(\App\Modules\Bounties\Infrastructure\Persistence\WishlistBountyRepository::class);
+        $wishlistFilters = [
+            'ma_mon_hoc' => $course->ma_mon_hoc,
+            'trang_thai' => $request->input('wishlist_status', 'TAT_CA'),
+            'phan_loai'  => $request->input('wishlist_category'),
+            'sap_xep'    => $request->input('wishlist_sort', 'moi_nhat'),
+        ];
+        $wishlistRequests = $wishlistRepo->getPaginatedWishlist($wishlistFilters, 8);
+        $wishlistRequests->appends($request->query());
+
         return Inertia::render('Courses/Show', [
-            'course'    => $course,
-            'faculties' => $faculties,
-            'documents' => $documents,
-            'reviews'   => $reviewData['reviews'],
-            'thong_ke'  => $reviewData['thong_ke'],
-            'filters'   => [
-                'search'   => $request->input('search'),
-                'category' => $request->input('category'),
-                'sort'     => $request->input('sort'),
-                'tab'      => $request->input('tab', 'documents'),
+            'course'            => $course,
+            'faculties'         => $faculties,
+            'documents'         => $documents,
+            'reviews'           => $reviewData['reviews'],
+            'thong_ke'          => $reviewData['thong_ke'],
+            'wishlist_requests' => $wishlistRequests,
+            'filters'           => [
+                'search'            => $request->input('search'),
+                'category'          => $request->input('category'),
+                'sort'              => $request->input('sort'),
+                'tab'               => $request->input('tab', 'documents'),
+                'wishlist_status'   => $request->input('wishlist_status', 'TAT_CA'),
+                'wishlist_category' => $request->input('wishlist_category'),
+                'wishlist_sort'     => $request->input('wishlist_sort', 'moi_nhat'),
             ],
         ]);
     }

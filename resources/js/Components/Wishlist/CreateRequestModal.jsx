@@ -1,25 +1,43 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm, usePage } from '@inertiajs/react';
-import { X, Coins, AlertCircle, BookOpen, User, Tag, HelpCircle } from 'lucide-react';
+import { X, Coins, AlertCircle, BookOpen, User, Tag, HelpCircle, Lock } from 'lucide-react';
 
-export default function CreateRequestModal({ isOpen, onClose, courses = [] }) {
+export default function CreateRequestModal({ isOpen, onClose, courses = [], defaultCourse = null }) {
     const { auth } = usePage().props;
     const availablePoints = auth?.user?.vi_diem?.diem_kha_dung || 0;
 
     const { data, setData, post, processing, errors, reset } = useForm({
-        ma_mon_hoc: '',
+        ma_mon_hoc: defaultCourse?.ma_mon_hoc || '',
         tieu_de: '',
         mo_ta: '',
         ten_giang_vien: '',
         phan_loai: 'DE_THI',
         diem_thuong: 30,
+        redirect_to: defaultCourse ? 'back' : undefined,
     });
+
+    useEffect(() => {
+        if (defaultCourse) {
+            setData((prev) => ({
+                ...prev,
+                ma_mon_hoc: defaultCourse.ma_mon_hoc,
+                redirect_to: 'back',
+            }));
+        }
+    }, [defaultCourse, isOpen]);
 
     if (!isOpen) return null;
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        const payload = {
+            ...data,
+            ma_mon_hoc: defaultCourse ? defaultCourse.ma_mon_hoc : data.ma_mon_hoc,
+            redirect_to: defaultCourse ? 'back' : undefined,
+        };
         post(route('document-requests.store'), {
+            data: payload,
+            preserveScroll: true,
             onSuccess: () => {
                 reset();
                 onClose();
@@ -44,29 +62,47 @@ export default function CreateRequestModal({ isOpen, onClose, courses = [] }) {
                     <button
                         onClick={onClose}
                         className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition-colors"
+                        aria-label="Đóng"
                     >
                         <X className="w-5 h-5" />
                     </button>
                 </div>
 
                 <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-                    {/* Chọn môn học */}
+                    {/* Chọn môn học (Tự động khóa nếu có defaultCourse) */}
                     <div>
                         <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">
                             Môn học <span className="text-rose-500">*</span>
                         </label>
-                        <select
-                            value={data.ma_mon_hoc}
-                            onChange={(e) => setData('ma_mon_hoc', e.target.value)}
-                            className="w-full text-sm rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-slate-800 focus:outline-none focus:border-[#005baa] focus:ring-2 focus:ring-[#005baa]/20 transition-colors shadow-2xs cursor-pointer"
-                        >
-                            <option value="">-- Chọn môn học --</option>
-                            {courses.map((course) => (
-                                <option key={course.ma_mon_hoc} value={course.ma_mon_hoc}>
-                                    [{course.ma_hoc_phan}] {course.ten_mon_hoc}
-                                </option>
-                            ))}
-                        </select>
+                        {defaultCourse ? (
+                            <div className="p-3 bg-blue-50/70 border border-blue-200/80 rounded-xl flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <span className="font-mono text-xs font-bold text-[#005baa] bg-white px-2.5 py-1 rounded-lg border border-blue-200 shadow-2xs">
+                                        {defaultCourse.ma_hoc_phan || defaultCourse.course_code}
+                                    </span>
+                                    <span className="text-xs font-semibold text-slate-800 truncate max-w-[240px]">
+                                        {defaultCourse.ten_mon_hoc || defaultCourse.name}
+                                    </span>
+                                </div>
+                                <span className="inline-flex items-center gap-1 text-[11px] text-[#005baa] font-semibold bg-blue-100/70 px-2.5 py-0.5 rounded-full border border-blue-200/60 shrink-0">
+                                    <Lock size={11} />
+                                    <span>Đã khóa môn này</span>
+                                </span>
+                            </div>
+                        ) : (
+                            <select
+                                value={data.ma_mon_hoc}
+                                onChange={(e) => setData('ma_mon_hoc', e.target.value)}
+                                className="w-full text-sm rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-slate-800 focus:outline-none focus:border-[#005baa] focus:ring-2 focus:ring-[#005baa]/20 transition-colors shadow-2xs cursor-pointer"
+                            >
+                                <option value="">-- Chọn môn học --</option>
+                                {courses.map((course) => (
+                                    <option key={course.ma_mon_hoc} value={course.ma_mon_hoc}>
+                                        [{course.ma_hoc_phan}] {course.ten_mon_hoc}
+                                    </option>
+                                ))}
+                            </select>
+                        )}
                         {errors.ma_mon_hoc && <p className="text-rose-500 text-xs mt-1">{errors.ma_mon_hoc}</p>}
                     </div>
 
@@ -214,7 +250,7 @@ export default function CreateRequestModal({ isOpen, onClose, courses = [] }) {
                                 !data.diem_thuong ||
                                 Number(data.diem_thuong) < 10 ||
                                 Number(data.diem_thuong) > availablePoints ||
-                                !data.ma_mon_hoc ||
+                                !(defaultCourse ? defaultCourse.ma_mon_hoc : data.ma_mon_hoc) ||
                                 !data.tieu_de?.trim()
                             }
                             className="px-5 py-2 text-sm font-bold text-white bg-[#005baa] hover:bg-blue-800 disabled:bg-slate-300 rounded-xl shadow-xs transition-colors flex items-center gap-2"
