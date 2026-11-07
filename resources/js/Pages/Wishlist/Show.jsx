@@ -351,6 +351,7 @@ export default function WishlistShow({ item, is_creator = false }) {
                     isOpen={isFulfillOpen}
                     onClose={() => setIsFulfillOpen(false)}
                     requestId={item.ma_yeu_cau}
+                    course={item.mon_hoc}
                 />
             </div>
         </StudentLayout>

@@ -71,7 +71,7 @@ class WishlistBountyController extends Controller
     // Đóng góp tài liệu giải quyết yêu cầu (POST /yeu-cau-tai-lieu/{ma_yeu_cau}/dong-gop)
     public function fulfill(FulfillBountyRequest $request, int $ma_yeu_cau, FulfillBountyRequestAction $action): RedirectResponse
     {
-        $result = $action->execute($request->user(), $ma_yeu_cau, $request->validated());
+        $result = $action->execute($request->user(), $ma_yeu_cau, $request->validated(), $request->file('file'));
 
         if (!$result['success']) {
             return back()->with('error', $result['message']);

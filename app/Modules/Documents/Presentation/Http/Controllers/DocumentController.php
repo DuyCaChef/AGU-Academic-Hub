@@ -102,26 +102,26 @@ class DocumentController extends Controller
         );
     }
 
-    // Xem chi tiết tài liệu
-    public function show(int $id, GetDocumentDetailQuery $query): InertiaResponse
+    // Xem chi tiết tài liệu (Kiểm tra quyền xem tài liệu chưa duyệt)
+    public function show(Request $request, int $id, GetDocumentDetailQuery $query): InertiaResponse
     {
-        $document = $query->execute($id);
+        $document = $query->execute($id, $request->user());
 
         return Inertia::render('Documents/Show', [
             'document' => $document,
         ]);
     }
 
-    // Xem trước trực tuyến tài liệu PDF
-    public function preview(int $id, PreviewDocumentAction $action): Response
+    // Xem trước trực tuyến tài liệu PDF (Bảo vệ tài liệu chưa duyệt)
+    public function preview(Request $request, int $id, PreviewDocumentAction $action): Response
     {
-        return $action->execute($id);
+        return $action->execute($id, $request->user());
     }
 
-    // Tải file tài liệu về máy và tự động tăng lượt tải
-    public function download(int $id, DownloadDocumentAction $action): Response
+    // Tải file tài liệu về máy và tự động tăng lượt tải (Bảo vệ tài liệu chưa duyệt)
+    public function download(Request $request, int $id, DownloadDocumentAction $action): Response
     {
-        return $action->execute($id);
+        return $action->execute($id, $request->user());
     }
 
     // Bình chọn / Thích tài liệu (Upvote)
