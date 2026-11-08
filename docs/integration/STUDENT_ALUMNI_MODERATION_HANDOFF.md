@@ -62,7 +62,7 @@ CHO_KIEM_TRA / TAM_AN_KIEM_TRA        │
 
 ### 2.2. Vòng đời Trạng thái Yêu cầu Săn thưởng (`yeu_cau_tai_lieu.trang_thai`)
 
-Yêu cầu tìm tài liệu (Wishlist/Bounty) liên kết chặt chẽ với số dư ví điểm (`vi_diem`):
+Yêu cầu tìm tài liệu (Wishlist/Bounty) liên kết chặt chẽ với số dư ví điểm (`vi_diem`) và quy trình phê duyệt giải ngân 2 lớp (Student Confirm -> Admin/Mod Approve):
 
 ```
 Sinh viên tạo yêu cầu (Cọc tối thiểu 10 điểm)
@@ -71,39 +71,50 @@ Sinh viên tạo yêu cầu (Cọc tối thiểu 10 điểm)
              MO ─────────────────────────────┐ (Người tạo tự hủy yêu cầu)
               │                               ▼
               │ (Người tạo xác nhận       DA_HUY (Hoàn trả 100% điểm tạm giữ)
-              │  nghiệm thu bài nộp)
+              │  bài nộp của SV B)
               ▼
+        CHO_GIAI_NGAN (Mới) ─────────────────┐
+        (Điểm VẪN ĐÓNG BĂNG trong ví SV A,    │ (Admin/Mod từ chối giải ngân:
+         chờ Admin/Mod kiểm tra an toàn)      │  Hoàn 100% điểm tạm giữ về ví SV A,
+              │                               │  mở lại yêu cầu để người khác nộp)
+              │ (Admin/Mod duyệt giải ngân)   ▼
+              ▼                              MO (Mở lại)
         DA_HOAN_THANH
-  (Giải ngân điểm tạm giữ -> ví người đóng góp)
+  (Chính thức giải ngân điểm tạm giữ -> ví SV B)
 ```
 
 | Trạng thái Yêu cầu | Tác động ví điểm | Mô tả |
 |---|---|---|
-| `MO` | Trừ `diem_kha_dung`, cộng `diem_tam_giu` của Requester | Yêu cầu đang mở, hiển thị trên tab Wishlist của môn học. Cho phép thành viên nộp tài liệu phản hồi. |
-| `DA_HOAN_THANH` | Trừ `diem_tam_giu` của Requester, cộng `diem_kha_dung` và cộng `diem_uy_tin` của Contributor | Đã có bài nộp được người tạo chấp nhận và giải ngân thành công. Không thể hủy hoặc nộp thêm. |
-| `DA_HUY` | Hoàn trả: trừ `diem_tam_giu`, cộng lại `diem_kha_dung` của Requester | Người tạo tự hủy yêu cầu khi chưa nghiệm thu bài nộp nào. Toàn bộ điểm tạm giữ được hoàn trả ngay lập tức kèm bản ghi `GiaoDichDiem` loại `HOAN_TRA`. |
+| `MO` | Trừ `diem_kha_dung`, cộng `diem_tam_giu` của Requester (SV A) | Yêu cầu đang mở, hiển thị trên tab Wishlist của môn học. Cho phép thành viên nộp tài liệu phản hồi. |
+| `CHO_GIAI_NGAN` | **Không thay đổi số dư ví** (Điểm thưởng vẫn an toàn trong `diem_tam_giu` của SV A) | SV A đã bấm "Xác nhận" chọn bài của SV B. Hệ thống chuyển sang hàng đợi Admin/Mod để kiểm tra mã độc, spam hoặc gian lận cày điểm. SV B **chưa** nhận được điểm tại bước này. |
+| `DA_HOAN_THANH` | Trừ `diem_tam_giu` của SV A, cộng `diem_kha_dung` và cộng `diem_uy_tin` của SV B | Admin/Mod đã duyệt giải ngân thành công. Điểm thưởng và điểm uy tín chính thức được chuyển cho SV B. Yêu cầu hoàn tất. |
+| `DA_HUY` | Hoàn trả: trừ `diem_tam_giu`, cộng lại `diem_kha_dung` của SV A | SV A tự hủy yêu cầu khi chưa nghiệm thu bài nộp nào. Toàn bộ điểm tạm giữ được hoàn trả ngay lập tức kèm bản ghi `GiaoDichDiem` loại `HOAN_TRA`. |
 
 ---
 
 ### 2.3. Vòng đời Trạng thái Bài nộp Săn thưởng (`dap_ung_yeu_cau_tai_lieu.trang_thai`)
 
 ```
-Contributor nộp bài (Method A hoặc B)
+Contributor (SV B) nộp bài (Method A hoặc B)
                  │
                  ▼
-             CHO_DUYET ──────────────────────┐
-                 │                           │ (Người tạo chọn từ chối bài nộp)
-                 │                           ▼
-                 │                        TU_CHOI
-                 ▼ (Người tạo xác nhận nghiệm thu - ĐIỀU KIỆN: tai_lieu.trang_thai == 'DA_DUYET')
+             CHO_DUYET ──────────────────────────────────┐
+                 │                                       │ (Người tạo hoặc Admin từ chối)
+                 │ (SV A bấm Xác nhận chọn bài này)      ▼
+                 ▼                                    TU_CHOI
+      NGUOI_YEU_CAU_XAC_NHAN (Mới)               (Lưu lý do từ chối:
+                 │                                ly_do_tu_choi_giai_ngan)
+                 │ (Admin/Mod duyệt giải ngân)
+                 ▼
              CHAP_NHAN
 ```
 
 | Trạng thái Bài nộp | Ý nghĩa | Điều kiện chuyển trạng thái |
 |---|---|---|
 | `CHO_DUYET` | Đang chờ nghiệm thu | Mặc định khi bài nộp được tạo. Bài nộp chưa được nhận điểm thưởng. |
-| `CHAP_NHAN` | Nghiệm thu thành công | Người tạo bấm "Xác nhận nhận tài liệu & Tặng thưởng". **Bắt buộc**: Tài liệu đính kèm phải có trạng thái `DA_DUYET` (được Ban kiểm duyệt duyệt trước). |
-| `TU_CHOI` | Từ chối bài nộp | Người tạo từ chối bài nộp do tài liệu không đúng yêu cầu đề ra. Điểm thưởng của Requester không bị trừ. |
+| `NGUOI_YEU_CAU_XAC_NHAN` | SV A đã đồng ý chọn | SV A bấm "Xác nhận chọn bài này". **Điều kiện tiền đề**: Tài liệu đính kèm phải có trạng thái `DA_DUYET`. Trạng thái này đánh dấu bài nộp được gửi đến Admin/Mod để chờ duyệt giải ngân điểm. |
+| `CHAP_NHAN` | Giải ngân thành công | Admin/Mod duyệt giải ngân thành công trên Admin Console. SV B nhận điểm thưởng vào ví. |
+| `TU_CHOI` | Từ chối bài nộp | Do SV A từ chối hoặc Admin/Mod từ chối giải ngân (kèm `ly_do_tu_choi_giai_ngan` hiển thị cho sinh viên). Điểm thưởng của Requester không bị mất. |
 
 ---
 
@@ -139,20 +150,52 @@ Người dùng Student/Alumni có hai phương thức để nộp tài liệu gi
 
 ---
 
-### 3.2. Chốt chặn Bảo mật Nghiệm thu Giải ngân (AUD-H01 Security Lock)
-- Tại `ConfirmBountyFulfillmentAction`:
-  ```php
-  // BẢO VỆ ĐIỂM THƯỞNG: Bắt buộc tài liệu phải DA_DUYET trước khi giải ngân
-  if ($dapUng->taiLieu && $dapUng->taiLieu->trang_thai !== 'DA_DUYET' && $dapUng->taiLieu->trang_thai !== TrangThaiTaiLieu::DA_DUYET) {
-      return [
-          'success' => false,
-          'message' => 'Tài liệu đóng góp này chưa được Ban kiểm duyệt phê duyệt, chưa thể xác nhận giải ngân điểm.',
-      ];
-  }
-  ```
-- **Ý nghĩa đối với Phân hệ Moderation**:
-  - Khi Kiểm duyệt viên duyệt tài liệu (`trang_thai = DA_DUYET`), tài liệu này đồng thời được phép giải ngân trong Bounty.
-  - Nếu Kiểm duyệt viên từ chối tài liệu (`trang_thai = TU_CHOI`), bài nộp không thể giải ngân, bảo vệ điểm thưởng của sinh viên tạo yêu cầu khỏi các nội dung rác hoặc lừa đảo điểm uy tín.
+### 3.2. Quy trình Nghiệm thu và Duyệt Giải ngân Điểm thưởng 2 Lớp (Two-Step Bounty Payout Flow)
+
+Nhằm phòng chống triệt để các hành vi gian lận (thông đồng cày điểm, tải tệp rác, file trắng, tài liệu chứa mã độc/virus để trục lợi điểm thưởng), hệ thống áp dụng **cơ chế xác thực 2 lớp** bắt buộc:
+
+```
+[SV B nộp bài] ──> [Kiểm duyệt tài liệu DA_DUYET] ──> [SV A bấm Xác nhận] ──> [Admin/Mod Duyệt giải ngân] ──> [SV B nhận điểm]
+                                                                  │
+                                                       (Điểm VẪN ĐÓNG BĂNG,
+                                                        chưa chuyển cho SV B)
+```
+
+#### Bước 1: Sinh viên A (Người tạo yêu cầu) xác nhận chọn bài nộp
+- **Endpoint**: `POST /yeu-cau-tai-lieu/{ma_yeu_cau}/xac-nhan`
+- **Payload**: `{ ma_dap_ung: int }`
+- **Điều kiện kiểm tra tại `ConfirmBountyFulfillmentAction`**:
+  1. Quyền xác nhận: Chỉ người tạo yêu cầu (`$user->ma_nguoi_dung === $yeuCau->ma_nguoi_tao`).
+  2. Trạng thái yêu cầu: Phải đang là `MO`.
+  3. Trạng thái bài nộp: Phải đang là `CHO_DUYET`.
+  4. Trạng thái tệp tài liệu: Bắt buộc đã được Ban kiểm duyệt duyệt (`taiLieu->trang_thai === 'DA_DUYET'`).
+- **Hành động trong Transaction CSDL**:
+  * Đánh dấu bài nộp: `dap_ung.trang_thai = 'NGUOI_YEU_CAU_XAC_NHAN'`.
+  * Đổi trạng thái yêu cầu: `yeu_cau.trang_thai = 'CHO_GIAI_NGAN'`.
+  * Ghi nhận: `ma_dap_ung_duoc_chon = $maDapUng`, `thoi_gian_nguoi_yeu_cau_xac_nhan = now()`.
+  * **ĐIỂM THƯỞNG**: Điểm vẫn nằm nguyên ở `diem_tam_giu` của SV A, **TUYỆT ĐỐI CHƯA CỘNG CHO SV B**.
+- **Thông báo**: Bắn `BountyPayoutApprovalRequiredNotification` vào chuông thông báo của tất cả Quản trị viên và Kiểm duyệt viên để đưa vào hàng đợi xử lý.
+
+#### Bước 2: Ban Quản trị / Ban Kiểm duyệt thẩm định và ra quyết định giải ngân
+- **Endpoint kiểm tra của Admin**:
+  * Danh sách hàng đợi: `GET /quan-tri/yeu-cau-tai-lieu/cho-giai-ngan` (`admin.bounties.payout-queue`).
+  * Chi tiết yêu cầu: `GET /quan-tri/yeu-cau-tai-lieu/cho-giai-ngan/{ma_yeu_cau}` (`admin.bounties.payout-detail`).
+- **Quyết định A: Phê duyệt giải ngân (`ApproveBountyPayoutAction`)**:
+  * **Endpoint**: `PUT /quan-tri/yeu-cau-tai-lieu/cho-giai-ngan/{ma_yeu_cau}/duyet`
+  * **Hành động**:
+    1. Trừ `diem_tam_giu` của SV A, cộng `diem_kha_dung` cho SV B, tăng `diem_uy_tin` cho SV B thông qua `ReputationEvaluator::giaiNganDiemBounty`.
+    2. Cập nhật `dap_ung.trang_thai = 'CHAP_NHAN'`, từ chối các bài nộp khác (`TU_CHOI`), đóng yêu cầu `yeu_cau.trang_thai = 'DA_HOAN_THANH'`.
+    3. Ghi nhật ký kiểm toán: `HanhDongKiemToan::DUYET_GIAI_NGAN_BOUNTY`.
+    4. Gửi notification `BountyPayoutApprovedNotification` chúc mừng SV B.
+- **Quyết định B: Từ chối giải ngân & Hoàn điểm bảo vệ SV A (`RejectBountyPayoutAction`)**:
+  * **Endpoint**: `PUT /quan-tri/yeu-cau-tai-lieu/cho-giai-ngan/{ma_yeu_cau}/tu-choi`
+  * **Payload**: `{ ly_do: string }` (Tối thiểu 10 ký tự, giải thích rõ căn cứ từ chối).
+  * **Hành động**:
+    1. **Hoàn trả an toàn**: Chuyển toàn bộ điểm tạm giữ về lại số dư khả dụng (`diem_kha_dung`) của SV A qua `ReputationEvaluator::hoanDiemBounty`. SV A không bị mất điểm oan.
+    2. Cập nhật `dap_ung.trang_thai = 'TU_CHOI'`, lưu `ly_do_tu_choi_giai_ngan`.
+    3. Mở lại yêu cầu sang `yeu_cau.trang_thai = 'MO'`, reset `ma_dap_ung_duoc_chon = null` để sinh viên khác tiếp tục nộp bài.
+    4. Ghi nhật ký kiểm toán: `HanhDongKiemToan::TU_CHOI_GIAI_NGAN_BOUNTY`.
+    5. Gửi notification `BountyPayoutRejectedNotification` giải thích lý do cho cả SV A và SV B.
 
 ---
 
@@ -227,7 +270,7 @@ sequenceDiagram
 
 ---
 
-### Sơ đồ 2: Luồng Đóng góp Săn thưởng & Nghiệm thu Giải ngân (Bounty Moderation & Disbursement)
+### Sơ đồ 2: Luồng Đóng góp Săn thưởng & Duyệt Giải ngân 2 Lớp (Bounty Two-Step Payout Flow)
 
 ```mermaid
 sequenceDiagram
@@ -236,7 +279,7 @@ sequenceDiagram
     actor Contributor as Sinh viên B (Đóng góp)
     participant BountySystem as Wishlist / Bounty System
     participant DocModule as Document Module
-    actor Moderator as Ban Kiểm duyệt
+    actor Moderator as Ban Quản trị / Kiểm duyệt
     participant Reputation as Reputation & Wallet Engine
 
     Requester->>BountySystem: POST /yeu-cau-tai-lieu (Đóng băng 50 điểm thưởng)
@@ -244,31 +287,42 @@ sequenceDiagram
     Note over BountySystem: Yêu cầu mở (trang_thai: 'MO')
 
     alt Phương thức B: Sinh viên B tải tệp mới từ máy
-        Contributor->>BountySystem: POST /yeu-cau-tai-lieu/{id}/dap-ung (Gửi kèm file)
+        Contributor->>BountySystem: POST /yeu-cau-tai-lieu/{id}/dong-gop (Gửi kèm file)
         BountySystem->>DocModule: Tạo TaiLieu mới (trang_thai: 'CHO_DUYET')
         BountySystem->>BountySystem: Tạo DapUngYeuCau (trang_thai: 'CHO_DUYET')
         Note over Contributor,Requester: Điểm thưởng VẪN ĐÓNG BĂNG, chưa giải ngân
+        
+        Note over Moderator: Kiểm duyệt viên thẩm định file ban đầu
+        Moderator->>DocModule: Phê duyệt tài liệu -> UPDATE tai_lieu SET trang_thai = 'DA_DUYET'
     end
 
-    opt Sinh viên A cố tình nghiệm thu khi chưa duyệt
-        Requester->>BountySystem: POST /yeu-cau-tai-lieu/{id}/xac-nhan
-        BountySystem->>BountySystem: Kiểm tra tai_lieu->trang_thai
-        BountySystem-->>Requester: THẤT BẠI: "Tài liệu chưa được Ban kiểm duyệt phê duyệt"
-    end
-
-    Note over Moderator: Kiểm duyệt viên vào hàng đợi kiểm duyệt
-    Moderator->>DocModule: Phê duyệt tài liệu -> UPDATE tai_lieu SET trang_thai = 'DA_DUYET'
-    DocModule-->>Requester: Thông báo: Tài liệu đóng góp cho yêu cầu của bạn đã được duyệt
-
-    Requester->>BountySystem: POST /yeu-cau-tai-lieu/{id}/xac-nhan (Nghiệm thu thành công)
+    Note over Requester: BƯỚC 1: Sinh viên A xác nhận chọn bài nộp
+    Requester->>BountySystem: POST /yeu-cau-tai-lieu/{id}/xac-nhan (ma_dap_ung)
     BountySystem->>BountySystem: Kiểm tra tai_lieu->trang_thai == 'DA_DUYET' (HỢP LỆ)
-    BountySystem->>Reputation: Giải ngân điểm Bounty:
-    Reputation->>Reputation: Ví A: Diem_tam_giu -= 50
-    Reputation->>Reputation: Ví B: Diem_kha_dung += 50
-    Reputation->>Reputation: Điểm uy tín B += 50
-    BountySystem->>BountySystem: UPDATE dap_ung SET trang_thai = 'CHAP_NHAN'
-    BountySystem->>BountySystem: UPDATE yeu_cau SET trang_thai = 'DA_HOAN_THANH'
-    BountySystem-->>Contributor: Thông báo: Bạn đã nhận được 50 điểm thưởng và 50 điểm uy tín!
+    BountySystem->>BountySystem: UPDATE yeu_cau SET trang_thai = 'CHO_GIAI_NGAN'
+    BountySystem->>BountySystem: UPDATE dap_ung SET trang_thai = 'NGUOI_YEU_CAU_XAC_NHAN'
+    Note over BountySystem,Reputation: ĐIỂM VẪN ĐÓNG BĂNG, SV B CHƯA ĐƯỢC CỘNG ĐIỂM
+    BountySystem->>Moderator: Bắn thông báo: "Yêu cầu #id cần duyệt giải ngân"
+
+    Note over Moderator: BƯỚC 2: Admin/Mod kiểm tra an toàn và quyết định
+    alt Trường hợp A: Admin/Mod PHÊ DUYỆT GIẢI NGÂN
+        Moderator->>BountySystem: PUT /quan-tri/yeu-cau-tai-lieu/cho-giai-ngan/{id}/duyet
+        BountySystem->>Reputation: Giải ngân điểm Bounty (giaiNganDiemBounty):
+        Reputation->>Reputation: Ví A: Diem_tam_giu -= 50
+        Reputation->>Reputation: Ví B: Diem_kha_dung += 50
+        Reputation->>Reputation: Điểm uy tín B += 50
+        BountySystem->>BountySystem: UPDATE dap_ung SET trang_thai = 'CHAP_NHAN'
+        BountySystem->>BountySystem: UPDATE yeu_cau SET trang_thai = 'DA_HOAN_THANH'
+        BountySystem-->>Contributor: Thông báo: "Đã nhận 50 điểm thưởng từ yêu cầu #id!"
+    else Trường hợp B: Admin/Mod TỪ CHỐI GIẢI NGÂN (Có nghi vấn mã độc / gian lận)
+        Moderator->>BountySystem: PUT /quan-tri/yeu-cau-tai-lieu/cho-giai-ngan/{id}/tu-choi (Lý do)
+        BountySystem->>Reputation: Hoàn điểm bảo vệ SV A (hoanDiemBounty):
+        Reputation->>Reputation: Ví A: Diem_tam_giu -= 50, Diem_kha_dung += 50
+        BountySystem->>BountySystem: UPDATE dap_ung SET trang_thai = 'TU_CHOI' (kèm lý do)
+        BountySystem->>BountySystem: UPDATE yeu_cau SET trang_thai = 'MO' (mở lại để người khác nộp)
+        BountySystem-->>Requester: Thông báo: "Bài nộp bị từ chối, đã hoàn 50 điểm vào ví của bạn"
+        BountySystem-->>Contributor: Thông báo: "Bài đóng góp bị từ chối giải ngân kèm lý do"
+    end
 ```
 
 ---
@@ -330,7 +384,8 @@ Ký hiệu:
 | **Tạo yêu cầu tìm tài liệu (Wishlist)** | R | R | - | I |
 | **Hủy yêu cầu & Hoàn điểm tạm giữ** | R (Chỉ người tạo) | R (Chỉ người tạo) | - | A |
 | **Nộp tài liệu săn thưởng (Method A)** | R | R | I | I |
-| **Nghiệm thu giải ngân Bounty** | R (Chỉ người tạo) | R (Chỉ người tạo) | **A (Duyệt doc trước)** | A |
+| **Xác nhận chọn bài nộp Bounty (Bước 1)** | R (Chỉ người tạo) | R (Chỉ người tạo) | I | I |
+| **Duyệt / Từ chối giải ngân Bounty (Bước 2)** | - | - | **R / A** | **A** |
 | **Báo cáo vi phạm tài liệu** | R | R | A | A |
 | **Xử lý tài liệu trong Hàng đợi vi phạm** | I | I | **R / A** | **A** |
 | **Khôi phục tài liệu từ Thùng rác** | - | - | R | **A** |
@@ -351,9 +406,9 @@ Ký hiệu:
 | Hàng đợi duyệt tài liệu báo cáo vi phạm | Moderation | `[IMPLEMENTED]` | `GetReviewQueueQuery` và `DocumentModerationController`. |
 | Xử lý quyết định vi phạm (`KEEP`, `RESTORE`, `HIDE`, `DELETE`) | Moderation | `[IMPLEMENTED]` | `DecideDocumentReviewAction` hoạt động với Audit Log. |
 | **Hàng đợi duyệt tài liệu mới đăng (`CHO_DUYET`)** | **Moderation** | `[PARTIALLY IMPLEMENTED]` | Backend query hiện lọc `['CHO_KIEM_TRA', 'TAM_AN_KIEM_TRA']`. Cần mở rộng query để lấy cả danh sách tài liệu mới `CHO_DUYET`. |
-| **Giao diện phân loại tài liệu Bounty vs Thường** | **Moderation** | `[REQUIRED / NOT IMPLEMENTED]` | Màn hình ReviewQueue cần hiển thị huy hiệu (Badge) phân biệt rõ: "Tài liệu đóng góp Bounty (Cần duyệt để giải ngân)" vs "Tài liệu đăng thông thường". |
-| **Thông báo tự động khi Duyệt / Từ chối tài liệu Bounty** | **Moderation** | `[REQUIRED / NOT IMPLEMENTED]` | Khi Moderation duyệt một tài liệu thuộc bài nộp Bounty, cần bắn Notification cho Requester ("Tài liệu bạn cần đã được duyệt, hãy vào kiểm tra") và Contributor ("Tài liệu của bạn đã được duyệt"). |
-| **Cơ chế nộp lại khi bị Từ chối kiểm duyệt** | **Moderation / Bounties** | `[REQUIRED / NOT IMPLEMENTED]` | Nếu Kiểm duyệt viên từ chối tài liệu nộp Bounty, cần cập nhật trạng thái `DapUngYeuCauTaiLieu` thành `TU_CHOI` và cho phép Contributor nộp file thay thế. |
+| **Hàng đợi duyệt giải ngân Bounty (`CHO_GIAI_NGAN`)** | **Bounties / Admin** | `[IMPLEMENTED]` | Đã có màn hình `/quan-tri/yeu-cau-tai-lieu/cho-giai-ngan`, controller `AdminBountyPayoutController`, 2 Action Duyệt/Từ chối và thông báo tự động. |
+| **Quy trình giải ngân 2 lớp (Requester -> Admin/Mod)** | **Bounties** | `[IMPLEMENTED]` | `ConfirmBountyFulfillmentAction` chỉ chuyển trạng thái sang `CHO_GIAI_NGAN`, `ApproveBountyPayoutAction` và `RejectBountyPayoutAction` xử lý giải ngân/hoàn điểm. |
+| **Cơ chế nộp lại khi bài nộp bị từ chối** | **Bounties** | `[IMPLEMENTED]` | Khi Admin từ chối giải ngân, yêu cầu được mở lại `MO`, điểm tạm giữ được hoàn trả ngay về ví của SV A, bài nộp lưu `ly_do_tu_choi_giai_ngan`. |
 
 ---
 
@@ -404,9 +459,125 @@ Dưới đây là 7 vấn đề nghiệp vụ và thiết kế kiến trúc then
 
 ---
 
-## 8. TỔNG KẾT BÀN GIAO
+## 8. HƯỚNG DẪN KẾT NỐI API & GIAO DIỆN PHÍA STUDENT (STUDENT INTEGRATION CONTRACT)
 
-Toàn bộ nền tảng dữ liệu, bảo mật, API và giao diện tương tác của nhóm người dùng `SINH_VIEN` và `CUU_SINH_VIEN` trong việc Đăng tải tài liệu, Nộp tài liệu Bounty, Đóng băng điểm, Chặn giải ngân khi chưa duyệt, và Bảo vệ tài liệu chờ duyệt đã được kiểm thử tự động **255/255 tests thành công (1,925 assertions)**.
+Phần này đặc biệt dành cho đồng nghiệp phụ trách giao diện người dùng **Sinh viên / Cựu sinh viên (Student/Alumni)** để kết nối đồng bộ 100% với Backend và Admin Console:
 
-Module Moderation hoàn toàn có thể an tâm kế thừa và mở rộng các Action/Query để hoàn thiện các màn hình quản trị dành cho Kiểm duyệt viên mà không lo xảy ra xung đột hay phá vỡ tính toàn vẹn dữ liệu của hệ sinh thái AGU Academic Hub.
+### 8.1. Các thay đổi về Data Model & Schema
+Sinh viên gọi API chi tiết yêu cầu (`GET /yeu-cau-tai-lieu/{ma_yeu_cau}`) sẽ nhận được cấu trúc dữ liệu mới:
+
+1. **`yeu_cau_tai_lieu`**:
+   - `trang_thai`: Bổ sung giá trị `'CHO_GIAI_NGAN'`.
+     * `MO`: Đang mở tìm kiếm, cho phép nộp bài.
+     * `CHO_GIAI_NGAN`: SV A đã bấm xác nhận, chờ Admin/Mod duyệt giải ngân.
+     * `DA_HOAN_THANH`: Đã duyệt và giải ngân điểm thành công.
+     * `DA_HUY`: Yêu cầu đã hủy, điểm hoàn trả.
+   - `ma_dap_ung_duoc_chon`: (int | null) Mã bài nộp mà SV A đã chọn.
+   - `thoi_gian_nguoi_yeu_cau_xac_nhan`: (datetime | null) Thời điểm SV A nhấn xác nhận.
+   - Quan hệ Eloquent: `$yeuCau->dapUngDuocChon` (liên kết với bài nộp được chọn).
+
+2. **`dap_ung_yeu_cau_tai_lieu`**:
+   - `trang_thai`: Bổ sung giá trị `'NGUOI_YEU_CAU_XAC_NHAN'`.
+     * `CHO_DUYET`: Bài nộp mới, chờ SV A xem xét.
+     * `NGUOI_YEU_CAU_XAC_NHAN`: Được SV A bấm chọn, đang chờ Admin duyệt.
+     * `CHAP_NHAN`: Admin đã duyệt, đã nhận điểm thưởng.
+     * `TU_CHOI`: Bị từ chối bởi SV A hoặc bởi Admin.
+   - `ly_do_tu_choi_giai_ngan`: (string | null) Lý do Admin từ chối giải ngân (ví dụ: *"File rác", "Chứa mã độc", "Sai môn học"*).
+
+---
+
+### 8.2. Hướng dẫn hiển thị Giao diện trên trang Chi tiết Yêu cầu (Wishlist/Show.jsx)
+
+#### A. Đối với Sinh viên A (Người tạo yêu cầu - Requester)
+1. **Khi yêu cầu ở trạng thái `MO`**:
+   - Hiển thị danh sách các bài nộp.
+   - Bài nộp có `tai_lieu.trang_thai === 'DA_DUYET'` $\rightarrow$ Hiển thị nút **[Xác nhận nhận tài liệu]**.
+   - Bài nộp có `tai_lieu.trang_thai === 'CHO_DUYET'` $\rightarrow$ Disable nút [Xác nhận] kèm chú thích: *"Tài liệu đang chờ Ban kiểm duyệt duyệt nội dung trước khi bạn có thể nghiệm thu"*.
+   - Cho phép bấm nút **[Hủy yêu cầu]** để nhận lại 100% điểm tạm giữ vào ví.
+
+2. **Khi SV A bấm [Xác nhận nhận tài liệu]**:
+   - Gửi request: `POST /yeu-cau-tai-lieu/{ma_yeu_cau}/xac-nhan` với body `{ ma_dap_ung: number }`.
+   - Phản hồi thành công từ server:
+     ```json
+     {
+       "success": true,
+       "message": "Đã xác nhận bài đóng góp! Hệ thống đang chờ Admin duyệt để giải ngân 30 điểm cho Nguyễn Văn B."
+     }
+     ```
+   - **Cập nhật giao diện sau khi bấm**:
+     * Huy hiệu trạng thái yêu cầu chuyển thành: `Chờ Admin duyệt giải ngân` (màu hổ phách / warning).
+     * Bài nộp được chọn hiển thị huy hiệu: `Đã chọn · Chờ Admin duyệt giải ngân`.
+     * Ẩn nút "Xác nhận" và ẩn nút "Hủy yêu cầu" (đang trong quá trình hậu kiểm).
+     * Hiển thị Alert thông tin: *"Bạn đã chọn tài liệu này. Điểm thưởng của bạn đang được tạm giữ an toàn và sẽ chính thức được chuyển cho người đóng góp sau khi Admin kiểm tra an toàn tệp tin."*
+
+3. **Khi Admin phê duyệt giải ngân**:
+   - Yêu cầu chuyển sang `DA_HOAN_THANH`. Huy hiệu màu xanh lá: `Đã hoàn thành & Đã giải ngân`.
+
+4. **Khi Admin từ chối giải ngân**:
+   - Yêu cầu tự động quay lại `MO`. Nút [Hủy yêu cầu] xuất hiện lại.
+   - Số dư khả dụng (`diem_kha_dung`) của SV A được hoàn trả lại nguyên vẹn.
+   - SV A nhận được Database Notification: *"Bài đóng góp bạn xác nhận cho yêu cầu #id đã bị Admin từ chối. Lý do: [Lý do]. Điểm thưởng đã được hoàn trả vào ví của bạn. Yêu cầu đã được mở lại."*
+   - SV A có thể tiếp tục xem và chọn các bài nộp khác hoặc chờ người khác đóng góp.
+
+---
+
+#### B. Đối với Sinh viên B (Người nộp bài đóng góp - Contributor)
+1. **Sau khi SV A xác nhận**:
+   - Bài nộp của SV B hiển thị huy hiệu: `Người yêu cầu đã xác nhận · Chờ Admin duyệt giải ngân`.
+   - SV B **chưa** nhận được điểm trong ví tại thời điểm này.
+2. **Khi Admin phê duyệt (`ApproveBountyPayoutAction`)**:
+   - Bài nộp chuyển sang `CHAP_NHAN`.
+   - SV B nhận được Notification: *"Chúc mừng! Tài liệu đóng góp của bạn cho yêu cầu #id đã được Admin duyệt. Bạn nhận được {diem_thuong} điểm thưởng."* (link: `/vi-diem`).
+   - Ví điểm của SV B tự động được cộng điểm khả dụng và điểm uy tín.
+3. **Khi Admin từ chối (`RejectBountyPayoutAction`)**:
+   - Bài nộp chuyển sang `TU_CHOI`.
+   - Hiển thị thông báo lý do từ chối: `{dap_ung.ly_do_tu_choi_giai_ngan}`.
+   - SV B nhận được Notification: *"Bài đóng góp của bạn cho yêu cầu #id đã bị Admin từ chối giải ngân. Lý do: [Lý do]."*
+   - SV B có thể dựa vào lý do để khắc phục (tải file đúng chuẩn hơn) và nộp lại bài đóng góp mới.
+
+---
+
+### 8.3. Danh sách Notifications (Database Channel) cần đồng bộ trên NotificationDropdown.jsx
+
+Các thông báo đều được lưu tại bảng `notifications` với kênh `database`. Thuộc tính `data` có định dạng:
+
+1. **`BountyPayoutApprovedNotification` (Gửi cho SV B khi được duyệt)**:
+   ```json
+   {
+     "title": "Điểm thưởng Bounty đã được giải ngân",
+     "message": "Chúc mừng! Tài liệu đóng góp của bạn cho yêu cầu #12 đã được Admin duyệt. Bạn nhận được 30 điểm thưởng.",
+     "ma_yeu_cau": 12,
+     "diem_thuong": 30,
+     "url": "/vi-diem"
+   }
+   ```
+
+2. **`BountyPayoutRejectedNotification` (Gửi cho SV A khi bị từ chối)**:
+   ```json
+   {
+     "title": "Bài đóng góp bị từ chối bởi Admin",
+     "message": "Bài đóng góp bạn xác nhận cho yêu cầu #12 đã bị Admin từ chối. Lý do: File rác không có nội dung. Điểm thưởng 30 điểm đã được hoàn trả vào ví của bạn. Yêu cầu đã được mở lại.",
+     "ma_yeu_cau": 12,
+     "url": "/yeu-cau-tai-lieu/12"
+   }
+   ```
+
+3. **`BountyPayoutRejectedNotification` (Gửi cho SV B khi bị từ chối)**:
+   ```json
+   {
+     "title": "Bài đóng góp của bạn bị Admin từ chối giải ngân",
+     "message": "Bài đóng góp của bạn cho yêu cầu #12 đã bị từ chối duyệt giải ngân. Lý do: File rác không có nội dung.",
+     "ma_yeu_cau": 12,
+     "url": "/yeu-cau-tai-lieu/12"
+   }
+   ```
+
+---
+
+## 9. TỔNG KẾT BÀN GIAO
+
+Toàn bộ nền tảng dữ liệu, bảo mật, API và giao diện tương tác của nhóm người dùng `SINH_VIEN` và `CUU_SINH_VIEN` trong việc Đăng tải tài liệu, Nộp tài liệu Bounty, Đóng băng điểm, Chặn giải ngân khi chưa duyệt, Bảo vệ tài liệu chờ duyệt và **Hàng đợi kiểm duyệt giải ngân 2 lớp của Ban Quản trị** đã được kiểm thử và tích hợp hoàn chỉnh.
+
+Thành viên phụ trách phân hệ Student/Alumni có thể căn cứ trực tiếp vào Section 8 của tài liệu này để hoàn thiện giao diện hiển thị badge, xử lý button và chuông thông báo mà không gặp bất kỳ vướng mắc hay thiếu hụt thông tin nào.
+
 
