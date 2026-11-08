@@ -14,10 +14,10 @@ class NotificationResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
-        $data = is_array($this->du_lieu) ? $this->du_lieu : (json_decode($this->du_lieu ?? '[]', true) ?: []);
+        $data = is_array($this->data) ? $this->data : (json_decode($this->data ?? '[]', true) ?: []);
 
         // Xác định loại thông báo và nhóm
-        $type = $data['type'] ?? class_basename($this->loai ?? $this->type);
+        $type = $data['type'] ?? class_basename($this->type);
         $category = $data['category'] ?? 'PERSONAL';
 
         // Lấy URL an toàn (chống open redirect)
@@ -28,13 +28,13 @@ class NotificationResource extends JsonResource
             'id'               => (string) $this->id,
             'type'             => $type,
             'category'         => $category,
-            'title'            => (string) ($this->tieu_de ?? $data['title'] ?? 'Thông báo hệ thống'),
-            'message'          => (string) ($this->noi_dung ?? $data['message'] ?? ''),
+            'title'            => (string) ($this->title ?? $data['title'] ?? 'Thông báo hệ thống'),
+            'message'          => (string) ($this->message ?? $data['message'] ?? ''),
             'target_type'      => $data['target_type'] ?? null,
             'target_id'        => $data['target_id'] ?? null,
             'url'              => $safeUrl,
             'action_url'       => $safeUrl,
-            'read_at'          => $this->da_doc_luc?->toIso8601String(),
+            'read_at'          => $this->read_at?->toIso8601String(),
             'is_read'          => $this->read(),
             'created_at'       => $this->created_at?->toIso8601String(),
             'created_at_human' => $this->created_at?->diffForHumans() ?? 'Vừa xong',
