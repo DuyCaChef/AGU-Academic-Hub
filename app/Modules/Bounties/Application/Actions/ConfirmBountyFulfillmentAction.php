@@ -4,64 +4,85 @@ namespace App\Modules\Bounties\Application\Actions;
 
 use App\Enums\TrangThaiYeuCauTaiLieu;
 use App\Models\NguoiDung;
+use App\Models\VaiTroNguoiDung;
 use App\Modules\Bounties\Domain\Services\BountyRuleEvaluator;
-use App\Modules\Bounties\Domain\Services\ReputationEvaluator;
+use App\Modules\Bounties\Infrastructure\Notifications\BountyPayoutApprovalRequiredNotification;
 use App\Modules\Bounties\Infrastructure\Persistence\WishlistBountyRepository;
 use Illuminate\Support\Facades\DB;
 
-// Action xác nhận giải ngân điểm thưởng cho người đóng góp tài liệu
+// Action xử lý xác nhận của người yêu cầu - chuyển trạng thái sang CHO_GIAI_NGAN và thông báo Admin/Mod
 class ConfirmBountyFulfillmentAction
 {
     public function __construct(
         protected WishlistBountyRepository $bountyRepository,
-        protected BountyRuleEvaluator $ruleEvaluator,
-        protected ReputationEvaluator $reputationEvaluator
+        protected BountyRuleEvaluator $ruleEvaluator
     ) {}
 
     public function execute(NguoiDung $user, int $maYeuCau, int $maDapUng): array
     {
         $yeuCau = $this->bountyRepository->findRequestById($maYeuCau);
 
-        // Quyền xác nhận: Chỉ Người tạo hoặc Quản trị viên/Kiểm duyệt viên
+        // Quyền xác nhận: Chỉ người tạo yêu cầu mới được xác nhận
         if (!$this->ruleEvaluator->canConfirm($user, $yeuCau)) {
-            abort(403, 'Bạn không có quyền xác nhận giải ngân cho yêu cầu này.');
+            abort(403, 'Bạn không có quyền xác nhận bài đóng góp cho yêu cầu này.');
         }
 
+        // Yêu cầu phải đang ở trạng thái MO
         if ($yeuCau->trang_thai !== TrangThaiYeuCauTaiLieu::MO) {
             return [
                 'success' => false,
-                'message' => 'Yêu cầu này đã được hoàn thành hoặc đã bị hủy.',
+                'message' => 'Yêu cầu này đã được xử lý hoặc đã bị hủy, không thể xác nhận.',
             ];
         }
 
         $dapUng = $this->bountyRepository->findSubmission($yeuCau->ma_yeu_cau, $maDapUng);
 
-        // Bảo vệ điểm thưởng: Tài liệu đóng góp bắt buộc phải được Ban kiểm duyệt phê duyệt trước khi giải ngân
-        if ($dapUng->taiLieu && $dapUng->taiLieu->trang_thai !== 'DA_DUYET' && $dapUng->taiLieu->trang_thai !== \App\Enums\TrangThaiTaiLieu::DA_DUYET) {
+        // Bài nộp phải đang ở trạng thái CHO_DUYET
+        if ($dapUng->trang_thai !== 'CHO_DUYET') {
             return [
                 'success' => false,
-                'message' => 'Tài liệu đóng góp này chưa được Ban kiểm duyệt phê duyệt, chưa thể xác nhận giải ngân điểm.',
+                'message' => 'Bài đóng góp này không ở trạng thái hợp lệ để xác nhận.',
             ];
         }
 
-        DB::transaction(function () use ($yeuCau, $dapUng, $user) {
-            // 1. Giải ngân điểm qua ReputationEvaluator
-            $this->reputationEvaluator->giaiNganDiemBounty($yeuCau, $dapUng->nguoiDongGop);
+        // Tài liệu đóng góp phải đã được Ban kiểm duyệt duyệt
+        if ($dapUng->taiLieu && $dapUng->taiLieu->trang_thai !== 'DA_DUYET') {
+            return [
+                'success' => false,
+                'message' => 'Tài liệu đóng góp này chưa được Ban kiểm duyệt phê duyệt, chưa thể xác nhận.',
+            ];
+        }
 
-            // 2. Cập nhật trạng thái các bản đáp ứng và hoàn thành yêu cầu
-            $this->bountyRepository->updateConfirmedFulfillment(
-                $yeuCau,
-                $dapUng,
-                $user->ma_nguoi_dung
-            );
+        DB::transaction(function () use ($yeuCau, $dapUng) {
+            // Đánh dấu bài nộp được người yêu cầu chọn
+            $dapUng->update(['trang_thai' => 'NGUOI_YEU_CAU_XAC_NHAN']);
+
+            // Chuyển yêu cầu sang trạng thái CHO_GIAI_NGAN - điểm chưa được chuyển
+            $yeuCau->update([
+                'trang_thai'                      => TrangThaiYeuCauTaiLieu::CHO_GIAI_NGAN,
+                'ma_dap_ung_duoc_chon'            => $dapUng->ma_dap_ung,
+                'thoi_gian_nguoi_yeu_cau_xac_nhan' => now(),
+            ]);
         });
 
-        $contributorName = $dapUng->nguoiDongGop->ho_ten ?? 'người đóng góp';
+        // Thông báo đến tất cả Admin và Kiểm duyệt viên về yêu cầu duyệt giải ngân
+        $tenNguoiYeuCau  = $yeuCau->nguoiTao->ho_ten ?? 'Sinh viên';
+        $tenNguoiDongGop = $dapUng->nguoiDongGop->ho_ten ?? 'Người đóng góp';
+
+        $adminsAndMods = NguoiDung::whereIn('vai_tro', ['QUAN_TRI_VIEN', 'KIEM_DUYET_VIEN'])->get();
+        $adminsAndMods->each(function (NguoiDung $recipient) use ($yeuCau, $dapUng, $tenNguoiYeuCau, $tenNguoiDongGop) {
+            $recipient->notify(new BountyPayoutApprovalRequiredNotification(
+                maYeuCau:        $yeuCau->ma_yeu_cau,
+                maDapUng:        $dapUng->ma_dap_ung,
+                diemThuong:      $yeuCau->diem_thuong,
+                tenNguoiYeuCau:  $tenNguoiYeuCau,
+                tenNguoiDongGop: $tenNguoiDongGop
+            ));
+        });
 
         return [
             'success' => true,
-            'message' => "Xác nhận thành công! Đã giải ngân {$yeuCau->diem_thuong} điểm cho {$contributorName}.",
+            'message' => "Đã xác nhận bài đóng góp! Hệ thống đang chờ Admin duyệt để giải ngân {$yeuCau->diem_thuong} điểm cho {$tenNguoiDongGop}.",
         ];
     }
 }
-

@@ -19,6 +19,7 @@ class DapUngYeuCauTaiLieu extends Model
         'ma_nguoi_dong_gop',
         'trang_thai',
         'ghi_chu_dong_gop',
+        'ly_do_tu_choi_giai_ngan',
         'nguoi_duyet',
         'thoi_gian_duyet',
     ];

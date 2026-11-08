@@ -1,5 +1,6 @@
 <?php
 
+use App\Modules\Bounties\Presentation\Http\Controllers\AdminBountyPayoutController;
 use App\Modules\Bounties\Presentation\Http\Controllers\WalletController;
 use App\Modules\Bounties\Presentation\Http\Controllers\WishlistBountyController;
 use Illuminate\Support\Facades\Route;
@@ -20,4 +21,17 @@ Route::middleware('auth')->group(function (): void {
     Route::prefix('vi-diem')->name('wallet.')->group(function (): void {
         Route::get('/', [WalletController::class, 'index'])->name('index');
     });
+
+    // Hàng đợi duyệt giải ngân điểm Bounty - chỉ Admin và Kiểm duyệt viên
+    Route::middleware('role:KIEM_DUYET_VIEN,QUAN_TRI_VIEN')
+        ->prefix('quan-tri')
+        ->name('admin.')
+        ->group(function (): void {
+            Route::prefix('yeu-cau-tai-lieu')->name('bounties.')->group(function (): void {
+                Route::get('/cho-giai-ngan', [AdminBountyPayoutController::class, 'index'])->name('payout-queue');
+                Route::get('/cho-giai-ngan/{ma_yeu_cau}', [AdminBountyPayoutController::class, 'show'])->name('payout-detail');
+                Route::put('/cho-giai-ngan/{ma_yeu_cau}/duyet', [AdminBountyPayoutController::class, 'approve'])->name('approve-payout');
+                Route::put('/cho-giai-ngan/{ma_yeu_cau}/tu-choi', [AdminBountyPayoutController::class, 'reject'])->name('reject-payout');
+            });
+        });
 });

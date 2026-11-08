@@ -16,6 +16,7 @@ enum LoaiDoiTuongKiemToan: string
     case MON_HOC = 'MON_HOC';
     case CAU_HINH_HE_THONG = 'CAU_HINH_HE_THONG';
     case PHIEN_LAM_VIEC = 'PHIEN_LAM_VIEC';
+    case YEU_CAU_TAI_LIEU = 'YEU_CAU_TAI_LIEU';
 
     public function label(): string
     {
@@ -32,6 +33,7 @@ enum LoaiDoiTuongKiemToan: string
             self::MON_HOC => 'Môn học / Học phần',
             self::CAU_HINH_HE_THONG => 'Cấu hình hệ thống',
             self::PHIEN_LAM_VIEC => 'Phiên đăng nhập / đăng xuất',
+            self::YEU_CAU_TAI_LIEU => 'Yêu cầu tìm tài liệu',
         };
     }
 }

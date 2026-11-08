@@ -141,6 +141,14 @@ export default function AdminLayout({ children, title = 'Quản trị hệ thố
                     adminOnly: false,
                 },
                 {
+                    label: 'Duyệt giải ngân Bounty',
+                    routeName: 'admin.bounties.payout-queue',
+                    fallbackUrl: '/quan-tri/yeu-cau-tai-lieu/cho-giai-ngan',
+                    icon: Coins,
+                    desc: 'Duyệt điểm thưởng tài liệu',
+                    adminOnly: false,
+                },
+                {
                     label: 'Yêu cầu gỡ tài liệu',
                     routeName: 'admin.documents.removal-requests.index',
                     fallbackUrl: '/quan-tri/yeu-cau-go-tai-lieu',
