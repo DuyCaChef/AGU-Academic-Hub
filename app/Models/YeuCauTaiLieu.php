@@ -28,6 +28,8 @@ class YeuCauTaiLieu extends Model
         'diem_thuong',
         'trang_thai',
         'ma_tai_lieu_dap_ung',
+        'ma_dap_ung_duoc_chon',
+        'thoi_gian_nguoi_yeu_cau_xac_nhan',
         'nguoi_xac_nhan',
         'thoi_gian_xac_nhan',
     ];
@@ -37,6 +39,7 @@ class YeuCauTaiLieu extends Model
         return [
             'diem_thuong' => 'integer',
             'trang_thai' => TrangThaiYeuCauTaiLieu::class,
+            'thoi_gian_nguoi_yeu_cau_xac_nhan' => 'datetime',
             'thoi_gian_xac_nhan' => 'datetime',
         ];
     }
@@ -54,6 +57,11 @@ class YeuCauTaiLieu extends Model
     public function taiLieuDapUng(): BelongsTo
     {
         return $this->belongsTo(TaiLieu::class, 'ma_tai_lieu_dap_ung', 'ma_tai_lieu');
+    }
+
+    public function dapUngDuocChon(): BelongsTo
+    {
+        return $this->belongsTo(DapUngYeuCauTaiLieu::class, 'ma_dap_ung_duoc_chon', 'ma_dap_ung');
     }
 
     public function nguoiXacNhan(): BelongsTo

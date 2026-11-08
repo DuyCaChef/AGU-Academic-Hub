@@ -140,5 +140,78 @@ class WishlistBountyRepository
 
         $yeuCau->delete();
     }
+
+    // Lấy danh sách yêu cầu đang chờ duyệt giải ngân phân trang cho Admin/Mod
+    public function getPendingPayoutQueue(int $perPage = 15): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    {
+        return YeuCauTaiLieu::with([
+            'monHoc:ma_mon_hoc,ma_hoc_phan,ten_mon_hoc',
+            'nguoiTao:ma_nguoi_dung,ho_ten,mssv,anh_dai_dien',
+            'dapUngDuocChon.nguoiDongGop:ma_nguoi_dung,ho_ten,mssv,anh_dai_dien',
+            'dapUngDuocChon.taiLieu:ma_tai_lieu,tieu_de,duong_dan_tep,dinh_dang_tep,dung_luong_kb,phan_loai',
+        ])
+            ->where('trang_thai', \App\Enums\TrangThaiYeuCauTaiLieu::CHO_GIAI_NGAN)
+            ->orderByDesc('thoi_gian_nguoi_yeu_cau_xac_nhan')
+            ->paginate($perPage);
+    }
+
+    // Lấy chi tiết yêu cầu chờ duyệt giải ngân kèm đầy đủ thông tin liên kết
+    public function getPendingPayoutDetail(int $maYeuCau): YeuCauTaiLieu
+    {
+        return YeuCauTaiLieu::with([
+            'monHoc',
+            'nguoiTao:ma_nguoi_dung,ho_ten,mssv,anh_dai_dien,diem_uy_tin',
+            'dapUngDuocChon.nguoiDongGop:ma_nguoi_dung,ho_ten,mssv,anh_dai_dien,diem_uy_tin',
+            'dapUngDuocChon.taiLieu',
+            'dapUngs.nguoiDongGop:ma_nguoi_dung,ho_ten,mssv',
+            'dapUngs.taiLieu:ma_tai_lieu,tieu_de,trang_thai',
+        ])
+            ->where('trang_thai', \App\Enums\TrangThaiYeuCauTaiLieu::CHO_GIAI_NGAN)
+            ->findOrFail($maYeuCau);
+    }
+
+    // Cập nhật trạng thái khi Admin/Mod duyệt giải ngân thành công
+    public function approvePayout(YeuCauTaiLieu $yeuCau, DapUngYeuCauTaiLieu $dapUng, int $actorId): void
+    {
+        // Chuyển bài nộp được chọn sang CHAP_NHAN
+        $dapUng->update([
+            'trang_thai'      => 'CHAP_NHAN',
+            'nguoi_duyet'     => $actorId,
+            'thoi_gian_duyet' => now(),
+        ]);
+
+        // Từ chối tất cả bài nộp khác còn lại
+        DapUngYeuCauTaiLieu::where('ma_yeu_cau', $yeuCau->ma_yeu_cau)
+            ->where('ma_dap_ung', '!=', $dapUng->ma_dap_ung)
+            ->whereIn('trang_thai', ['CHO_DUYET', 'NGUOI_YEU_CAU_XAC_NHAN'])
+            ->update(['trang_thai' => 'TU_CHOI']);
+
+        // Đóng yêu cầu với trạng thái DA_HOAN_THANH
+        $yeuCau->update([
+            'trang_thai'          => \App\Enums\TrangThaiYeuCauTaiLieu::DA_HOAN_THANH,
+            'ma_tai_lieu_dap_ung' => $dapUng->ma_tai_lieu,
+            'nguoi_xac_nhan'      => $actorId,
+            'thoi_gian_xac_nhan'  => now(),
+        ]);
+    }
+
+    // Cập nhật trạng thái khi Admin/Mod từ chối giải ngân - mở lại yêu cầu để nhận bài nộp mới
+    public function rejectPayout(YeuCauTaiLieu $yeuCau, DapUngYeuCauTaiLieu $dapUng, string $lyDo, int $actorId): void
+    {
+        // Đánh dấu bài nộp bị từ chối kèm lý do
+        $dapUng->update([
+            'trang_thai'              => 'TU_CHOI',
+            'ly_do_tu_choi_giai_ngan' => $lyDo,
+            'nguoi_duyet'             => $actorId,
+            'thoi_gian_duyet'         => now(),
+        ]);
+
+        // Mở lại yêu cầu sang trạng thái MO để sinh viên khác có thể nộp bài
+        $yeuCau->update([
+            'trang_thai'                       => \App\Enums\TrangThaiYeuCauTaiLieu::MO,
+            'ma_dap_ung_duoc_chon'             => null,
+            'thoi_gian_nguoi_yeu_cau_xac_nhan' => null,
+        ]);
+    }
 }
 

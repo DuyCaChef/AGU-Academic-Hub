@@ -14,7 +14,9 @@ use App\Models\Khoa;
 use App\Models\MonHoc;
 use App\Models\NguoiDung;
 use App\Models\TaiLieu;
+use App\Enums\TrangThaiYeuCauTaiLieu;
 use App\Models\YeuCauGoBoTaiLieu;
+use App\Models\YeuCauTaiLieu;
 use App\Models\YeuCauXacThuc;
 
 class AdminDashboardStatsRepository
@@ -183,5 +185,13 @@ class AdminDashboardStatsRepository
             'totalDownloads' => $downloads,
             'trashed' => $trashed,
         ];
+    }
+
+    // Đếm số lượng yêu cầu tài liệu Bounty đang chờ Admin/Mod duyệt giải ngân
+    public function getPendingBountyPayoutsCount(): int
+    {
+        return YeuCauTaiLieu::query()
+            ->where('trang_thai', TrangThaiYeuCauTaiLieu::CHO_GIAI_NGAN->value)
+            ->count();
     }
 }

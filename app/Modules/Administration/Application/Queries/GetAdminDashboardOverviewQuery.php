@@ -30,17 +30,19 @@ class GetAdminDashboardOverviewQuery
         $pendingRemovalRequests = $this->statsRepository->getPendingRemovalRequestsCount();
         $trashedDocuments = $this->statsRepository->getTrashedDocumentsCount();
         $expiredTrashedDocuments = $this->statsRepository->getExpiredTrashedDocumentsCount();
+        $pendingBountyPayouts = $this->statsRepository->getPendingBountyPayoutsCount();
 
         // Đánh giá các cảnh báo nghiệp vụ cần xử lý ngay
         $alerts = $this->alertEvaluator->evaluate([
-            'storage' => $storageStats,
-            'pendingReports' => $pendingReports,
+            'storage'              => $storageStats,
+            'pendingReports'       => $pendingReports,
             'pendingRemovalRequests' => $pendingRemovalRequests,
-            'documentsToReview' => $documentsToReview,
-            'pendingKyc' => $pendingKyc,
-            'pendingAlumniKyc' => $kycStats['pendingAlumni'],
+            'documentsToReview'    => $documentsToReview,
+            'pendingKyc'           => $pendingKyc,
+            'pendingAlumniKyc'     => $kycStats['pendingAlumni'],
             'expiredTrashedDocuments' => $expiredTrashedDocuments,
-            'lockedUsers' => $userStats['locked'],
+            'lockedUsers'          => $userStats['locked'],
+            'pendingBountyPayouts' => $pendingBountyPayouts,
         ]);
 
         return [

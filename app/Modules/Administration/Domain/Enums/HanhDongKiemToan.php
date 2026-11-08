@@ -30,6 +30,8 @@ enum HanhDongKiemToan: string
     case XOA_MEM_TAI_LIEU = 'XOA_MEM_TAI_LIEU';
     case KHOI_PHUC_TAI_LIEU = 'KHOI_PHUC_TAI_LIEU';
     case XOA_VINH_VIEN_TAI_LIEU = 'XOA_VINH_VIEN_TAI_LIEU';
+    case DUYET_GIAI_NGAN_BOUNTY = 'DUYET_GIAI_NGAN_BOUNTY';
+    case TU_CHOI_GIAI_NGAN_BOUNTY = 'TU_CHOI_GIAI_NGAN_BOUNTY';
 
     // Kiểm duyệt Đánh giá môn học
     case XU_LY_BAO_CAO_DANH_GIA = 'XU_LY_BAO_CAO_DANH_GIA';
@@ -65,6 +67,8 @@ enum HanhDongKiemToan: string
             self::XOA_MEM_TAI_LIEU => 'Xóa mềm tài liệu',
             self::KHOI_PHUC_TAI_LIEU => 'Khôi phục tài liệu',
             self::XOA_VINH_VIEN_TAI_LIEU => 'Xóa vĩnh viễn tài liệu',
+            self::DUYET_GIAI_NGAN_BOUNTY => 'Duyệt giải ngân điểm Bounty',
+            self::TU_CHOI_GIAI_NGAN_BOUNTY => 'Từ chối giải ngân điểm Bounty',
             self::XU_LY_BAO_CAO_DANH_GIA => 'Xử lý báo cáo đánh giá môn học',
             self::AN_DANH_GIA => 'Tạm ẩn đánh giá môn học',
             self::XOA_DANH_GIA => 'Xóa đánh giá môn học',
@@ -80,8 +84,8 @@ enum HanhDongKiemToan: string
     {
         return match ($this) {
             self::DANG_NHAP_ADMIN, self::DANG_XUAT_ADMIN => 'blue',
-            self::DUYET_KYC, self::MO_KHOA_TAI_KHOAN, self::KHOI_PHUC_TAI_LIEU => 'emerald',
-            self::TU_CHOI_KYC, self::KHOA_TAI_KHOAN, self::XOA_MEM_TAI_LIEU, self::XOA_VINH_VIEN_TAI_LIEU, self::XOA_SINH_VIEN_RAW, self::XOA_DANH_GIA => 'rose',
+            self::DUYET_KYC, self::MO_KHOA_TAI_KHOAN, self::KHOI_PHUC_TAI_LIEU, self::DUYET_GIAI_NGAN_BOUNTY => 'emerald',
+            self::TU_CHOI_KYC, self::KHOA_TAI_KHOAN, self::XOA_MEM_TAI_LIEU, self::XOA_VINH_VIEN_TAI_LIEU, self::XOA_SINH_VIEN_RAW, self::XOA_DANH_GIA, self::TU_CHOI_GIAI_NGAN_BOUNTY => 'rose',
             self::AN_TAI_LIEU, self::GHI_NHAN_VI_PHAM, self::XU_LY_BAO_CAO, self::XU_LY_BAO_CAO_DANH_GIA, self::AN_DANH_GIA => 'amber',
             self::NAP_SINH_VIEN_RAW, self::CAP_NHAT_SINH_VIEN_RAW => 'indigo',
             self::THAY_DOI_VAI_TRO, self::THAY_DOI_CAU_HINH => 'purple',

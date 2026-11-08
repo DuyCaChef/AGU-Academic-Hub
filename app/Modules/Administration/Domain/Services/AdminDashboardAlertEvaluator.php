@@ -126,6 +126,20 @@ class AdminDashboardAlertEvaluator
             ];
         }
 
+        // 8. Yêu cầu giải ngân điểm thưởng Bounty chờ duyệt
+        $pendingBountyPayouts = (int) ($params['pendingBountyPayouts'] ?? 0);
+        if ($pendingBountyPayouts > 0) {
+            $alerts[] = [
+                'id' => 'pending_bounty_payouts',
+                'severity' => 'warning',
+                'title' => 'Giải ngân điểm Bounty chờ duyệt',
+                'message' => "Có {$pendingBountyPayouts} yêu cầu tài liệu đã được sinh viên xác nhận và đang chờ Admin/Mod duyệt giải ngân điểm thưởng.",
+                'count' => $pendingBountyPayouts,
+                'actionLabel' => 'Duyệt giải ngân',
+                'actionRoute' => 'admin.bounties.payout-queue',
+            ];
+        }
+
         // Sắp xếp thứ tự ưu tiên: critical -> warning -> info
         $severityWeight = ['critical' => 1, 'warning' => 2, 'info' => 3];
         usort($alerts, function ($a, $b) use ($severityWeight) {
