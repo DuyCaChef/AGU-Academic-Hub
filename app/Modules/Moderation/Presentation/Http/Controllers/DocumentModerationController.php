@@ -4,9 +4,11 @@ namespace App\Modules\Moderation\Presentation\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\TaiLieu;
+use App\Modules\Moderation\Application\Actions\ApproveNewDocumentAction;
 use App\Modules\Moderation\Application\Actions\ArchiveViolationReportAction;
 use App\Modules\Moderation\Application\Actions\DecideDocumentReviewAction;
 use App\Modules\Moderation\Application\Actions\PermanentlyDeleteDocumentAction;
+use App\Modules\Moderation\Application\Actions\RejectNewDocumentAction;
 use App\Modules\Moderation\Application\Actions\ResolveViolationReportAction;
 use App\Modules\Moderation\Application\Actions\RestoreDocumentAction;
 use App\Modules\Moderation\Application\Queries\GetDeletedDocumentsQuery;
@@ -36,9 +38,44 @@ class DocumentModerationController extends Controller
     {
         abort_unless($request->user()?->laQuanTriVien() || $request->user()?->laKiemDuyetVien(), 403, 'Bạn không có quyền thực hiện kiểm duyệt.');
 
-        $data = $query->execute();
+        $data = $query->execute($request->only(['tab', 'status']));
 
         return Inertia::render('Admin/Documents/ReviewQueue', $data);
+    }
+
+    // Phê duyệt công khai tài liệu mới đăng
+    public function approveNewDocument(Request $request, int $id, ApproveNewDocumentAction $action): RedirectResponse
+    {
+        abort_unless($request->user()?->laQuanTriVien() || $request->user()?->laKiemDuyetVien(), 403, 'Bạn không có quyền thực hiện kiểm duyệt.');
+
+        $result = $action->execute($id, $request->user());
+
+        if (!$result['success']) {
+            return back()->with('error', $result['message']);
+        }
+
+        return back()->with('success', $result['message']);
+    }
+
+    // Từ chối duyệt tài liệu mới đăng kèm lý do
+    public function rejectNewDocument(Request $request, int $id, RejectNewDocumentAction $action): RedirectResponse
+    {
+        abort_unless($request->user()?->laQuanTriVien() || $request->user()?->laKiemDuyetVien(), 403, 'Bạn không có quyền thực hiện kiểm duyệt.');
+
+        $request->validate([
+            'reason' => ['required', 'string', 'min:10', 'max:2000'],
+        ], [
+            'reason.required' => 'Vui lòng nhập lý do từ chối tài liệu.',
+            'reason.min'      => 'Lý do từ chối phải có ít nhất 10 ký tự.',
+        ]);
+
+        $result = $action->execute($id, $request->input('reason'), $request->user());
+
+        if (!$result['success']) {
+            return back()->with('error', $result['message']);
+        }
+
+        return back()->with('success', $result['message']);
     }
 
     // Chi tiết thẩm định tài liệu trong hàng đợi kiểm tra (hỗ trợ cả trashed)

@@ -25,6 +25,8 @@ enum HanhDongKiemToan: string
     case GHI_NHAN_VI_PHAM = 'GHI_NHAN_VI_PHAM';
 
     // Kiểm duyệt & Quản trị tài liệu
+    case DUYET_TAI_LIEU = 'DUYET_TAI_LIEU';
+    case TU_CHOI_TAI_LIEU = 'TU_CHOI_TAI_LIEU';
     case XU_LY_BAO_CAO = 'XU_LY_BAO_CAO';
     case AN_TAI_LIEU = 'AN_TAI_LIEU';
     case XOA_MEM_TAI_LIEU = 'XOA_MEM_TAI_LIEU';
@@ -62,6 +64,8 @@ enum HanhDongKiemToan: string
             self::MO_KHOA_TAI_KHOAN => 'Mở khóa tài khoản',
             self::THAY_DOI_VAI_TRO => 'Thay đổi vai trò / Phân quyền',
             self::GHI_NHAN_VI_PHAM => 'Ghi nhận vi phạm người dùng',
+            self::DUYET_TAI_LIEU => 'Phê duyệt tài liệu mới',
+            self::TU_CHOI_TAI_LIEU => 'Từ chối duyệt tài liệu mới',
             self::XU_LY_BAO_CAO => 'Xử lý báo cáo vi phạm tài liệu',
             self::AN_TAI_LIEU => 'Tạm ẩn tài liệu',
             self::XOA_MEM_TAI_LIEU => 'Xóa mềm tài liệu',
@@ -84,8 +88,8 @@ enum HanhDongKiemToan: string
     {
         return match ($this) {
             self::DANG_NHAP_ADMIN, self::DANG_XUAT_ADMIN => 'blue',
-            self::DUYET_KYC, self::MO_KHOA_TAI_KHOAN, self::KHOI_PHUC_TAI_LIEU, self::DUYET_GIAI_NGAN_BOUNTY => 'emerald',
-            self::TU_CHOI_KYC, self::KHOA_TAI_KHOAN, self::XOA_MEM_TAI_LIEU, self::XOA_VINH_VIEN_TAI_LIEU, self::XOA_SINH_VIEN_RAW, self::XOA_DANH_GIA, self::TU_CHOI_GIAI_NGAN_BOUNTY => 'rose',
+            self::DUYET_KYC, self::MO_KHOA_TAI_KHOAN, self::KHOI_PHUC_TAI_LIEU, self::DUYET_GIAI_NGAN_BOUNTY, self::DUYET_TAI_LIEU => 'emerald',
+            self::TU_CHOI_KYC, self::KHOA_TAI_KHOAN, self::XOA_MEM_TAI_LIEU, self::XOA_VINH_VIEN_TAI_LIEU, self::XOA_SINH_VIEN_RAW, self::XOA_DANH_GIA, self::TU_CHOI_GIAI_NGAN_BOUNTY, self::TU_CHOI_TAI_LIEU => 'rose',
             self::AN_TAI_LIEU, self::GHI_NHAN_VI_PHAM, self::XU_LY_BAO_CAO, self::XU_LY_BAO_CAO_DANH_GIA, self::AN_DANH_GIA => 'amber',
             self::NAP_SINH_VIEN_RAW, self::CAP_NHAT_SINH_VIEN_RAW => 'indigo',
             self::THAY_DOI_VAI_TRO, self::THAY_DOI_CAU_HINH => 'purple',

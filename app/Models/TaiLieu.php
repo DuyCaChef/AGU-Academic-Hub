@@ -94,4 +94,9 @@ class TaiLieu extends Model
     {
         return $this->hasMany(LichSuThungRac::class, 'ma_tai_lieu', 'ma_tai_lieu');
     }
+
+    public function dapUngYeuCaus(): HasMany
+    {
+        return $this->hasMany(DapUngYeuCauTaiLieu::class, 'ma_tai_lieu', 'ma_tai_lieu');
+    }
 }

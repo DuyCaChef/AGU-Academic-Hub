@@ -79,7 +79,7 @@ class AdminDashboardStatsRepository
     public function getDocumentsToReviewCount(): int
     {
         return TaiLieu::query()
-            ->whereIn('trang_thai', ['CHO_KIEM_TRA', 'TAM_AN_KIEM_TRA'])
+            ->whereIn('trang_thai', ['CHO_DUYET', 'CHO_KIEM_TRA', 'TAM_AN_KIEM_TRA'])
             ->count();
     }
 
