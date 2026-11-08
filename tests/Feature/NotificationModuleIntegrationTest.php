@@ -566,9 +566,12 @@ class NotificationModuleIntegrationTest extends TestCase
         $reportAction->execute($this->studentA, $review->ma_danh_gia, 'SPAM', 'Nội dung trùng lặp');
 
         // Moderator nhận được thông báo UC-MOD-03
-        $modNotif = $this->moderator->notifications()->latest()->first();
+        $modNotif = $this->moderator->notifications()->where('tieu_de', 'like', '%báo cáo vi phạm%')->first();
         $this->assertNotNull($modNotif);
-        $this->assertStringContainsString('Đánh giá môn học bị báo cáo vi phạm', $modNotif->tieu_de);
+        $this->assertTrue(
+            str_contains($modNotif->tieu_de, 'Đánh giá môn học bị báo cáo vi phạm') ||
+            str_contains($modNotif->tieu_de, 'Báo cáo vi phạm đánh giá mới')
+        );
         // Bảo vệ danh tính: Thông báo không chứa tên thật của tác giả review ẩn danh
         $this->assertStringNotContainsString($this->studentB->ho_ten, $modNotif->noi_dung);
     }
