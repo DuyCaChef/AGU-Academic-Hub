@@ -438,6 +438,12 @@ class NotificationModuleIntegrationTest extends TestCase
         $result = $confirmAction->execute($this->studentA, $yeuCau->ma_yeu_cau, $dapUng->ma_dap_ung);
         $this->assertTrue($result['success']);
 
+        // Admin duyệt giải ngân điểm Bounty
+        /** @var \App\Modules\Bounties\Application\Actions\ApproveBountyPayoutAction $approveAction */
+        $approveAction = app(\App\Modules\Bounties\Application\Actions\ApproveBountyPayoutAction::class);
+        $approveResult = $approveAction->execute($this->admin, $yeuCau->ma_yeu_cau);
+        $this->assertTrue($approveResult['success']);
+
         // Student A nhận thông báo nghiệm thu thành công (UC-ST-04)
         $notifA = $this->studentA->notifications()->latest()->first();
         $this->assertNotNull($notifA);

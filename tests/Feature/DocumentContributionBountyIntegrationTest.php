@@ -38,62 +38,62 @@ class DocumentContributionBountyIntegrationTest extends TestCase
         parent::setUp();
 
         $this->faculty = Khoa::create([
-            'ten_khoa'     => 'Khoa Công nghệ Thông tin',
+            'ten_khoa' => 'Khoa Công nghệ Thông tin',
             'ky_hieu_khoa' => 'CNTT',
         ]);
 
         $this->courseA = MonHoc::create([
-            'ma_khoa'     => $this->faculty->ma_khoa,
+            'ma_khoa' => $this->faculty->ma_khoa,
             'ma_hoc_phan' => 'COS101',
             'ten_mon_hoc' => 'Lập trình Cơ bản',
-            'so_tin_chi'  => 3,
-            'mo_ta'       => 'Môn học cơ bản đại cương',
+            'so_tin_chi' => 3,
+            'mo_ta' => 'Môn học cơ bản đại cương',
         ]);
 
         $this->courseB = MonHoc::create([
-            'ma_khoa'     => $this->faculty->ma_khoa,
+            'ma_khoa' => $this->faculty->ma_khoa,
             'ma_hoc_phan' => 'COS102',
             'ten_mon_hoc' => 'Cơ sở Dữ liệu',
-            'so_tin_chi'  => 3,
-            'mo_ta'       => 'Môn học cơ sở dữ liệu',
+            'so_tin_chi' => 3,
+            'mo_ta' => 'Môn học cơ sở dữ liệu',
         ]);
 
         // 1. Người tạo yêu cầu săn thưởng (Requester - Student A)
         $this->requester = NguoiDung::factory()->create([
-            'ho_ten'      => 'Nguyễn Văn Requester',
-            'ma_khoa'     => $this->faculty->ma_khoa,
-            'vai_tro'     => VaiTroNguoiDung::SINH_VIEN,
+            'ho_ten' => 'Nguyễn Văn Requester',
+            'ma_khoa' => $this->faculty->ma_khoa,
+            'vai_tro' => VaiTroNguoiDung::SINH_VIEN,
             'diem_uy_tin' => 100,
         ]);
 
         // 2. Người đóng góp tài liệu săn thưởng (Contributor - Student B)
         $this->contributor = NguoiDung::factory()->create([
-            'ho_ten'      => 'Trần Thị Contributor',
-            'ma_khoa'     => $this->faculty->ma_khoa,
-            'vai_tro'     => VaiTroNguoiDung::SINH_VIEN,
+            'ho_ten' => 'Trần Thị Contributor',
+            'ma_khoa' => $this->faculty->ma_khoa,
+            'vai_tro' => VaiTroNguoiDung::SINH_VIEN,
             'diem_uy_tin' => 50,
         ]);
 
         // 3. Người dùng sinh viên khác (Other Student C)
         $this->otherStudent = NguoiDung::factory()->create([
-            'ho_ten'      => 'Lê Văn Other',
-            'ma_khoa'     => $this->faculty->ma_khoa,
-            'vai_tro'     => VaiTroNguoiDung::SINH_VIEN,
+            'ho_ten' => 'Lê Văn Other',
+            'ma_khoa' => $this->faculty->ma_khoa,
+            'vai_tro' => VaiTroNguoiDung::SINH_VIEN,
             'diem_uy_tin' => 50,
         ]);
 
         // 4. Kiểm duyệt viên (Moderator)
         $this->moderator = NguoiDung::factory()->create([
-            'ho_ten'      => 'Phạm Văn Kiểm Duyệt Viên',
-            'ma_khoa'     => $this->faculty->ma_khoa,
-            'vai_tro'     => VaiTroNguoiDung::KIEM_DUYET_VIEN,
+            'ho_ten' => 'Phạm Văn Kiểm Duyệt Viên',
+            'ma_khoa' => $this->faculty->ma_khoa,
+            'vai_tro' => VaiTroNguoiDung::KIEM_DUYET_VIEN,
         ]);
 
         // 5. Quản trị viên (Admin)
         $this->admin = NguoiDung::factory()->create([
-            'ho_ten'      => 'Hoàng Quản Trị Viên',
-            'ma_khoa'     => $this->faculty->ma_khoa,
-            'vai_tro'     => VaiTroNguoiDung::QUAN_TRI_VIEN,
+            'ho_ten' => 'Hoàng Quản Trị Viên',
+            'ma_khoa' => $this->faculty->ma_khoa,
+            'vai_tro' => VaiTroNguoiDung::QUAN_TRI_VIEN,
         ]);
     }
 
@@ -104,32 +104,32 @@ class DocumentContributionBountyIntegrationTest extends TestCase
     public function test_wishlist_repository_eager_loading_loads_tai_lieu_without_sql_column_error(): void
     {
         $yeuCau = YeuCauTaiLieu::create([
-            'ma_mon_hoc'   => $this->courseA->ma_mon_hoc,
+            'ma_mon_hoc' => $this->courseA->ma_mon_hoc,
             'ma_nguoi_tao' => $this->requester->ma_nguoi_dung,
-            'tieu_de'      => 'Cần tìm slide bài giảng lập trình',
-            'phan_loai'    => 'BAI_GIANG',
-            'diem_thuong'  => 30,
-            'trang_thai'   => TrangThaiYeuCauTaiLieu::MO,
+            'tieu_de' => 'Cần tìm slide bài giảng lập trình',
+            'phan_loai' => 'BAI_GIANG',
+            'diem_thuong' => 30,
+            'trang_thai' => TrangThaiYeuCauTaiLieu::MO,
         ]);
 
         $taiLieu = TaiLieu::create([
-            'ma_mon_hoc'    => $this->courseA->ma_mon_hoc,
+            'ma_mon_hoc' => $this->courseA->ma_mon_hoc,
             'ma_nguoi_dang' => $this->contributor->ma_nguoi_dung,
-            'tieu_de'       => 'Slide bài giảng chuẩn',
+            'tieu_de' => 'Slide bài giảng chuẩn',
             'duong_dan_tep' => 'documents/slide.pdf',
             'dinh_dang_tep' => 'pdf',
             'dung_luong_kb' => 120,
-            'ma_bam_file'   => hash('sha256', 'sample_slide_content'),
-            'phan_loai'     => 'BAI_GIANG',
-            'luot_tai'      => 0,
-            'trang_thai'    => TrangThaiTaiLieu::DA_DUYET->value,
+            'ma_bam_file' => hash('sha256', 'sample_slide_content'),
+            'phan_loai' => 'BAI_GIANG',
+            'luot_tai' => 0,
+            'trang_thai' => TrangThaiTaiLieu::DA_DUYET->value,
         ]);
 
         $dapUng = DapUngYeuCauTaiLieu::create([
-            'ma_yeu_cau'        => $yeuCau->ma_yeu_cau,
-            'ma_tai_lieu'       => $taiLieu->ma_tai_lieu,
+            'ma_yeu_cau' => $yeuCau->ma_yeu_cau,
+            'ma_tai_lieu' => $taiLieu->ma_tai_lieu,
             'ma_nguoi_dong_gop' => $this->contributor->ma_nguoi_dung,
-            'trang_thai'        => 'CHO_DUYET',
+            'trang_thai' => 'CHO_DUYET',
         ]);
 
         /** @var WishlistBountyRepository $repository */
@@ -160,26 +160,26 @@ class DocumentContributionBountyIntegrationTest extends TestCase
     public function test_cannot_fulfill_bounty_with_another_users_document(): void
     {
         $yeuCau = YeuCauTaiLieu::create([
-            'ma_mon_hoc'   => $this->courseA->ma_mon_hoc,
+            'ma_mon_hoc' => $this->courseA->ma_mon_hoc,
             'ma_nguoi_tao' => $this->requester->ma_nguoi_dung,
-            'tieu_de'      => 'Cần tìm đề thi mẫu',
-            'phan_loai'    => 'DE_THI',
-            'diem_thuong'  => 40,
-            'trang_thai'   => TrangThaiYeuCauTaiLieu::MO,
+            'tieu_de' => 'Cần tìm đề thi mẫu',
+            'phan_loai' => 'DE_THI',
+            'diem_thuong' => 40,
+            'trang_thai' => TrangThaiYeuCauTaiLieu::MO,
         ]);
 
         // Document belongs to otherStudent
         $docOther = TaiLieu::create([
-            'ma_mon_hoc'    => $this->courseA->ma_mon_hoc,
+            'ma_mon_hoc' => $this->courseA->ma_mon_hoc,
             'ma_nguoi_dang' => $this->otherStudent->ma_nguoi_dung,
-            'tieu_de'       => 'Đề thi của Other Student',
+            'tieu_de' => 'Đề thi của Other Student',
             'duong_dan_tep' => 'documents/other.pdf',
             'dinh_dang_tep' => 'pdf',
             'dung_luong_kb' => 80,
-            'ma_bam_file'   => hash('sha256', 'other_content'),
-            'phan_loai'     => 'DE_THI',
-            'luot_tai'      => 0,
-            'trang_thai'    => TrangThaiTaiLieu::DA_DUYET->value,
+            'ma_bam_file' => hash('sha256', 'other_content'),
+            'phan_loai' => 'DE_THI',
+            'luot_tai' => 0,
+            'trang_thai' => TrangThaiTaiLieu::DA_DUYET->value,
         ]);
 
         // Contributor attempts to submit other's document
@@ -190,7 +190,7 @@ class DocumentContributionBountyIntegrationTest extends TestCase
 
         $response->assertSessionHas('error');
         $this->assertDatabaseMissing('dap_ung_yeu_cau_tai_lieu', [
-            'ma_yeu_cau'        => $yeuCau->ma_yeu_cau,
+            'ma_yeu_cau' => $yeuCau->ma_yeu_cau,
             'ma_nguoi_dong_gop' => $this->contributor->ma_nguoi_dung,
         ]);
     }
@@ -198,26 +198,26 @@ class DocumentContributionBountyIntegrationTest extends TestCase
     public function test_cannot_fulfill_bounty_with_unapproved_document_method_a(): void
     {
         $yeuCau = YeuCauTaiLieu::create([
-            'ma_mon_hoc'   => $this->courseA->ma_mon_hoc,
+            'ma_mon_hoc' => $this->courseA->ma_mon_hoc,
             'ma_nguoi_tao' => $this->requester->ma_nguoi_dung,
-            'tieu_de'      => 'Cần tìm đề thi cuối kỳ',
-            'phan_loai'    => 'DE_THI',
-            'diem_thuong'  => 30,
-            'trang_thai'   => TrangThaiYeuCauTaiLieu::MO,
+            'tieu_de' => 'Cần tìm đề thi cuối kỳ',
+            'phan_loai' => 'DE_THI',
+            'diem_thuong' => 30,
+            'trang_thai' => TrangThaiYeuCauTaiLieu::MO,
         ]);
 
         // Contributor's document is still pending moderation (CHO_DUYET)
         $docPending = TaiLieu::create([
-            'ma_mon_hoc'    => $this->courseA->ma_mon_hoc,
+            'ma_mon_hoc' => $this->courseA->ma_mon_hoc,
             'ma_nguoi_dang' => $this->contributor->ma_nguoi_dung,
-            'tieu_de'       => 'Đề thi chưa duyệt',
+            'tieu_de' => 'Đề thi chưa duyệt',
             'duong_dan_tep' => 'documents/pending.pdf',
             'dinh_dang_tep' => 'pdf',
             'dung_luong_kb' => 80,
-            'ma_bam_file'   => hash('sha256', 'pending_content'),
-            'phan_loai'     => 'DE_THI',
-            'luot_tai'      => 0,
-            'trang_thai'    => TrangThaiTaiLieu::CHO_DUYET->value,
+            'ma_bam_file' => hash('sha256', 'pending_content'),
+            'phan_loai' => 'DE_THI',
+            'luot_tai' => 0,
+            'trang_thai' => TrangThaiTaiLieu::CHO_DUYET->value,
         ]);
 
         $response = $this->actingAs($this->contributor)
@@ -227,7 +227,7 @@ class DocumentContributionBountyIntegrationTest extends TestCase
 
         $response->assertSessionHas('error');
         $this->assertDatabaseMissing('dap_ung_yeu_cau_tai_lieu', [
-            'ma_yeu_cau'  => $yeuCau->ma_yeu_cau,
+            'ma_yeu_cau' => $yeuCau->ma_yeu_cau,
             'ma_tai_lieu' => $docPending->ma_tai_lieu,
         ]);
     }
@@ -235,26 +235,26 @@ class DocumentContributionBountyIntegrationTest extends TestCase
     public function test_cannot_fulfill_bounty_with_document_from_different_course(): void
     {
         $yeuCau = YeuCauTaiLieu::create([
-            'ma_mon_hoc'   => $this->courseA->ma_mon_hoc, // Course A
+            'ma_mon_hoc' => $this->courseA->ma_mon_hoc, // Course A
             'ma_nguoi_tao' => $this->requester->ma_nguoi_dung,
-            'tieu_de'      => 'Cần tìm tài liệu Course A',
-            'phan_loai'    => 'BAI_GIANG',
-            'diem_thuong'  => 25,
-            'trang_thai'   => TrangThaiYeuCauTaiLieu::MO,
+            'tieu_de' => 'Cần tìm tài liệu Course A',
+            'phan_loai' => 'BAI_GIANG',
+            'diem_thuong' => 25,
+            'trang_thai' => TrangThaiYeuCauTaiLieu::MO,
         ]);
 
         // Contributor has approved doc for Course B
         $docCourseB = TaiLieu::create([
-            'ma_mon_hoc'    => $this->courseB->ma_mon_hoc, // Course B!
+            'ma_mon_hoc' => $this->courseB->ma_mon_hoc, // Course B!
             'ma_nguoi_dang' => $this->contributor->ma_nguoi_dung,
-            'tieu_de'       => 'Tài liệu Course B',
+            'tieu_de' => 'Tài liệu Course B',
             'duong_dan_tep' => 'documents/b.pdf',
             'dinh_dang_tep' => 'pdf',
             'dung_luong_kb' => 80,
-            'ma_bam_file'   => hash('sha256', 'course_b_content'),
-            'phan_loai'     => 'BAI_GIANG',
-            'luot_tai'      => 0,
-            'trang_thai'    => TrangThaiTaiLieu::DA_DUYET->value,
+            'ma_bam_file' => hash('sha256', 'course_b_content'),
+            'phan_loai' => 'BAI_GIANG',
+            'luot_tai' => 0,
+            'trang_thai' => TrangThaiTaiLieu::DA_DUYET->value,
         ]);
 
         $response = $this->actingAs($this->contributor)
@@ -264,7 +264,7 @@ class DocumentContributionBountyIntegrationTest extends TestCase
 
         $response->assertSessionHas('error');
         $this->assertDatabaseMissing('dap_ung_yeu_cau_tai_lieu', [
-            'ma_yeu_cau'  => $yeuCau->ma_yeu_cau,
+            'ma_yeu_cau' => $yeuCau->ma_yeu_cau,
             'ma_tai_lieu' => $docCourseB->ma_tai_lieu,
         ]);
     }
@@ -272,31 +272,31 @@ class DocumentContributionBountyIntegrationTest extends TestCase
     public function test_cannot_fulfill_same_bounty_twice_with_same_document(): void
     {
         $yeuCau = YeuCauTaiLieu::create([
-            'ma_mon_hoc'   => $this->courseA->ma_mon_hoc,
+            'ma_mon_hoc' => $this->courseA->ma_mon_hoc,
             'ma_nguoi_tao' => $this->requester->ma_nguoi_dung,
-            'tieu_de'      => 'Cần tìm tài liệu chống spam',
-            'phan_loai'    => 'BAI_GIANG',
-            'diem_thuong'  => 30,
-            'trang_thai'   => TrangThaiYeuCauTaiLieu::MO,
+            'tieu_de' => 'Cần tìm tài liệu chống spam',
+            'phan_loai' => 'BAI_GIANG',
+            'diem_thuong' => 30,
+            'trang_thai' => TrangThaiYeuCauTaiLieu::MO,
         ]);
 
         $doc = TaiLieu::create([
-            'ma_mon_hoc'    => $this->courseA->ma_mon_hoc,
+            'ma_mon_hoc' => $this->courseA->ma_mon_hoc,
             'ma_nguoi_dang' => $this->contributor->ma_nguoi_dung,
-            'tieu_de'       => 'Tài liệu hợp lệ',
+            'tieu_de' => 'Tài liệu hợp lệ',
             'duong_dan_tep' => 'documents/valid.pdf',
             'dinh_dang_tep' => 'pdf',
             'dung_luong_kb' => 100,
-            'ma_bam_file'   => hash('sha256', 'valid_content'),
-            'phan_loai'     => 'BAI_GIANG',
-            'luot_tai'      => 0,
-            'trang_thai'    => TrangThaiTaiLieu::DA_DUYET->value,
+            'ma_bam_file' => hash('sha256', 'valid_content'),
+            'phan_loai' => 'BAI_GIANG',
+            'luot_tai' => 0,
+            'trang_thai' => TrangThaiTaiLieu::DA_DUYET->value,
         ]);
 
         // First fulfillment succeeds
         $firstResponse = $this->actingAs($this->contributor)
             ->post(route('document-requests.fulfill', $yeuCau->ma_yeu_cau), [
-                'ma_tai_lieu'      => $doc->ma_tai_lieu,
+                'ma_tai_lieu' => $doc->ma_tai_lieu,
                 'ghi_chu_dong_gop' => 'Gửi lần 1',
             ]);
         $firstResponse->assertSessionHas('success');
@@ -304,7 +304,7 @@ class DocumentContributionBountyIntegrationTest extends TestCase
         // Second fulfillment with identical document must be rejected
         $secondResponse = $this->actingAs($this->contributor)
             ->post(route('document-requests.fulfill', $yeuCau->ma_yeu_cau), [
-                'ma_tai_lieu'      => $doc->ma_tai_lieu,
+                'ma_tai_lieu' => $doc->ma_tai_lieu,
                 'ghi_chu_dong_gop' => 'Gửi lần 2 trùng lặp',
             ]);
         $secondResponse->assertSessionHas('error');
@@ -318,9 +318,9 @@ class DocumentContributionBountyIntegrationTest extends TestCase
     {
         // Requester creates bounty with 50 points frozen
         $this->actingAs($this->requester)->post(route('document-requests.store'), [
-            'ma_mon_hoc'  => $this->courseA->ma_mon_hoc,
-            'tieu_de'     => 'Cần tìm đồ án môn học',
-            'phan_loai'   => 'DO_AN',
+            'ma_mon_hoc' => $this->courseA->ma_mon_hoc,
+            'tieu_de' => 'Cần tìm đồ án môn học',
+            'phan_loai' => 'DO_AN',
             'diem_thuong' => 50,
         ]);
 
@@ -329,23 +329,23 @@ class DocumentContributionBountyIntegrationTest extends TestCase
 
         // Document submitted via local upload or pending moderation
         $unapprovedDoc = TaiLieu::create([
-            'ma_mon_hoc'    => $this->courseA->ma_mon_hoc,
+            'ma_mon_hoc' => $this->courseA->ma_mon_hoc,
             'ma_nguoi_dang' => $this->contributor->ma_nguoi_dung,
-            'tieu_de'       => 'Đồ án đang chờ duyệt',
+            'tieu_de' => 'Đồ án đang chờ duyệt',
             'duong_dan_tep' => 'documents/do_an_cho_duyet.pdf',
             'dinh_dang_tep' => 'pdf',
             'dung_luong_kb' => 500,
-            'ma_bam_file'   => hash('sha256', 'unapproved_project_content'),
-            'phan_loai'     => 'DO_AN',
-            'luot_tai'      => 0,
-            'trang_thai'    => TrangThaiTaiLieu::CHO_DUYET->value,
+            'ma_bam_file' => hash('sha256', 'unapproved_project_content'),
+            'phan_loai' => 'DO_AN',
+            'luot_tai' => 0,
+            'trang_thai' => TrangThaiTaiLieu::CHO_DUYET->value,
         ]);
 
         $dapUng = DapUngYeuCauTaiLieu::create([
-            'ma_yeu_cau'        => $yeuCau->ma_yeu_cau,
-            'ma_tai_lieu'       => $unapprovedDoc->ma_tai_lieu,
+            'ma_yeu_cau' => $yeuCau->ma_yeu_cau,
+            'ma_tai_lieu' => $unapprovedDoc->ma_tai_lieu,
             'ma_nguoi_dong_gop' => $this->contributor->ma_nguoi_dung,
-            'trang_thai'        => 'CHO_DUYET',
+            'trang_thai' => 'CHO_DUYET',
         ]);
 
         // Requester tries to confirm disbursement for unapproved document
@@ -366,32 +366,32 @@ class DocumentContributionBountyIntegrationTest extends TestCase
     public function test_requester_can_confirm_disbursement_once_document_is_approved(): void
     {
         $this->actingAs($this->requester)->post(route('document-requests.store'), [
-            'ma_mon_hoc'  => $this->courseA->ma_mon_hoc,
-            'tieu_de'     => 'Cần tìm đồ án giải thuật',
-            'phan_loai'   => 'DO_AN',
+            'ma_mon_hoc' => $this->courseA->ma_mon_hoc,
+            'tieu_de' => 'Cần tìm đồ án giải thuật',
+            'phan_loai' => 'DO_AN',
             'diem_thuong' => 50,
         ]);
 
         $yeuCau = YeuCauTaiLieu::first();
 
         $doc = TaiLieu::create([
-            'ma_mon_hoc'    => $this->courseA->ma_mon_hoc,
+            'ma_mon_hoc' => $this->courseA->ma_mon_hoc,
             'ma_nguoi_dang' => $this->contributor->ma_nguoi_dung,
-            'tieu_de'       => 'Đồ án đã được duyệt',
+            'tieu_de' => 'Đồ án đã được duyệt',
             'duong_dan_tep' => 'documents/do_an_da_duyet.pdf',
             'dinh_dang_tep' => 'pdf',
             'dung_luong_kb' => 500,
-            'ma_bam_file'   => hash('sha256', 'approved_project_content'),
-            'phan_loai'     => 'DO_AN',
-            'luot_tai'      => 0,
-            'trang_thai'    => TrangThaiTaiLieu::DA_DUYET->value,
+            'ma_bam_file' => hash('sha256', 'approved_project_content'),
+            'phan_loai' => 'DO_AN',
+            'luot_tai' => 0,
+            'trang_thai' => TrangThaiTaiLieu::DA_DUYET->value,
         ]);
 
         $dapUng = DapUngYeuCauTaiLieu::create([
-            'ma_yeu_cau'        => $yeuCau->ma_yeu_cau,
-            'ma_tai_lieu'       => $doc->ma_tai_lieu,
+            'ma_yeu_cau' => $yeuCau->ma_yeu_cau,
+            'ma_tai_lieu' => $doc->ma_tai_lieu,
             'ma_nguoi_dong_gop' => $this->contributor->ma_nguoi_dung,
-            'trang_thai'        => 'CHO_DUYET',
+            'trang_thai' => 'CHO_DUYET',
         ]);
 
         $response = $this->actingAs($this->requester)
@@ -424,16 +424,16 @@ class DocumentContributionBountyIntegrationTest extends TestCase
     public function test_unrelated_user_or_guest_cannot_view_unapproved_document_detail(): void
     {
         $unapprovedDoc = TaiLieu::create([
-            'ma_mon_hoc'    => $this->courseA->ma_mon_hoc,
+            'ma_mon_hoc' => $this->courseA->ma_mon_hoc,
             'ma_nguoi_dang' => $this->contributor->ma_nguoi_dung,
-            'tieu_de'       => 'Tài liệu đang chờ kiểm duyệt',
+            'tieu_de' => 'Tài liệu đang chờ kiểm duyệt',
             'duong_dan_tep' => 'documents/pending_detail.pdf',
             'dinh_dang_tep' => 'pdf',
             'dung_luong_kb' => 100,
-            'ma_bam_file'   => hash('sha256', 'pending_detail_content'),
-            'phan_loai'     => 'BAI_GIANG',
-            'luot_tai'      => 0,
-            'trang_thai'    => TrangThaiTaiLieu::CHO_DUYET->value,
+            'ma_bam_file' => hash('sha256', 'pending_detail_content'),
+            'phan_loai' => 'BAI_GIANG',
+            'luot_tai' => 0,
+            'trang_thai' => TrangThaiTaiLieu::CHO_DUYET->value,
         ]);
 
         // Unrelated student -> 403 Forbidden
@@ -449,16 +449,16 @@ class DocumentContributionBountyIntegrationTest extends TestCase
     public function test_author_can_view_own_unapproved_document_detail(): void
     {
         $unapprovedDoc = TaiLieu::create([
-            'ma_mon_hoc'    => $this->courseA->ma_mon_hoc,
+            'ma_mon_hoc' => $this->courseA->ma_mon_hoc,
             'ma_nguoi_dang' => $this->contributor->ma_nguoi_dung,
-            'tieu_de'       => 'Tài liệu của chính tôi đang chờ duyệt',
+            'tieu_de' => 'Tài liệu của chính tôi đang chờ duyệt',
             'duong_dan_tep' => 'documents/my_pending.pdf',
             'dinh_dang_tep' => 'pdf',
             'dung_luong_kb' => 100,
-            'ma_bam_file'   => hash('sha256', 'my_pending_content'),
-            'phan_loai'     => 'BAI_GIANG',
-            'luot_tai'      => 0,
-            'trang_thai'    => TrangThaiTaiLieu::CHO_DUYET->value,
+            'ma_bam_file' => hash('sha256', 'my_pending_content'),
+            'phan_loai' => 'BAI_GIANG',
+            'luot_tai' => 0,
+            'trang_thai' => TrangThaiTaiLieu::CHO_DUYET->value,
         ]);
 
         $response = $this->actingAs($this->contributor)
@@ -470,16 +470,16 @@ class DocumentContributionBountyIntegrationTest extends TestCase
     public function test_admin_and_moderator_can_view_unapproved_document_detail(): void
     {
         $unapprovedDoc = TaiLieu::create([
-            'ma_mon_hoc'    => $this->courseA->ma_mon_hoc,
+            'ma_mon_hoc' => $this->courseA->ma_mon_hoc,
             'ma_nguoi_dang' => $this->contributor->ma_nguoi_dung,
-            'tieu_de'       => 'Tài liệu chờ duyệt cho staff',
+            'tieu_de' => 'Tài liệu chờ duyệt cho staff',
             'duong_dan_tep' => 'documents/staff_pending.pdf',
             'dinh_dang_tep' => 'pdf',
             'dung_luong_kb' => 100,
-            'ma_bam_file'   => hash('sha256', 'staff_pending_content'),
-            'phan_loai'     => 'BAI_GIANG',
-            'luot_tai'      => 0,
-            'trang_thai'    => TrangThaiTaiLieu::CHO_DUYET->value,
+            'ma_bam_file' => hash('sha256', 'staff_pending_content'),
+            'phan_loai' => 'BAI_GIANG',
+            'luot_tai' => 0,
+            'trang_thai' => TrangThaiTaiLieu::CHO_DUYET->value,
         ]);
 
         // Moderator can view
@@ -500,16 +500,16 @@ class DocumentContributionBountyIntegrationTest extends TestCase
         Storage::disk('local')->put($path, 'protected raw pdf bytes');
 
         $unapprovedDoc = TaiLieu::create([
-            'ma_mon_hoc'    => $this->courseA->ma_mon_hoc,
+            'ma_mon_hoc' => $this->courseA->ma_mon_hoc,
             'ma_nguoi_dang' => $this->contributor->ma_nguoi_dung,
-            'tieu_de'       => 'File nhạy cảm chờ duyệt',
+            'tieu_de' => 'File nhạy cảm chờ duyệt',
             'duong_dan_tep' => $path,
             'dinh_dang_tep' => 'pdf',
             'dung_luong_kb' => 50,
-            'ma_bam_file'   => hash('sha256', 'unapproved_raw_bytes'),
-            'phan_loai'     => 'DE_THI',
-            'luot_tai'      => 0,
-            'trang_thai'    => TrangThaiTaiLieu::CHO_DUYET->value,
+            'ma_bam_file' => hash('sha256', 'unapproved_raw_bytes'),
+            'phan_loai' => 'DE_THI',
+            'luot_tai' => 0,
+            'trang_thai' => TrangThaiTaiLieu::CHO_DUYET->value,
         ]);
 
         // Unrelated student trying preview -> 403
@@ -530,16 +530,16 @@ class DocumentContributionBountyIntegrationTest extends TestCase
         Storage::disk('local')->put($path, 'staff raw pdf bytes');
 
         $unapprovedDoc = TaiLieu::create([
-            'ma_mon_hoc'    => $this->courseA->ma_mon_hoc,
+            'ma_mon_hoc' => $this->courseA->ma_mon_hoc,
             'ma_nguoi_dang' => $this->contributor->ma_nguoi_dung,
-            'tieu_de'       => 'File kiểm duyệt nội bộ',
+            'tieu_de' => 'File kiểm duyệt nội bộ',
             'duong_dan_tep' => $path,
             'dinh_dang_tep' => 'pdf',
             'dung_luong_kb' => 50,
-            'ma_bam_file'   => hash('sha256', 'staff_raw_bytes'),
-            'phan_loai'     => 'DE_THI',
-            'luot_tai'      => 0,
-            'trang_thai'    => TrangThaiTaiLieu::CHO_DUYET->value,
+            'ma_bam_file' => hash('sha256', 'staff_raw_bytes'),
+            'phan_loai' => 'DE_THI',
+            'luot_tai' => 0,
+            'trang_thai' => TrangThaiTaiLieu::CHO_DUYET->value,
         ]);
 
         // Author preview
@@ -562,21 +562,21 @@ class DocumentContributionBountyIntegrationTest extends TestCase
         Storage::fake('local');
 
         $yeuCau = YeuCauTaiLieu::create([
-            'ma_mon_hoc'   => $this->courseA->ma_mon_hoc,
+            'ma_mon_hoc' => $this->courseA->ma_mon_hoc,
             'ma_nguoi_tao' => $this->requester->ma_nguoi_dung,
-            'tieu_de'      => 'Cần tìm đề thi trắc nghiệm C++',
-            'phan_loai'    => 'DE_THI',
-            'diem_thuong'  => 45,
-            'trang_thai'   => TrangThaiYeuCauTaiLieu::MO,
+            'tieu_de' => 'Cần tìm đề thi trắc nghiệm C++',
+            'phan_loai' => 'DE_THI',
+            'diem_thuong' => 45,
+            'trang_thai' => TrangThaiYeuCauTaiLieu::MO,
         ]);
 
         $fakeFile = UploadedFile::fake()->create('de_thi_cpp_2026.pdf', 350, 'application/pdf');
 
         $response = $this->actingAs($this->contributor)
             ->post(route('document-requests.fulfill', $yeuCau->ma_yeu_cau), [
-                'file'             => $fakeFile,
-                'tieu_de'          => 'Đề thi trắc nghiệm C++ có đáp án chi tiết',
-                'phan_loai'        => 'DE_THI',
+                'file' => $fakeFile,
+                'tieu_de' => 'Đề thi trắc nghiệm C++ có đáp án chi tiết',
+                'phan_loai' => 'DE_THI',
                 'ghi_chu_dong_gop' => 'File PDF scan chuẩn từ giáo trình môn học.',
             ]);
 
@@ -584,12 +584,12 @@ class DocumentContributionBountyIntegrationTest extends TestCase
 
         // Document created in database with CHO_DUYET
         $this->assertDatabaseHas('tai_lieu', [
-            'ma_mon_hoc'    => $this->courseA->ma_mon_hoc,
+            'ma_mon_hoc' => $this->courseA->ma_mon_hoc,
             'ma_nguoi_dang' => $this->contributor->ma_nguoi_dung,
-            'tieu_de'       => 'Đề thi trắc nghiệm C++ có đáp án chi tiết',
+            'tieu_de' => 'Đề thi trắc nghiệm C++ có đáp án chi tiết',
             'dinh_dang_tep' => 'pdf',
-            'phan_loai'     => 'DE_THI',
-            'trang_thai'    => TrangThaiTaiLieu::CHO_DUYET->value,
+            'phan_loai' => 'DE_THI',
+            'trang_thai' => TrangThaiTaiLieu::CHO_DUYET->value,
         ]);
 
         $createdDoc = TaiLieu::where('tieu_de', 'Đề thi trắc nghiệm C++ có đáp án chi tiết')->first();
@@ -598,11 +598,11 @@ class DocumentContributionBountyIntegrationTest extends TestCase
 
         // Submission created in database with CHO_DUYET
         $this->assertDatabaseHas('dap_ung_yeu_cau_tai_lieu', [
-            'ma_yeu_cau'        => $yeuCau->ma_yeu_cau,
-            'ma_tai_lieu'       => $createdDoc->ma_tai_lieu,
+            'ma_yeu_cau' => $yeuCau->ma_yeu_cau,
+            'ma_tai_lieu' => $createdDoc->ma_tai_lieu,
             'ma_nguoi_dong_gop' => $this->contributor->ma_nguoi_dung,
-            'trang_thai'        => 'CHO_DUYET',
-            'ghi_chu_dong_gop'  => 'File PDF scan chuẩn từ giáo trình môn học.',
+            'trang_thai' => 'CHO_DUYET',
+            'ghi_chu_dong_gop' => 'File PDF scan chuẩn từ giáo trình môn học.',
         ]);
 
         // Ensure physical file stored on disk
@@ -618,33 +618,33 @@ class DocumentContributionBountyIntegrationTest extends TestCase
 
         // Pre-existing document with same SHA-256 in the same course
         TaiLieu::create([
-            'ma_mon_hoc'    => $this->courseA->ma_mon_hoc,
+            'ma_mon_hoc' => $this->courseA->ma_mon_hoc,
             'ma_nguoi_dang' => $this->otherStudent->ma_nguoi_dung,
-            'tieu_de'       => 'Tài liệu đã tồn tại trong môn học',
+            'tieu_de' => 'Tài liệu đã tồn tại trong môn học',
             'duong_dan_tep' => 'documents/preexisting.pdf',
             'dinh_dang_tep' => 'pdf',
             'dung_luong_kb' => 100,
-            'ma_bam_file'   => $sha256,
-            'phan_loai'     => 'DE_THI',
-            'luot_tai'      => 0,
-            'trang_thai'    => TrangThaiTaiLieu::DA_DUYET->value,
+            'ma_bam_file' => $sha256,
+            'phan_loai' => 'DE_THI',
+            'luot_tai' => 0,
+            'trang_thai' => TrangThaiTaiLieu::DA_DUYET->value,
         ]);
 
         $yeuCau = YeuCauTaiLieu::create([
-            'ma_mon_hoc'   => $this->courseA->ma_mon_hoc,
+            'ma_mon_hoc' => $this->courseA->ma_mon_hoc,
             'ma_nguoi_tao' => $this->requester->ma_nguoi_dung,
-            'tieu_de'      => 'Cần tìm đề thi',
-            'phan_loai'    => 'DE_THI',
-            'diem_thuong'  => 30,
-            'trang_thai'   => TrangThaiYeuCauTaiLieu::MO,
+            'tieu_de' => 'Cần tìm đề thi',
+            'phan_loai' => 'DE_THI',
+            'diem_thuong' => 30,
+            'trang_thai' => TrangThaiYeuCauTaiLieu::MO,
         ]);
 
         $duplicateFile = UploadedFile::fake()->createWithContent('duplicate.pdf', $fileContent);
 
         $response = $this->actingAs($this->contributor)
             ->post(route('document-requests.fulfill', $yeuCau->ma_yeu_cau), [
-                'file'      => $duplicateFile,
-                'tieu_de'   => 'Đề thi thử trùng lặp',
+                'file' => $duplicateFile,
+                'tieu_de' => 'Đề thi thử trùng lặp',
                 'phan_loai' => 'DE_THI',
             ]);
 
@@ -659,28 +659,28 @@ class DocumentContributionBountyIntegrationTest extends TestCase
         Storage::fake('local');
 
         $yeuCau = YeuCauTaiLieu::create([
-            'ma_mon_hoc'   => $this->courseA->ma_mon_hoc,
+            'ma_mon_hoc' => $this->courseA->ma_mon_hoc,
             'ma_nguoi_tao' => $this->requester->ma_nguoi_dung,
-            'tieu_de'      => 'Cần tìm tài liệu vượt hạn mức',
-            'phan_loai'    => 'BAI_GIANG',
-            'diem_thuong'  => 20,
-            'trang_thai'   => TrangThaiYeuCauTaiLieu::MO,
+            'tieu_de' => 'Cần tìm tài liệu vượt hạn mức',
+            'phan_loai' => 'BAI_GIANG',
+            'diem_thuong' => 20,
+            'trang_thai' => TrangThaiYeuCauTaiLieu::MO,
         ]);
 
         // Contributor has already uploaded 10 documents today
         for ($i = 1; $i <= 10; $i++) {
             TaiLieu::create([
-                'ma_mon_hoc'    => $this->courseA->ma_mon_hoc,
+                'ma_mon_hoc' => $this->courseA->ma_mon_hoc,
                 'ma_nguoi_dang' => $this->contributor->ma_nguoi_dung,
-                'tieu_de'       => "Tài liệu thứ {$i} trong ngày",
+                'tieu_de' => "Tài liệu thứ {$i} trong ngày",
                 'duong_dan_tep' => "documents/doc_{$i}.pdf",
                 'dinh_dang_tep' => 'pdf',
                 'dung_luong_kb' => 50,
-                'ma_bam_file'   => hash('sha256', "content_{$i}"),
-                'phan_loai'     => 'BAI_GIANG',
-                'luot_tai'      => 0,
-                'trang_thai'    => TrangThaiTaiLieu::CHO_DUYET->value,
-                'created_at'    => Carbon::now(),
+                'ma_bam_file' => hash('sha256', "content_{$i}"),
+                'phan_loai' => 'BAI_GIANG',
+                'luot_tai' => 0,
+                'trang_thai' => TrangThaiTaiLieu::CHO_DUYET->value,
+                'created_at' => Carbon::now(),
             ]);
         }
 
@@ -689,8 +689,8 @@ class DocumentContributionBountyIntegrationTest extends TestCase
 
         $response = $this->actingAs($this->contributor)
             ->post(route('document-requests.fulfill', $yeuCau->ma_yeu_cau), [
-                'file'      => $fakeFile,
-                'tieu_de'   => 'Tài liệu thứ 11 cố tình tải lên',
+                'file' => $fakeFile,
+                'tieu_de' => 'Tài liệu thứ 11 cố tình tải lên',
                 'phan_loai' => 'BAI_GIANG',
             ]);
 
@@ -705,19 +705,19 @@ class DocumentContributionBountyIntegrationTest extends TestCase
         Storage::fake('local');
 
         $yeuCau = YeuCauTaiLieu::create([
-            'ma_mon_hoc'   => $this->courseA->ma_mon_hoc,
+            'ma_mon_hoc' => $this->courseA->ma_mon_hoc,
             'ma_nguoi_tao' => $this->requester->ma_nguoi_dung,
-            'tieu_de'      => 'Cần tìm tài liệu',
-            'phan_loai'    => 'BAI_GIANG',
-            'diem_thuong'  => 20,
-            'trang_thai'   => TrangThaiYeuCauTaiLieu::MO,
+            'tieu_de' => 'Cần tìm tài liệu',
+            'phan_loai' => 'BAI_GIANG',
+            'diem_thuong' => 20,
+            'trang_thai' => TrangThaiYeuCauTaiLieu::MO,
         ]);
 
         // 1. Invalid extension (.exe)
         $exeFile = UploadedFile::fake()->create('malicious.exe', 100, 'application/x-msdownload');
         $responseExe = $this->actingAs($this->contributor)
             ->post(route('document-requests.fulfill', $yeuCau->ma_yeu_cau), [
-                'file'    => $exeFile,
+                'file' => $exeFile,
                 'tieu_de' => 'Tệp exe độc hại',
             ]);
         $responseExe->assertSessionHasErrors('file');
@@ -726,7 +726,7 @@ class DocumentContributionBountyIntegrationTest extends TestCase
         $emptyFile = UploadedFile::fake()->createWithContent('empty.pdf', '');
         $responseEmpty = $this->actingAs($this->contributor)
             ->post(route('document-requests.fulfill', $yeuCau->ma_yeu_cau), [
-                'file'    => $emptyFile,
+                'file' => $emptyFile,
                 'tieu_de' => 'Tệp PDF rỗng 0 bytes',
             ]);
         $responseEmpty->assertSessionHas('error');
