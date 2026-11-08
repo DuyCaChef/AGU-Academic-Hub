@@ -26,7 +26,7 @@ class LaravelNotificationDispatcher implements NotificationDispatcherInterface
             $isDuplicate = ThongBao::query()
                 ->where('notifiable_type', $recipient->getMorphClass())
                 ->where('notifiable_id', $recipient->getKey())
-                ->where('data', 'like', '%"idempotency_key":"' . $payload->idempotencyKey . '"%')
+                ->where('du_lieu', 'like', '%"idempotency_key":"' . $payload->idempotencyKey . '"%')
                 ->exists();
 
             if ($isDuplicate) {

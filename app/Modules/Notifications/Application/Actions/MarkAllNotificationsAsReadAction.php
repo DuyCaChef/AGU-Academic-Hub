@@ -10,7 +10,7 @@ class MarkAllNotificationsAsReadAction
     public function execute(NguoiDung $user): int
     {
         return $user->unreadNotifications()->update([
-            'read_at' => now(),
+            'da_doc_luc' => now(),
         ]);
     }
 }

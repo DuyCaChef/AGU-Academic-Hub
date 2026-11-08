@@ -20,11 +20,11 @@ class NotificationController extends Controller
             ->map(function (ThongBao $item): array {
                 return [
                     'id'               => $item->id,
-                    'type'             => class_basename($item->type),
+                    'type'             => class_basename($item->loai ?? $item->type),
                     'title'            => $item->tieu_de,
                     'message'          => $item->noi_dung,
                     'url'              => $item->duong_dan,
-                    'read_at'          => $item->read_at?->toIso8601String(),
+                    'read_at'          => $item->da_doc_luc?->toIso8601String(),
                     'is_read'          => $item->read(),
                     'created_at'       => $item->created_at?->toIso8601String(),
                     'created_at_human' => $item->created_at?->diffForHumans(),

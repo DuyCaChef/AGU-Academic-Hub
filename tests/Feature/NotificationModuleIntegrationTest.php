@@ -118,7 +118,7 @@ class NotificationModuleIntegrationTest extends TestCase
         $dispatcher->dispatch($this->studentA, $payload3);
 
         // Đánh dấu thông báo 3 đã đọc
-        $notif3 = $this->studentA->notifications()->where('title', 'Thông báo 3 đã đọc')->first();
+        $notif3 = $this->studentA->notifications()->where('tieu_de', 'Thông báo 3 đã đọc')->first();
         $notif3->markAsRead();
 
         // 1. Lọc tất cả (JSON API)
@@ -185,7 +185,7 @@ class NotificationModuleIntegrationTest extends TestCase
         $res1 = $this->actingAs($this->studentA)->postJson(route('notifications.read', $notif->id));
         $res1->assertOk();
         $res1->assertJson(['success' => true, 'unread_count' => 0]);
-        $this->assertNotNull($notif->fresh()->read_at);
+        $this->assertNotNull($notif->fresh()->da_doc_luc);
 
         // Gọi lần 2 (Idempotency - không gây lỗi)
         $res2 = $this->actingAs($this->studentA)->postJson(route('notifications.read', $notif->id));

@@ -14,14 +14,14 @@ class GetNotificationsQuery
 
         // 1. Bộ lọc trạng thái đọc
         if ($filter === 'unread') {
-            $query->whereNull('read_at');
+            $query->whereNull('da_doc_luc');
         } elseif ($filter === 'read') {
-            $query->whereNotNull('read_at');
+            $query->whereNotNull('da_doc_luc');
         }
 
         // 2. Bộ lọc nhóm thông báo (Cá nhân vs Tác vụ xử lý)
         if (!empty($category)) {
-            $query->where('data', 'like', '%"category":"' . $category . '"%');
+            $query->where('du_lieu', 'like', '%"category":"' . $category . '"%');
         }
 
         // 3. Sắp xếp mới nhất trước và phân trang
