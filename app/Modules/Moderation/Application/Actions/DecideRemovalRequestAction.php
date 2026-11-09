@@ -6,6 +6,7 @@ use App\Models\LichSuThungRac;
 use App\Models\NguoiDung;
 use App\Models\YeuCauGoBoTaiLieu;
 use App\Modules\Documents\Infrastructure\Notifications\DocumentRemovalRequestResolvedNotification;
+use App\Modules\Moderation\Domain\Services\BountySubmissionModerationSynchronizer;
 use App\Modules\Moderation\Infrastructure\Persistence\RemovalRequestRepository;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -13,7 +14,8 @@ use Illuminate\Validation\ValidationException;
 class DecideRemovalRequestAction
 {
     public function __construct(
-        protected RemovalRequestRepository $repository
+        protected RemovalRequestRepository $repository,
+        protected BountySubmissionModerationSynchronizer $bountySynchronizer
     ) {}
 
     // Quyết định duyệt hoặc từ chối yêu cầu xin gỡ tài liệu
@@ -63,6 +65,13 @@ class DecideRemovalRequestAction
                     'nguon'              => 'TAC_GIA',
                     'ly_do'              => $removalRequest->ly_do,
                 ]);
+
+                // Đồng bộ xử lý hoặc thu hồi điểm Bounty liên kết với tài liệu vừa gỡ
+                $this->bountySynchronizer->syncOnDocumentDeleted(
+                    document: $removalRequest->taiLieu,
+                    actor: $actor,
+                    reason: "Yêu cầu gỡ bỏ tài liệu được chấp thuận: {$removalRequest->ly_do}"
+                );
             }
 
             return $removalRequest->fresh([

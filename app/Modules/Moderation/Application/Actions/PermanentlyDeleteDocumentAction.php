@@ -7,6 +7,7 @@ use App\Models\NguoiDung;
 use App\Modules\Administration\Domain\Enums\HanhDongKiemToan;
 use App\Modules\Administration\Domain\Enums\LoaiDoiTuongKiemToan;
 use App\Modules\Administration\Domain\Services\AuditLogger;
+use App\Modules\Moderation\Domain\Services\BountySubmissionModerationSynchronizer;
 use App\Modules\Moderation\Domain\Services\ModerationDecisionEvaluator;
 use App\Modules\Moderation\Infrastructure\Persistence\TrashManagementRepository;
 use Illuminate\Support\Facades\DB;
@@ -16,7 +17,8 @@ class PermanentlyDeleteDocumentAction
 {
     public function __construct(
         protected TrashManagementRepository $repository,
-        protected ModerationDecisionEvaluator $evaluator
+        protected ModerationDecisionEvaluator $evaluator,
+        protected BountySubmissionModerationSynchronizer $bountySynchronizer
     ) {}
 
     // Xóa vĩnh viễn (Hard Delete / Purge) tài liệu và file vật lý khỏi hệ thống sau 60 ngày
@@ -53,7 +55,14 @@ class PermanentlyDeleteDocumentAction
             // 2. Xóa tệp vật lý trên đĩa cứng
             Storage::disk('local')->delete($document->duong_dan_tep);
 
-            // 3. Xóa vĩnh viễn dòng dữ liệu trong CSDL
+            // 3. Đồng bộ xử lý các bài nộp hoặc thu hồi giải ngân Bounty liên kết nếu còn
+            $this->bountySynchronizer->syncOnDocumentDeleted(
+                document: $document,
+                actor: $actor,
+                reason: $reason ?: 'Xóa vĩnh viễn tài liệu khỏi hệ thống.'
+            );
+
+            // 4. Xóa vĩnh viễn dòng dữ liệu trong CSDL
             $document->forceDelete();
         });
     }

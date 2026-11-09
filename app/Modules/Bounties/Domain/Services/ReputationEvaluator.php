@@ -3,6 +3,7 @@
 namespace App\Modules\Bounties\Domain\Services;
 
 use App\Enums\LoaiGiaoDichDiem;
+use App\Models\DapUngYeuCauTaiLieu;
 use App\Models\GiaoDichDiem;
 use App\Models\NguoiDung;
 use App\Models\ViDiem;
@@ -158,6 +159,83 @@ class ReputationEvaluator
             'mo_ta'             => "Hoàn trả {$diemThuong} điểm do hủy yêu cầu tài liệu #{$yeuCau->ma_yeu_cau}",
             'thoi_gian_tao'     => now(),
         ]);
+    }
+
+    // Thu hồi (Clawback) điểm thưởng đã giải ngân từ người đóng góp vi phạm và hoàn trả đền bù cho người tạo yêu cầu
+    public function thuHoiDiemBounty(
+        YeuCauTaiLieu $yeuCau,
+        DapUngYeuCauTaiLieu $dapUng,
+        NguoiDung $nguoiDongGop,
+        NguoiDung $nguoiTao,
+        string $lyDo,
+        ?string $khoaChongLap = null
+    ): array {
+        $khoaChongLap = $khoaChongLap ?? "thu_hoi_yc_{$yeuCau->ma_yeu_cau}_dap_ung_{$dapUng->ma_dap_ung}";
+
+        $daThuHoi = GiaoDichDiem::where('khoa_chong_trung', $khoaChongLap . '_nguoi_tao')->exists();
+        if ($daThuHoi) {
+            return [
+                'diem_thuong'   => $yeuCau->diem_thuong,
+                'diem_thu_hoi'  => 0,
+                'diem_hoan_tra' => 0,
+                'da_xu_ly'      => true,
+            ];
+        }
+
+        $diemThuong = $yeuCau->diem_thuong;
+
+        // 1. Thu hồi điểm khả dụng từ ví người đóng góp (SV B)
+        $viDongGop = $this->khoaViDiem($nguoiDongGop->ma_nguoi_dung);
+        $diemThuHoi = min($viDongGop->diem_kha_dung, $diemThuong);
+
+        if ($diemThuHoi > 0) {
+            $viDongGop->diem_kha_dung -= $diemThuHoi;
+            $viDongGop->save();
+
+            GiaoDichDiem::create([
+                'ma_vi'             => $viDongGop->ma_vi,
+                'loai_giao_dich'    => LoaiGiaoDichDiem::SU_DUNG,
+                'so_diem'           => $diemThuHoi,
+                'thay_doi_kha_dung' => -$diemThuHoi,
+                'thay_doi_tam_giu'  => 0,
+                'loai_tham_chieu'   => YeuCauTaiLieu::class,
+                'ma_tham_chieu'     => $yeuCau->ma_yeu_cau,
+                'khoa_chong_trung'  => $khoaChongLap . '_thu_hoi_dong_gop',
+                'mo_ta'             => "Thu hồi {$diemThuHoi} điểm thưởng đã giải ngân cho yêu cầu #{$yeuCau->ma_yeu_cau} do tài liệu bị xóa vì vi phạm bản quyền: {$lyDo}",
+                'thoi_gian_tao'     => now(),
+            ]);
+        }
+
+        // 2. Trừ điểm uy tín học thuật của người đóng góp đã nhận trước đó (đảm bảo không âm)
+        $truUyTin = min($nguoiDongGop->diem_uy_tin, $diemThuong);
+        if ($truUyTin > 0) {
+            $nguoiDongGop->decrement('diem_uy_tin', $truUyTin);
+        }
+
+        // 3. Hoàn trả đền bù đầy đủ điểm thưởng vào ví khả dụng cho người tạo yêu cầu (SV A)
+        $viNguoiTao = $this->khoaViDiem($nguoiTao->ma_nguoi_dung);
+        $viNguoiTao->diem_kha_dung += $diemThuong;
+        $viNguoiTao->save();
+
+        GiaoDichDiem::create([
+            'ma_vi'             => $viNguoiTao->ma_vi,
+            'loai_giao_dich'    => LoaiGiaoDichDiem::HOAN_TRA,
+            'so_diem'           => $diemThuong,
+            'thay_doi_kha_dung' => $diemThuong,
+            'thay_doi_tam_giu'  => 0,
+            'loai_tham_chieu'   => YeuCauTaiLieu::class,
+            'ma_tham_chieu'     => $yeuCau->ma_yeu_cau,
+            'khoa_chong_trung'  => $khoaChongLap . '_nguoi_tao',
+            'mo_ta'             => "Hoàn trả đền bù {$diemThuong} điểm cho yêu cầu #{$yeuCau->ma_yeu_cau} do tài liệu nhận được bị xóa vì vi phạm bản quyền: {$lyDo}",
+            'thoi_gian_tao'     => now(),
+        ]);
+
+        return [
+            'diem_thuong'   => $diemThuong,
+            'diem_thu_hoi'  => $diemThuHoi,
+            'diem_hoan_tra' => $diemThuong,
+            'da_xu_ly'      => false,
+        ];
     }
 }
 

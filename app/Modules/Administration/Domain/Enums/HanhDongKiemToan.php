@@ -34,6 +34,7 @@ enum HanhDongKiemToan: string
     case XOA_VINH_VIEN_TAI_LIEU = 'XOA_VINH_VIEN_TAI_LIEU';
     case DUYET_GIAI_NGAN_BOUNTY = 'DUYET_GIAI_NGAN_BOUNTY';
     case TU_CHOI_GIAI_NGAN_BOUNTY = 'TU_CHOI_GIAI_NGAN_BOUNTY';
+    case THU_HOI_GIAI_NGAN_BOUNTY = 'THU_HOI_GIAI_NGAN_BOUNTY';
 
     // Kiểm duyệt Đánh giá môn học
     case XU_LY_BAO_CAO_DANH_GIA = 'XU_LY_BAO_CAO_DANH_GIA';
@@ -73,6 +74,7 @@ enum HanhDongKiemToan: string
             self::XOA_VINH_VIEN_TAI_LIEU => 'Xóa vĩnh viễn tài liệu',
             self::DUYET_GIAI_NGAN_BOUNTY => 'Duyệt giải ngân điểm Bounty',
             self::TU_CHOI_GIAI_NGAN_BOUNTY => 'Từ chối giải ngân điểm Bounty',
+            self::THU_HOI_GIAI_NGAN_BOUNTY => 'Thu hồi điểm giải ngân Bounty do vi phạm',
             self::XU_LY_BAO_CAO_DANH_GIA => 'Xử lý báo cáo đánh giá môn học',
             self::AN_DANH_GIA => 'Tạm ẩn đánh giá môn học',
             self::XOA_DANH_GIA => 'Xóa đánh giá môn học',

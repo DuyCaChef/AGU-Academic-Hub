@@ -72,11 +72,11 @@ class ResolveViolationReportAction
                     penaltyPoints: $penaltyPoints
                 );
 
-                // Tự động đồng bộ từ chối các bài nộp Bounty liên kết nếu có
+                // Tự động đồng bộ từ chối hoặc thu hồi giải ngân Bounty liên kết nếu có
                 $this->bountySynchronizer->syncOnDocumentDeleted(
                     document: $document,
                     actor: $actor,
-                    reason: 'Tài liệu đính kèm đã bị Ban kiểm duyệt gỡ bỏ do vi phạm quy định.'
+                    reason: $reason
                 );
             }
 
