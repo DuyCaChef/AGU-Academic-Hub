@@ -8,6 +8,7 @@ use App\Modules\Administration\Domain\Enums\HanhDongKiemToan;
 use App\Modules\Administration\Domain\Enums\LoaiDoiTuongKiemToan;
 use App\Modules\Administration\Domain\Services\AuditLogger;
 use App\Modules\Identity\Application\Actions\ApproveKycAction;
+use App\Modules\Identity\Application\Actions\BulkApproveKycAction;
 use App\Modules\Identity\Application\Actions\RejectKycAction;
 use App\Modules\Identity\Application\Actions\SubmitAlumniKycAction;
 use App\Modules\Identity\Application\Queries\GetAlumniRegistrationFormQuery;
@@ -118,6 +119,37 @@ class KycController extends Controller
         $action->execute($ma_xac_thuc, $request->user());
 
         return back()->with('success', "Đã phê duyệt tài khoản cựu sinh viên {$kyc->nguoiDung->ho_ten} thành công.");
+    }
+
+    // Phê duyệt hàng loạt hồ sơ KYC đã chọn
+    public function pheDuyetHangLoat(
+        Request $request,
+        BulkApproveKycAction $action
+    ): RedirectResponse {
+        if (!$this->ruleEvaluator->canReviewKyc($request->user())) {
+            abort(403, 'Bạn không có thẩm quyền thực hiện thao tác duyệt hồ sơ KYC.');
+        }
+
+        $data = $request->validate([
+            'ids'   => ['required', 'array', 'min:1'],
+            'ids.*' => ['required', 'integer'],
+        ], [
+            'ids.required' => 'Vui lòng chọn ít nhất một hồ sơ KYC để duyệt.',
+            'ids.min'      => 'Vui lòng chọn ít nhất một hồ sơ KYC để duyệt.',
+        ]);
+
+        $result = $action->execute($data['ids'], $request->user());
+
+        if ($result['approved_count'] === 0) {
+            return back()->with('error', 'Không có hồ sơ nào đủ điều kiện để phê duyệt hàng loạt.');
+        }
+
+        $msg = "Đã phê duyệt thành công {$result['approved_count']} hồ sơ KYC.";
+        if ($result['failed_count'] > 0) {
+            $msg .= " (Bỏ qua {$result['failed_count']} hồ sơ không hợp lệ hoặc đã xử lý).";
+        }
+
+        return back()->with('success', $msg);
     }
 
     // Từ chối hồ sơ kèm lý do

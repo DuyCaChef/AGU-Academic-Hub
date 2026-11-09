@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\TaiLieu;
 use App\Modules\Moderation\Application\Actions\ApproveNewDocumentAction;
 use App\Modules\Moderation\Application\Actions\ArchiveViolationReportAction;
+use App\Modules\Moderation\Application\Actions\BulkApproveNewDocumentsAction;
 use App\Modules\Moderation\Application\Actions\DecideDocumentReviewAction;
 use App\Modules\Moderation\Application\Actions\PermanentlyDeleteDocumentAction;
 use App\Modules\Moderation\Application\Actions\RejectNewDocumentAction;
@@ -55,6 +56,35 @@ class DocumentModerationController extends Controller
         }
 
         return back()->with('success', $result['message']);
+    }
+
+    // Phê duyệt hàng loạt tài liệu mới đăng
+    public function bulkApproveNewDocuments(
+        Request $request,
+        BulkApproveNewDocumentsAction $action
+    ): RedirectResponse {
+        abort_unless($request->user()?->laQuanTriVien() || $request->user()?->laKiemDuyetVien(), 403, 'Bạn không có quyền thực hiện kiểm duyệt.');
+
+        $data = $request->validate([
+            'ids'   => ['required', 'array', 'min:1'],
+            'ids.*' => ['required', 'integer'],
+        ], [
+            'ids.required' => 'Vui lòng chọn ít nhất một tài liệu để phê duyệt.',
+            'ids.min'      => 'Vui lòng chọn ít nhất một tài liệu để phê duyệt.',
+        ]);
+
+        $result = $action->execute($data['ids'], $request->user());
+
+        if ($result['approved_count'] === 0) {
+            return back()->with('error', 'Không có tài liệu nào đủ điều kiện phê duyệt.');
+        }
+
+        $msg = "Đã phê duyệt thành công {$result['approved_count']} tài liệu.";
+        if ($result['failed_count'] > 0) {
+            $msg .= " (Bỏ qua {$result['failed_count']} tài liệu không đủ điều kiện).";
+        }
+
+        return back()->with('success', $msg);
     }
 
     // Từ chối duyệt tài liệu mới đăng kèm lý do

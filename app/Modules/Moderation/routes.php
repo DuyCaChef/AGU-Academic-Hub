@@ -34,12 +34,15 @@ Route::middleware(['auth', 'role:KIEM_DUYET_VIEN,QUAN_TRI_VIEN'])
 
         // --- Hàng đợi Báo cáo đánh giá môn học (Course Review Report Queue) ---
         Route::get('/bao-cao-danh-gia', [ReviewModerationController::class, 'index'])->name('review-reports.index');
+        Route::post('/bao-cao/bac-bo-hang-loat', [ReviewModerationController::class, 'bulkDismiss'])->name('reports.bulk-dismiss');
+        Route::post('/bao-cao/luu-tru-hang-loat', [ReviewModerationController::class, 'bulkArchive'])->name('reports.bulk-archive');
         Route::get('/bao-cao-danh-gia/{id}', [ReviewModerationController::class, 'show'])->name('review-reports.show');
         Route::put('/bao-cao-danh-gia/{id}/giai-quyet', [ReviewModerationController::class, 'resolve'])->name('review-reports.resolve');
         Route::delete('/bao-cao-danh-gia/{id}', [ReviewModerationController::class, 'archive'])->name('review-reports.archive');
 
         // --- Hàng đợi Kiểm tra tài liệu nguy cơ cao & Phê duyệt tài liệu mới ---
         Route::get('/tai-lieu/cho-kiem-tra', [DocumentModerationController::class, 'reviewQueue'])->name('documents.review-queue');
+        Route::post('/tai-lieu/duyet-hang-loat', [DocumentModerationController::class, 'bulkApproveNewDocuments'])->name('documents.bulk-approve');
         Route::get('/tai-lieu/{id}/kiem-tra', [DocumentModerationController::class, 'reviewDocument'])->name('documents.review-detail');
         Route::get('/tai-lieu/{id}/xem-tep', [DocumentModerationController::class, 'previewDocument'])->name('documents.preview');
         Route::put('/tai-lieu/{id}/quyet-dinh', [DocumentModerationController::class, 'decideDocument'])->name('documents.decide');
