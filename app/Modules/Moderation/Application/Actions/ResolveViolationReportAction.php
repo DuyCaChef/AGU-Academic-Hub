@@ -9,6 +9,7 @@ use App\Models\TaiLieu;
 use App\Modules\Administration\Domain\Enums\HanhDongKiemToan;
 use App\Modules\Administration\Domain\Enums\LoaiDoiTuongKiemToan;
 use App\Modules\Administration\Domain\Services\AuditLogger;
+use App\Modules\Moderation\Domain\Services\BountySubmissionModerationSynchronizer;
 use App\Modules\Moderation\Domain\Services\DocumentReportRecalculator;
 use App\Modules\Moderation\Domain\Services\UserViolationPenaltyEvaluator;
 use App\Modules\Moderation\Infrastructure\Notifications\ViolationReportResolvedNotification;
@@ -18,7 +19,8 @@ class ResolveViolationReportAction
 {
     public function __construct(
         protected DocumentReportRecalculator $recalculator,
-        protected UserViolationPenaltyEvaluator $penaltyEvaluator
+        protected UserViolationPenaltyEvaluator $penaltyEvaluator,
+        protected BountySubmissionModerationSynchronizer $bountySynchronizer
     ) {}
 
     // Quyết định giải quyết báo cáo vi phạm: Duyệt ẩn, xóa mềm hoặc bác bỏ
@@ -68,6 +70,13 @@ class ResolveViolationReportAction
                     reason: $reason,
                     targetTitle: $document->tieu_de,
                     penaltyPoints: $penaltyPoints
+                );
+
+                // Tự động đồng bộ từ chối các bài nộp Bounty liên kết nếu có
+                $this->bountySynchronizer->syncOnDocumentDeleted(
+                    document: $document,
+                    actor: $actor,
+                    reason: 'Tài liệu đính kèm đã bị Ban kiểm duyệt gỡ bỏ do vi phạm quy định.'
                 );
             }
 

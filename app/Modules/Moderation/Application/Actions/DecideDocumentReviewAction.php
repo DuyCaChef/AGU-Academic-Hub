@@ -9,13 +9,15 @@ use App\Models\TaiLieu;
 use App\Modules\Administration\Domain\Enums\HanhDongKiemToan;
 use App\Modules\Administration\Domain\Enums\LoaiDoiTuongKiemToan;
 use App\Modules\Administration\Domain\Services\AuditLogger;
+use App\Modules\Moderation\Domain\Services\BountySubmissionModerationSynchronizer;
 use App\Modules\Moderation\Domain\Services\UserViolationPenaltyEvaluator;
 use Illuminate\Support\Facades\DB;
 
 class DecideDocumentReviewAction
 {
     public function __construct(
-        protected UserViolationPenaltyEvaluator $penaltyEvaluator
+        protected UserViolationPenaltyEvaluator $penaltyEvaluator,
+        protected BountySubmissionModerationSynchronizer $bountySynchronizer
     ) {}
 
     // Quyết định xử lý tài liệu trong hàng đợi kiểm tra (KEEP, RESTORE, HIDE, DELETE)
@@ -75,6 +77,13 @@ class DecideDocumentReviewAction
                     reason: $reason,
                     targetTitle: $document->tieu_de,
                     penaltyPoints: $penaltyPoints
+                );
+
+                // Tự động đồng bộ từ chối các bài nộp Bounty liên kết nếu có
+                $this->bountySynchronizer->syncOnDocumentDeleted(
+                    document: $document,
+                    actor: $actor,
+                    reason: 'Tài liệu đính kèm đã bị Ban kiểm duyệt gỡ bỏ do vi phạm quy định.'
                 );
             }
 

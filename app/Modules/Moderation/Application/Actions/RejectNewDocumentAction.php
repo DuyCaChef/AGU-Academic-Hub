@@ -3,12 +3,12 @@
 namespace App\Modules\Moderation\Application\Actions;
 
 use App\Enums\TrangThaiTaiLieu;
-use App\Models\DapUngYeuCauTaiLieu;
 use App\Models\NguoiDung;
 use App\Models\TaiLieu;
 use App\Modules\Administration\Domain\Enums\HanhDongKiemToan;
 use App\Modules\Administration\Domain\Enums\LoaiDoiTuongKiemToan;
 use App\Modules\Administration\Domain\Services\AuditLogger;
+use App\Modules\Moderation\Domain\Services\BountySubmissionModerationSynchronizer;
 use App\Modules\Moderation\Infrastructure\Notifications\DocumentRejectedNotification;
 use Illuminate\Support\Facades\DB;
 
@@ -16,7 +16,8 @@ use Illuminate\Support\Facades\DB;
 class RejectNewDocumentAction
 {
     public function __construct(
-        protected AuditLogger $auditLogger
+        protected AuditLogger $auditLogger,
+        protected BountySubmissionModerationSynchronizer $bountySynchronizer
     ) {}
 
     public function execute(int $documentId, string $reason, NguoiDung $actor): array
@@ -43,15 +44,12 @@ class RejectNewDocumentAction
                 'ly_do_trang_thai' => "Bị từ chối bởi {$actor->ho_ten}: {$reason}",
             ]);
 
-            // Nếu tài liệu nộp cho Bounty, cập nhật bài nộp tương ứng thành TU_CHOI để đồng bộ
-            DapUngYeuCauTaiLieu::where('ma_tai_lieu', $document->ma_tai_lieu)
-                ->whereIn('trang_thai', ['CHO_DUYET', 'NGUOI_YEU_CAU_XAC_NHAN'])
-                ->update([
-                    'trang_thai'              => 'TU_CHOI',
-                    'ly_do_tu_choi_giai_ngan' => "Tài liệu bị Ban kiểm duyệt từ chối: {$reason}",
-                    'nguoi_duyet'             => $actor->getKey(),
-                    'thoi_gian_duyet'         => now(),
-                ]);
+            // Nếu tài liệu nộp cho Bounty, đồng bộ từ chối bài nộp tương ứng
+            $this->bountySynchronizer->syncOnDocumentDeleted(
+                document: $document,
+                actor: $actor,
+                reason: "Tài liệu bị Ban kiểm duyệt từ chối: {$reason}"
+            );
 
             // Ghi nhật ký kiểm toán hành vi từ chối tài liệu
             $this->auditLogger->log(

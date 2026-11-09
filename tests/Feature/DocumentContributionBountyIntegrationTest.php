@@ -401,6 +401,16 @@ class DocumentContributionBountyIntegrationTest extends TestCase
 
         $response->assertSessionHas('success');
 
+        // Bước 1: SV A xác nhận, yêu cầu chuyển sang CHO_GIAI_NGAN để Admin/Mod thẩm duyệt
+        $this->assertEquals(TrangThaiYeuCauTaiLieu::CHO_GIAI_NGAN, $yeuCau->fresh()->trang_thai);
+        $this->assertEquals('NGUOI_YEU_CAU_XAC_NHAN', $dapUng->fresh()->trang_thai);
+
+        // Bước 2: Admin/Kiểm duyệt viên phê duyệt giải ngân điểm thưởng Bounty
+        $adminResponse = $this->actingAs($this->admin)
+            ->put(route('admin.bounties.approve-payout', $yeuCau->ma_yeu_cau));
+
+        $adminResponse->assertSessionHas('success');
+
         $this->assertEquals(TrangThaiYeuCauTaiLieu::DA_HOAN_THANH, $yeuCau->fresh()->trang_thai);
         $this->assertEquals('CHAP_NHAN', $dapUng->fresh()->trang_thai);
         $this->assertEquals(0, $this->requester->viDiem->fresh()->diem_tam_giu);
