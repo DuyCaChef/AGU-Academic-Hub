@@ -35,10 +35,48 @@ export default function ReviewQueue({
     const [rejectReason, setRejectReason] = useState('');
     const [processing, setProcessing] = useState(false);
 
+    // State chọn tài liệu hàng loạt
+    const [selectedDocIds, setSelectedDocIds] = useState([]);
+
     const items = documents?.data || [];
+    const newPendingDocs = items.filter((d) => d.trang_thai === 'CHO_DUYET');
+
+    const handleSelectAll = (e) => {
+        if (e.target.checked) {
+            setSelectedDocIds(newPendingDocs.map((d) => d.ma_tai_lieu));
+        } else {
+            setSelectedDocIds([]);
+        }
+    };
+
+    const handleToggleSelect = (id) => {
+        setSelectedDocIds((prev) =>
+            prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+        );
+    };
+
+    const handleBulkApprove = () => {
+        if (!selectedDocIds.length) return;
+
+        if (!window.confirm(`Xác nhận phê duyệt công khai hàng loạt ${selectedDocIds.length} tài liệu đã chọn?`)) {
+            return;
+        }
+
+        setProcessing(true);
+        router.post(
+            route('admin.documents.bulk-approve'),
+            { ids: selectedDocIds },
+            {
+                preserveScroll: true,
+                onSuccess: () => setSelectedDocIds([]),
+                onFinish: () => setProcessing(false),
+            }
+        );
+    };
 
     // Chuyển tab lọc trạng thái
     const handleTabChange = (tabKey) => {
+        setSelectedDocIds([]);
         router.get(
             route('admin.documents.review-queue'),
             { tab: tabKey },
@@ -171,6 +209,36 @@ export default function ReviewQueue({
 
                 {/* Bảng danh sách hàng đợi */}
                 <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs">
+                    {/* Thanh thao tác hàng loạt cho tài liệu mới */}
+                    {selectedDocIds.length > 0 && (
+                        <div className="bg-sky-50 border-b border-sky-200 px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+                            <div className="flex items-center gap-2">
+                                <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#005baa] text-white">
+                                    Đã chọn {selectedDocIds.length}
+                                </span>
+                                <span className="text-xs text-sky-900 font-medium">tài liệu mới chờ duyệt</span>
+                                <button
+                                    type="button"
+                                    onClick={() => setSelectedDocIds([])}
+                                    className="text-xs text-sky-700 underline hover:text-sky-900 ml-2"
+                                >
+                                    Bỏ chọn tất cả
+                                </button>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    type="button"
+                                    disabled={processing}
+                                    onClick={handleBulkApprove}
+                                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 shadow-xs active:scale-95 transition-all disabled:opacity-50"
+                                >
+                                    <CheckCircle2 className="w-4 h-4" />
+                                    Phê duyệt công khai ({selectedDocIds.length})
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
                     {items.length === 0 ? (
                         <div className="p-16 text-center">
                             <ShieldCheck className="mx-auto mb-3 h-12 w-12 text-emerald-600" />
@@ -186,6 +254,16 @@ export default function ReviewQueue({
                             <table className="min-w-[1200px] w-full text-left text-sm text-slate-600">
                                 <thead className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase text-slate-500">
                                     <tr>
+                                        <th className="px-4 py-4 w-10 text-center">
+                                            <input
+                                                type="checkbox"
+                                                className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer"
+                                                checked={newPendingDocs.length > 0 && selectedDocIds.length === newPendingDocs.length}
+                                                onChange={handleSelectAll}
+                                                disabled={newPendingDocs.length === 0}
+                                                title="Chọn tất cả tài liệu mới chờ duyệt trên trang"
+                                            />
+                                        </th>
                                         <th className="px-6 py-4">Tài liệu & Phân loại</th>
                                         <th className="px-6 py-4">Người đăng</th>
                                         <th className="px-6 py-4">Trạng thái / Báo cáo</th>
@@ -198,9 +276,22 @@ export default function ReviewQueue({
                                         const isNewPending = document.trang_thai === 'CHO_DUYET';
                                         const isBounty = document.dap_ung_yeu_caus && document.dap_ung_yeu_caus.length > 0;
                                         const isRejecting = rejectingId === document.ma_tai_lieu;
+                                        const isSelected = selectedDocIds.includes(document.ma_tai_lieu);
 
                                         return (
-                                            <tr key={document.ma_tai_lieu} className="hover:bg-slate-50/60 transition">
+                                            <tr key={document.ma_tai_lieu} className={`hover:bg-slate-50/60 transition ${isSelected ? 'bg-sky-50/40' : ''}`}>
+                                                <td className="px-4 py-4 text-center align-top">
+                                                    {isNewPending ? (
+                                                        <input
+                                                            type="checkbox"
+                                                            className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer"
+                                                            checked={isSelected}
+                                                            onChange={() => handleToggleSelect(document.ma_tai_lieu)}
+                                                        />
+                                                    ) : (
+                                                        <span className="text-slate-300">—</span>
+                                                    )}
+                                                </td>
                                                 {/* Cột 1: Thông tin tài liệu */}
                                                 <td className="px-6 py-4 font-semibold text-slate-900 max-w-sm">
                                                     <div className="flex items-start gap-2">

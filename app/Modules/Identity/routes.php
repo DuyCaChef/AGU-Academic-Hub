@@ -113,6 +113,7 @@ Route::middleware(['auth', 'role:KIEM_DUYET_VIEN,QUAN_TRI_VIEN'])->group(functio
     // Hàng đợi duyệt và thao tác phê duyệt / từ chối hồ sơ cựu sinh viên
     Route::prefix('quan-tri')->name('admin.')->group(function (): void {
         Route::get('/duyet-kyc', [KycController::class, 'hangDoiKyc'])->name('kyc.index');
+        Route::post('/duyet-kyc/duyet-hang-loat', [KycController::class, 'pheDuyetHangLoat'])->name('kyc.bulk-approve');
         Route::put('/duyet-kyc/{ma_xac_thuc}/duyet', [KycController::class, 'pheDuyetHoSo'])->name('kyc.approve');
         Route::put('/duyet-kyc/{ma_xac_thuc}/tu-choi', [KycController::class, 'tuChoiHoSo'])->name('kyc.reject');
     });

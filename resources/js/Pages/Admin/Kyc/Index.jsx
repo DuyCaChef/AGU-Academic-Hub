@@ -36,6 +36,43 @@ export default function KycIndex({ kycQueue }) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [rejectError, setRejectError] = useState('');
 
+    // State chọn hàng loạt
+    const [selectedIds, setSelectedIds] = useState([]);
+
+    const handleSelectAll = (e) => {
+        if (e.target.checked) {
+            setSelectedIds(items.map((i) => i.ma_xac_thuc));
+        } else {
+            setSelectedIds([]);
+        }
+    };
+
+    const handleToggleSelect = (id) => {
+        setSelectedIds((prev) =>
+            prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+        );
+    };
+
+    // Xử lý duyệt hàng loạt hồ sơ KYC
+    const handleBulkApprove = () => {
+        if (!selectedIds.length) return;
+
+        if (!window.confirm(`Xác nhận phê duyệt hàng loạt ${selectedIds.length} hồ sơ KYC đã chọn? Các tài khoản sẽ được kích hoạt ngay lập tức.`)) {
+            return;
+        }
+
+        setIsSubmitting(true);
+        router.post(
+            route('admin.kyc.bulk-approve'),
+            { ids: selectedIds },
+            {
+                preserveScroll: true,
+                onSuccess: () => setSelectedIds([]),
+                onFinish: () => setIsSubmitting(false),
+            }
+        );
+    };
+
     // Xử lý mở Modal Xem ảnh
     const handleOpenPreview = (item) => {
         setPreviewImage(item);
@@ -143,6 +180,36 @@ export default function KycIndex({ kycQueue }) {
 
                 {/* Bảng danh sách hàng đợi KYC */}
                 <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+                    {/* Thanh thao tác hàng loạt */}
+                    {selectedIds.length > 0 && (
+                        <div className="bg-blue-50 border-b border-blue-100 px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+                            <div className="flex items-center gap-2">
+                                <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#005baa] text-white">
+                                    Đã chọn {selectedIds.length}
+                                </span>
+                                <span className="text-xs text-blue-900 font-medium">hồ sơ KYC</span>
+                                <button
+                                    type="button"
+                                    onClick={() => setSelectedIds([])}
+                                    className="text-xs text-blue-700 underline hover:text-blue-900 ml-2"
+                                >
+                                    Bỏ chọn tất cả
+                                </button>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    type="button"
+                                    disabled={isSubmitting}
+                                    onClick={handleBulkApprove}
+                                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 shadow-xs active:scale-95 transition-all disabled:opacity-50"
+                                >
+                                    <CheckCircle2 className="w-4 h-4" />
+                                    Duyệt hàng loạt ({selectedIds.length})
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
                     {items.length === 0 ? (
                         <div className="p-12 text-center">
                             <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-emerald-100">
@@ -158,6 +225,14 @@ export default function KycIndex({ kycQueue }) {
                             <table className="w-full text-left text-sm text-slate-600">
                                 <thead className="bg-slate-50/75 border-b border-slate-200/80 text-xs font-semibold text-slate-500 uppercase tracking-wider">
                                     <tr>
+                                        <th className="px-4 py-4 w-10 text-center">
+                                            <input
+                                                type="checkbox"
+                                                className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer"
+                                                checked={items.length > 0 && selectedIds.length === items.length}
+                                                onChange={handleSelectAll}
+                                            />
+                                        </th>
                                         <th className="px-6 py-4">Sinh viên / Ứng viên</th>
                                         <th className="px-6 py-4">MSSV / Khóa học</th>
                                         <th className="px-6 py-4">Khoa</th>
@@ -170,9 +245,18 @@ export default function KycIndex({ kycQueue }) {
                                 <tbody className="divide-y divide-slate-100">
                                     {items.map((item) => {
                                         const typeInfo = getVerificationTypeLabel(item.loai_minh_chung);
+                                        const isSelected = selectedIds.includes(item.ma_xac_thuc);
 
                                         return (
-                                            <tr key={item.ma_xac_thuc} className="hover:bg-slate-50/50 transition-colors">
+                                            <tr key={item.ma_xac_thuc} className={`hover:bg-slate-50/50 transition-colors ${isSelected ? 'bg-blue-50/30' : ''}`}>
+                                                <td className="px-4 py-4 text-center">
+                                                    <input
+                                                        type="checkbox"
+                                                        className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer"
+                                                        checked={isSelected}
+                                                        onChange={() => handleToggleSelect(item.ma_xac_thuc)}
+                                                    />
+                                                </td>
                                                 <td className="px-6 py-4">
                                                     <div className="flex items-center gap-3">
                                                         <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 font-bold flex items-center justify-center border border-slate-200 uppercase text-xs">
