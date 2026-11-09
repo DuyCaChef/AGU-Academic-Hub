@@ -9,10 +9,15 @@ use App\Models\TaiLieu;
 use App\Modules\Administration\Domain\Enums\HanhDongKiemToan;
 use App\Modules\Administration\Domain\Enums\LoaiDoiTuongKiemToan;
 use App\Modules\Administration\Domain\Services\AuditLogger;
+use App\Modules\Moderation\Domain\Services\UserViolationPenaltyEvaluator;
 use Illuminate\Support\Facades\DB;
 
 class DecideDocumentReviewAction
 {
+    public function __construct(
+        protected UserViolationPenaltyEvaluator $penaltyEvaluator
+    ) {}
+
     // Quyết định xử lý tài liệu trong hàng đợi kiểm tra (KEEP, RESTORE, HIDE, DELETE)
     public function execute(int $documentId, string $action, string $reason, NguoiDung $actor): void
     {
@@ -60,6 +65,17 @@ class DecideDocumentReviewAction
                     'nguon'              => $source,
                     'ly_do'              => $reason,
                 ]);
+
+                // Áp dụng chế tài phạt điểm uy tín và ghi nhận vi phạm cho tác giả tài liệu
+                $document->loadMissing('nguoiDang');
+                $penaltyPoints = (int) config('moderation.document_violation_penalty_points', 20);
+                $this->penaltyEvaluator->applyPenalty(
+                    author: $document->nguoiDang,
+                    actor: $actor,
+                    reason: $reason,
+                    targetTitle: $document->tieu_de,
+                    penaltyPoints: $penaltyPoints
+                );
             }
 
             $document->ly_do_trang_thai = "Admin {$actionLabel}: {$reason}";
