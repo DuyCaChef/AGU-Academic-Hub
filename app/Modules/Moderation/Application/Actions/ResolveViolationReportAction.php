@@ -9,14 +9,16 @@ use App\Models\TaiLieu;
 use App\Modules\Administration\Domain\Enums\HanhDongKiemToan;
 use App\Modules\Administration\Domain\Enums\LoaiDoiTuongKiemToan;
 use App\Modules\Administration\Domain\Services\AuditLogger;
-use App\Modules\Moderation\Infrastructure\Notifications\ViolationReportResolvedNotification;
 use App\Modules\Moderation\Domain\Services\DocumentReportRecalculator;
+use App\Modules\Moderation\Domain\Services\UserViolationPenaltyEvaluator;
+use App\Modules\Moderation\Infrastructure\Notifications\ViolationReportResolvedNotification;
 use Illuminate\Support\Facades\DB;
 
 class ResolveViolationReportAction
 {
     public function __construct(
-        protected DocumentReportRecalculator $recalculator
+        protected DocumentReportRecalculator $recalculator,
+        protected UserViolationPenaltyEvaluator $penaltyEvaluator
     ) {}
 
     // Quyết định giải quyết báo cáo vi phạm: Duyệt ẩn, xóa mềm hoặc bác bỏ
@@ -56,6 +58,17 @@ class ResolveViolationReportAction
                     'nguon'              => $source,
                     'ly_do'              => $reason,
                 ]);
+
+                // Áp dụng chế tài phạt điểm uy tín và ghi nhận vi phạm cho tác giả tài liệu
+                $document->loadMissing('nguoiDang');
+                $penaltyPoints = (int) config('moderation.document_violation_penalty_points', 20);
+                $this->penaltyEvaluator->applyPenalty(
+                    author: $document->nguoiDang,
+                    actor: $actor,
+                    reason: $reason,
+                    targetTitle: $document->tieu_de,
+                    penaltyPoints: $penaltyPoints
+                );
             }
 
             // 2. Cập nhật các bản ghi báo cáo (bao gồm báo cáo hiện tại và các báo cáo chờ duyệt cùng tài liệu)

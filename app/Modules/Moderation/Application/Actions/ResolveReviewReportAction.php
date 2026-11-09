@@ -9,11 +9,16 @@ use App\Models\NguoiDung;
 use App\Modules\Administration\Domain\Enums\HanhDongKiemToan;
 use App\Modules\Administration\Domain\Enums\LoaiDoiTuongKiemToan;
 use App\Modules\Administration\Domain\Services\AuditLogger;
+use App\Modules\Moderation\Domain\Services\UserViolationPenaltyEvaluator;
 use App\Modules\Moderation\Infrastructure\Notifications\ReviewReportResolvedNotification;
 use Illuminate\Support\Facades\DB;
 
 class ResolveReviewReportAction
 {
+    public function __construct(
+        protected UserViolationPenaltyEvaluator $penaltyEvaluator
+    ) {}
+
     // Quyết định giải quyết báo cáo đánh giá môn học: Tạm ẩn, Xóa hoặc Bác bỏ
     public function execute(int $reportId, string $action, string $reason, NguoiDung $actor): string
     {
@@ -41,6 +46,17 @@ class ResolveReviewReportAction
                 if (!$review->trashed()) {
                     $review->delete();
                 }
+
+                // Áp dụng chế tài phạt điểm uy tín và ghi nhận vi phạm cho tác giả bài đánh giá
+                $review->loadMissing('nguoiDung');
+                $penaltyPoints = (int) config('moderation.review_violation_penalty_points', 10);
+                $this->penaltyEvaluator->applyPenalty(
+                    author: $review->nguoiDung,
+                    actor: $actor,
+                    reason: $reason,
+                    targetTitle: "Bài đánh giá môn {$courseCode}",
+                    penaltyPoints: $penaltyPoints
+                );
             } elseif ($action === 'DISMISS') {
                 // Nếu trước đó bài bị tạm ẩn do auto-hide, khôi phục lại trạng thái đã duyệt
                 if ($review->trang_thai === TrangThaiDanhGiaMonHoc::TAM_AN) {
