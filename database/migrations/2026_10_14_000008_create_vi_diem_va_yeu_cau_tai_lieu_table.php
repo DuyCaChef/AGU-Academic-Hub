@@ -32,7 +32,7 @@ return new class extends Migration {
             $table->string('ten_giang_vien', 255)->nullable();
             $table->enum('phan_loai', ['DE_THI', 'BAI_GIANG', 'DO_AN', 'BAI_TAP', 'KHAC'])->default('KHAC');
             $table->unsignedInteger('diem_thuong')->default(50);
-            $table->enum('trang_thai', ['MO', 'DA_HOAN_THANH', 'DONG', 'DA_HUY'])->default('MO');
+            $table->enum('trang_thai', ['MO', 'CHO_GIAI_NGAN', 'DA_HOAN_THANH', 'DONG', 'DA_HUY'])->default('MO');
             $table->foreignId('ma_tai_lieu_dap_ung')->nullable()->constrained('tai_lieu', 'ma_tai_lieu')->nullOnDelete();
             $table->foreignId('nguoi_xac_nhan')->nullable()->constrained('nguoi_dung', 'ma_nguoi_dung')->nullOnDelete();
             $table->dateTime('thoi_gian_xac_nhan')->nullable();
@@ -49,7 +49,7 @@ return new class extends Migration {
             $table->foreignId('ma_yeu_cau')->constrained('yeu_cau_tai_lieu', 'ma_yeu_cau')->restrictOnDelete();
             $table->foreignId('ma_tai_lieu')->constrained('tai_lieu', 'ma_tai_lieu')->restrictOnDelete();
             $table->foreignId('ma_nguoi_dong_gop')->constrained('nguoi_dung', 'ma_nguoi_dung')->restrictOnDelete();
-            $table->enum('trang_thai', ['CHO_DUYET', 'CHAP_NHAN', 'TU_CHOI'])->default('CHO_DUYET');
+            $table->enum('trang_thai', ['CHO_DUYET', 'NGUOI_YEU_CAU_XAC_NHAN', 'CHAP_NHAN', 'TU_CHOI'])->default('CHO_DUYET');
             $table->text('ghi_chu_dong_gop')->nullable();
             $table->foreignId('nguoi_duyet')->nullable()->constrained('nguoi_dung', 'ma_nguoi_dung')->nullOnDelete();
             $table->dateTime('thoi_gian_duyet')->nullable();
