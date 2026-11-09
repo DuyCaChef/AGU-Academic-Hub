@@ -9,7 +9,7 @@ return new class extends Migration {
     {
         Schema::create('bao_cao_danh_gia', function (Blueprint $table) {
             $table->id('ma_bao_cao');
-            $table->foreignId('ma_danh_gia')->constrained('danh_gia_mon_hoc', 'ma_danh_gia')->cascadeOnDelete();
+            $table->foreignId('ma_danh_gia')->nullable()->constrained('danh_gia_mon_hoc', 'ma_danh_gia')->cascadeOnDelete();
             $table->foreignId('ma_nguoi_bao_cao')->constrained('nguoi_dung', 'ma_nguoi_dung')->cascadeOnDelete();
             $table->enum('ly_do', ['NGON_TU_KICH_DONG', 'BOI_NHO', 'QUAY_ROI', 'SPAM', 'KHAC']);
             $table->text('chi_tiet')->nullable();

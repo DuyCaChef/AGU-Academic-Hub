@@ -248,8 +248,12 @@ class ReviewModerationRepository
     }
 
     // Lấy danh sách các báo cáo khác cùng hướng tới bài đánh giá này
-    public function getRelatedReports(int $reviewId, int $excludeReportId): Collection
+    public function getRelatedReports(?int $reviewId, int $excludeReportId): Collection
     {
+        if (!$reviewId) {
+            return new Collection();
+        }
+
         return BaoCaoDanhGia::query()
             ->with(['nguoiBaoCao', 'nguoiXuLy'])
             ->where('ma_danh_gia', $reviewId)

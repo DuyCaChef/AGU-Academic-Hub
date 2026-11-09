@@ -26,9 +26,18 @@ class ReviewReportResolvedNotification extends Notification
     {
         $review = $this->report->danhGia;
         $course = $review?->monHoc;
-        $courseTitle = $course ? "{$course->ma_mon_hoc} - {$course->ten_mon_hoc}" : 'môn học';
+        $isLecturer = ($this->report->loai_doi_tuong === 'GIANG_VIEN') || ($this->report->ly_do === 'BOI_NHO');
+        $lecturerName = $this->report->ten_giang_vien;
+        $courseTitle = $course ? "{$course->ma_mon_hoc} - {$course->ten_mon_hoc}" : null;
 
-        $message = $this->customMessage ?? "Báo cáo của bạn về bài đánh giá cho môn \"{$courseTitle}\" đã được Ban kiểm duyệt {$this->actionLabel}.";
+        $targetText = match (true) {
+            $isLecturer && $lecturerName && $courseTitle => "giảng viên {$lecturerName} (môn {$courseTitle})",
+            $isLecturer && $lecturerName => "giảng viên {$lecturerName}",
+            !empty($courseTitle) => "môn \"{$courseTitle}\"",
+            default => 'nội dung đánh giá',
+        };
+
+        $message = $this->customMessage ?? "Báo cáo của bạn về bài đánh giá liên quan đến {$targetText} đã được Ban kiểm duyệt {$this->actionLabel}.";
 
         return new DatabaseMessage([
             'title'       => 'Kết quả xử lý báo cáo đánh giá',

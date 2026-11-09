@@ -395,5 +395,83 @@ class ReviewModerationWorkflowTest extends TestCase
             'trang_thai'       => 'CHO_XU_LY',
         ]);
     }
+
+    // Kiểm tra Moderator có thể giải quyết báo cáo giảng viên độc lập (không gắn với môn học hoặc ma_danh_gia) mà không bị lỗi
+    public function test_moderator_can_resolve_lecturer_report_without_course_without_crashing(): void
+    {
+        Notification::fake();
+
+        $report = BaoCaoDanhGia::create([
+            'ma_danh_gia'      => null,
+            'ma_nguoi_bao_cao' => $this->reporter->ma_nguoi_dung,
+            'loai_doi_tuong'   => 'GIANG_VIEN',
+            'ten_giang_vien'   => 'ThS. Nguyễn Văn Thầy',
+            'ly_do'            => 'BOI_NHO',
+            'chi_tiet'         => 'Nội dung bôi nhọ giảng viên ngoài phạm vi môn học.',
+            'trang_thai'       => 'CHO_XU_LY',
+        ]);
+
+        $response = $this->actingAs($this->moderator)
+            ->put(route('admin.review-reports.resolve', $report->ma_bao_cao), [
+                'action'            => 'DELETE',
+                'resolution_reason' => 'Xác nhận thông tin xúc phạm uy tín giảng viên.',
+            ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        $report->refresh();
+        $this->assertSame('DA_XU_LY', $report->trang_thai);
+        $this->assertSame($this->moderator->ma_nguoi_dung, $report->nguoi_xu_ly);
+
+        // Kiểm tra thông báo gửi tới người báo cáo có chứa tên giảng viên
+        Notification::assertSentTo($this->reporter, ReviewReportResolvedNotification::class, function ($notification) {
+            $data = $notification->toDatabase($this->reporter)->data;
+            return str_contains($data['message'], 'giảng viên ThS. Nguyễn Văn Thầy');
+        });
+
+        // Kiểm tra nhật ký kiểm toán ghi nhận đối tượng giảng viên
+        $this->assertDatabaseHas('nhat_ky_kiem_toan', [
+            'ma_nguoi_thuc_hien' => $this->moderator->ma_nguoi_dung,
+            'hanh_dong'          => HanhDongKiemToan::XU_LY_BAO_CAO_DANH_GIA->value,
+            'ma_doi_tuong'       => (string) $report->ma_bao_cao,
+        ]);
+    }
+
+    // Kiểm tra Moderator giải quyết báo cáo giảng viên gắn với bài đánh giá
+    public function test_moderator_can_resolve_lecturer_report_with_linked_review(): void
+    {
+        Notification::fake();
+
+        $report = BaoCaoDanhGia::create([
+            'ma_danh_gia'      => $this->review->ma_danh_gia,
+            'ma_nguoi_bao_cao' => $this->reporter->ma_nguoi_dung,
+            'loai_doi_tuong'   => 'GIANG_VIEN',
+            'ten_giang_vien'   => 'TS. Lê Hoàng Nam',
+            'ly_do'            => 'BOI_NHO',
+            'chi_tiet'         => 'Bôi nhọ giảng viên.',
+            'trang_thai'       => 'CHO_XU_LY',
+        ]);
+
+        $response = $this->actingAs($this->moderator)
+            ->put(route('admin.review-reports.resolve', $report->ma_bao_cao), [
+                'action'            => 'DELETE',
+                'resolution_reason' => 'Nội dung bôi nhọ danh dự giảng viên.',
+            ]);
+
+        $response->assertRedirect();
+
+        $report->refresh();
+        $this->assertSame('DA_XU_LY', $report->trang_thai);
+
+        // Bài đánh giá bị xóa mềm
+        $this->assertSoftDeleted('danh_gia_mon_hoc', [
+            'ma_danh_gia' => $this->review->ma_danh_gia,
+        ]);
+
+        // Tác giả bị phạt điểm uy tín
+        $this->student->refresh();
+        $this->assertSame(90, $this->student->diem_uy_tin);
+    }
 }
 
