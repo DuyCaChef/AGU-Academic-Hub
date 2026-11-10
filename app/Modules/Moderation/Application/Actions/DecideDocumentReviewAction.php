@@ -9,8 +9,7 @@ use App\Models\TaiLieu;
 use App\Modules\Administration\Domain\Enums\HanhDongKiemToan;
 use App\Modules\Administration\Domain\Enums\LoaiDoiTuongKiemToan;
 use App\Modules\Administration\Domain\Services\AuditLogger;
-use App\Modules\Moderation\Domain\Services\BountySubmissionModerationSynchronizer;
-use App\Modules\Moderation\Domain\Services\UserViolationPenaltyEvaluator;
+use App\Modules\Notifications\Domain\Events\DocumentModeratedEvent;
 use Illuminate\Support\Facades\DB;
 
 class DecideDocumentReviewAction
@@ -18,7 +17,8 @@ class DecideDocumentReviewAction
     public function __construct(
         protected UserViolationPenaltyEvaluator $penaltyEvaluator,
         protected BountySubmissionModerationSynchronizer $bountySynchronizer
-    ) {}
+    ) {
+    }
 
     // Quyết định xử lý tài liệu trong hàng đợi kiểm tra (KEEP, RESTORE, HIDE, DELETE)
     public function execute(int $documentId, string $action, string $reason, NguoiDung $actor): void
@@ -27,10 +27,10 @@ class DecideDocumentReviewAction
             $document = TaiLieu::withTrashed()->findOrFail($documentId);
 
             $actionLabel = match ($action) {
-                'KEEP'    => 'giữ nguyên',
+                'KEEP' => 'giữ nguyên',
                 'RESTORE' => 'khôi phục',
-                'HIDE'    => 'ẩn',
-                default   => 'xóa mềm',
+                'HIDE' => 'ẩn',
+                default => 'xóa mềm',
             };
 
             $source = $actor->laQuanTriVien() ? 'ADMIN' : 'MODERATOR';
@@ -41,31 +41,31 @@ class DecideDocumentReviewAction
 
                 if ($action === 'RESTORE') {
                     LichSuThungRac::create([
-                        'ma_tai_lieu'        => $document->getKey(),
+                        'ma_tai_lieu' => $document->getKey(),
                         'ma_nguoi_thuc_hien' => $actor->getKey(),
-                        'hanh_dong'          => 'RESTORE',
-                        'nguon'              => $source,
-                        'ly_do'              => $reason,
+                        'hanh_dong' => 'RESTORE',
+                        'nguon' => $source,
+                        'ly_do' => $reason,
                     ]);
                 }
             } elseif ($action === 'HIDE') {
                 $document->trang_thai = 'TAM_AN_KIEM_TRA';
             } else {
                 $document->forceFill([
-                    'ma_nguoi_xoa'      => $actor->getKey(),
-                    'ly_do_xoa'         => $reason,
-                    'nguon_xoa'         => $source,
+                    'ma_nguoi_xoa' => $actor->getKey(),
+                    'ly_do_xoa' => $reason,
+                    'nguon_xoa' => $source,
                     'han_luu_thung_rac' => now()->addDays(config('documents.trash_admin_delete_after_days', 60)),
                 ])->save();
 
                 $document->delete();
 
                 LichSuThungRac::create([
-                    'ma_tai_lieu'        => $document->getKey(),
+                    'ma_tai_lieu' => $document->getKey(),
                     'ma_nguoi_thuc_hien' => $actor->getKey(),
-                    'hanh_dong'          => 'SOFT_DELETE',
-                    'nguon'              => $source,
-                    'ly_do'              => $reason,
+                    'hanh_dong' => 'SOFT_DELETE',
+                    'nguon' => $source,
+                    'ly_do' => $reason,
                 ]);
 
                 // Áp dụng chế tài phạt điểm uy tín và ghi nhận vi phạm cho tác giả tài liệu
@@ -92,10 +92,10 @@ class DecideDocumentReviewAction
 
             // Ghi nhật ký kiểm toán hành vi quản trị tài liệu
             $auditAction = match ($action) {
-                'HIDE'    => HanhDongKiemToan::AN_TAI_LIEU,
+                'HIDE' => HanhDongKiemToan::AN_TAI_LIEU,
                 'RESTORE' => HanhDongKiemToan::KHOI_PHUC_TAI_LIEU,
-                'KEEP'    => HanhDongKiemToan::XU_LY_BAO_CAO,
-                default   => HanhDongKiemToan::XOA_MEM_TAI_LIEU,
+                'KEEP' => HanhDongKiemToan::XU_LY_BAO_CAO,
+                default => HanhDongKiemToan::XOA_MEM_TAI_LIEU,
             };
 
             app(AuditLogger::class)->log(
@@ -113,11 +113,17 @@ class DecideDocumentReviewAction
                 ->where('trang_thai_xu_ly', 'CHO_XU_LY')
                 ->update([
                     'trang_thai_xu_ly' => 'DA_XU_LY',
-                    'ma_nguoi_xu_ly'   => $actor->getKey(),
-                    'ly_do_xu_ly'      => $reason,
-                    'xu_ly_luc'        => now(),
+                    'ma_nguoi_xu_ly' => $actor->getKey(),
+                    'ly_do_xu_ly' => $reason,
+                    'xu_ly_luc' => now(),
                 ]);
         });
+
+        // Phát sự kiện kiểm duyệt tài liệu sau khi Transaction commit thành công
+        $freshDoc = TaiLieu::withTrashed()->find($documentId);
+        if ($freshDoc) {
+            DocumentModeratedEvent::dispatch($freshDoc, $action, $reason, $actor);
+        }
     }
 }
 

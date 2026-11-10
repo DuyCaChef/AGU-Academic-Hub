@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { usePage, router } from '@inertiajs/react';
-import { Bell, CheckCheck, CheckCircle2, AlertTriangle, AlertCircle, Info, Trash2, ShieldAlert, Loader2 } from 'lucide-react';
+import { Bell, CheckCheck, CheckCircle2, AlertTriangle, AlertCircle, Info, Trash2, ShieldAlert, Loader2, ArrowRight } from 'lucide-react';
 
 export default function NotificationDropdown({ variant = 'student' }) {
     const { auth } = usePage().props;
@@ -225,6 +225,21 @@ export default function NotificationDropdown({ variant = 'student' }) {
                                 </div>
                             ))
                         )}
+                    </div>
+
+                    {/* Footer - Điều hướng đến Trung tâm thông báo */}
+                    <div className="p-2 bg-slate-50 border-t border-slate-100 text-center">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setIsOpen(false);
+                                router.visit('/thong-bao');
+                            }}
+                            className="w-full py-1.5 px-3 text-xs font-semibold text-brand-primary hover:text-brand-secondary hover:bg-slate-100 rounded-lg transition-colors flex items-center justify-center gap-1.5"
+                        >
+                            <span>Xem tất cả thông báo</span>
+                            <ArrowRight className="w-3.5 h-3.5" />
+                        </button>
                     </div>
                 </div>
             )}

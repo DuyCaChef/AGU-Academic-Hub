@@ -8,6 +8,7 @@ use App\Models\VaiTroNguoiDung;
 use App\Modules\Bounties\Domain\Services\BountyRuleEvaluator;
 use App\Modules\Bounties\Infrastructure\Notifications\BountyPayoutApprovalRequiredNotification;
 use App\Modules\Bounties\Infrastructure\Persistence\WishlistBountyRepository;
+use App\Modules\Notifications\Domain\Events\BountyFulfillmentConfirmedEvent;
 use Illuminate\Support\Facades\DB;
 
 // Action xử lý xác nhận của người yêu cầu - chuyển trạng thái sang CHO_GIAI_NGAN và thông báo Admin/Mod
@@ -16,7 +17,8 @@ class ConfirmBountyFulfillmentAction
     public function __construct(
         protected WishlistBountyRepository $bountyRepository,
         protected BountyRuleEvaluator $ruleEvaluator
-    ) {}
+    ) {
+    }
 
     public function execute(NguoiDung $user, int $maYeuCau, int $maDapUng): array
     {
@@ -59,23 +61,23 @@ class ConfirmBountyFulfillmentAction
 
             // Chuyển yêu cầu sang trạng thái CHO_GIAI_NGAN - điểm chưa được chuyển
             $yeuCau->update([
-                'trang_thai'                      => TrangThaiYeuCauTaiLieu::CHO_GIAI_NGAN,
-                'ma_dap_ung_duoc_chon'            => $dapUng->ma_dap_ung,
+                'trang_thai' => TrangThaiYeuCauTaiLieu::CHO_GIAI_NGAN,
+                'ma_dap_ung_duoc_chon' => $dapUng->ma_dap_ung,
                 'thoi_gian_nguoi_yeu_cau_xac_nhan' => now(),
             ]);
         });
 
         // Thông báo đến tất cả Admin và Kiểm duyệt viên về yêu cầu duyệt giải ngân
-        $tenNguoiYeuCau  = $yeuCau->nguoiTao->ho_ten ?? 'Sinh viên';
+        $tenNguoiYeuCau = $yeuCau->nguoiTao->ho_ten ?? 'Sinh viên';
         $tenNguoiDongGop = $dapUng->nguoiDongGop->ho_ten ?? 'Người đóng góp';
 
         $adminsAndMods = NguoiDung::whereIn('vai_tro', ['QUAN_TRI_VIEN', 'KIEM_DUYET_VIEN'])->get();
         $adminsAndMods->each(function (NguoiDung $recipient) use ($yeuCau, $dapUng, $tenNguoiYeuCau, $tenNguoiDongGop) {
             $recipient->notify(new BountyPayoutApprovalRequiredNotification(
-                maYeuCau:        $yeuCau->ma_yeu_cau,
-                maDapUng:        $dapUng->ma_dap_ung,
-                diemThuong:      $yeuCau->diem_thuong,
-                tenNguoiYeuCau:  $tenNguoiYeuCau,
+                maYeuCau: $yeuCau->ma_yeu_cau,
+                maDapUng: $dapUng->ma_dap_ung,
+                diemThuong: $yeuCau->diem_thuong,
+                tenNguoiYeuCau: $tenNguoiYeuCau,
                 tenNguoiDongGop: $tenNguoiDongGop
             ));
         });

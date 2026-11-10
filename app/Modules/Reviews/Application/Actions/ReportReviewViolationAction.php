@@ -5,6 +5,7 @@ namespace App\Modules\Reviews\Application\Actions;
 use App\Models\BaoCaoDanhGia;
 use App\Models\NguoiDung;
 use App\Modules\Moderation\Domain\Services\ReviewReportRecalculator;
+use App\Modules\Notifications\Domain\Events\ReviewReportedEvent;
 use App\Modules\Reviews\Infrastructure\Persistence\CourseReviewRepository;
 
 // Action tiếp nhận và ghi nhận báo cáo vi phạm tiêu chuẩn cộng đồng cho bài đánh giá
@@ -25,7 +26,7 @@ class ReportReviewViolationAction
     ): BaoCaoDanhGia {
         $danhGia = $this->reviewRepository->findReviewById($maDanhGia);
 
-        return $this->recalculator->createReport(
+        $report = $this->recalculator->createReport(
             $danhGia,
             $user,
             [
@@ -35,6 +36,9 @@ class ReportReviewViolationAction
                 'ten_giang_vien' => $tenGiangVien,
             ]
         );
+
+        ReviewReportedEvent::dispatch($report, $danhGia, $user);
+
+        return $report;
     }
 }
-

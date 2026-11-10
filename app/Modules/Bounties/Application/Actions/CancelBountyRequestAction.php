@@ -7,6 +7,7 @@ use App\Models\NguoiDung;
 use App\Modules\Bounties\Domain\Services\BountyRuleEvaluator;
 use App\Modules\Bounties\Domain\Services\ReputationEvaluator;
 use App\Modules\Bounties\Infrastructure\Persistence\WishlistBountyRepository;
+use App\Modules\Notifications\Domain\Events\BountyCancelledEvent;
 use Illuminate\Support\Facades\DB;
 
 // Action hủy yêu cầu tìm tài liệu và hoàn trả điểm thưởng đã đóng băng vào ví
@@ -34,6 +35,9 @@ class CancelBountyRequestAction
             ];
         }
 
+        // Thu thập danh sách ID các contributor đã gửi bài nộp để gửi thông báo
+        $contributorIds = $yeuCau->dapUngs()->pluck('ma_nguoi_dong_gop')->unique()->all();
+
         DB::transaction(function () use ($yeuCau) {
             // 1. Hoàn trả điểm qua ReputationEvaluator
             $this->reputationEvaluator->hoanDiemBounty($yeuCau);
@@ -41,6 +45,9 @@ class CancelBountyRequestAction
             // 2. Chuyển trạng thái sang DA_HUY và Soft Delete
             $this->bountyRepository->cancelRequest($yeuCau);
         });
+
+        // Phát sự kiện nghiệp vụ sau khi Transaction Commit thành công
+        BountyCancelledEvent::dispatch($yeuCau, $user, (int) $yeuCau->diem_thuong, $contributorIds);
 
         return [
             'success' => true,
