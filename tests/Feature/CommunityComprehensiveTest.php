@@ -273,7 +273,16 @@ class CommunityComprehensiveTest extends TestCase
         $confirmResponse->assertRedirect();
         $confirmResponse->assertSessionHas('success');
 
-        // Kiểm tra trạng thái yêu cầu
+        // Kiểm tra trạng thái yêu cầu chuyển sang CHO_GIAI_NGAN
+        $yeuCau->refresh();
+        $this->assertEquals(TrangThaiYeuCauTaiLieu::CHO_GIAI_NGAN, $yeuCau->trang_thai);
+
+        // Admin duyệt giải ngân điểm Bounty
+        $approveAction = app(\App\Modules\Bounties\Application\Actions\ApproveBountyPayoutAction::class);
+        $approveResult = $approveAction->execute($this->admin, $yeuCau->ma_yeu_cau);
+        $this->assertTrue($approveResult['success']);
+
+        // Kiểm tra trạng thái yêu cầu sau khi duyệt
         $yeuCau->refresh();
         $this->assertEquals(TrangThaiYeuCauTaiLieu::DA_HOAN_THANH, $yeuCau->trang_thai);
 

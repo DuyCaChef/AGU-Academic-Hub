@@ -8,6 +8,7 @@ use App\Modules\Bounties\BountiesServiceProvider;
 use App\Modules\Documents\DocumentsServiceProvider;
 use App\Modules\Identity\IdentityServiceProvider;
 use App\Modules\Moderation\ModerationServiceProvider;
+use App\Modules\Notifications\NotificationsServiceProvider;
 use App\Modules\Reviews\ReviewsServiceProvider;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Vite;
@@ -25,6 +26,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->register(ModerationServiceProvider::class);
         $this->app->register(ReviewsServiceProvider::class);
         $this->app->register(BountiesServiceProvider::class);
+        $this->app->register(NotificationsServiceProvider::class);
     }
 
     // Bootstrap các dịch vụ ứng dụng

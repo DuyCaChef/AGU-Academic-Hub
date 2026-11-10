@@ -10,6 +10,7 @@ use App\Modules\Administration\Domain\Services\AuditLogger;
 use App\Modules\Bounties\Domain\Services\ReputationEvaluator;
 use App\Modules\Bounties\Infrastructure\Notifications\BountyPayoutApprovedNotification;
 use App\Modules\Bounties\Infrastructure\Persistence\WishlistBountyRepository;
+use App\Modules\Notifications\Domain\Events\BountyFulfillmentConfirmedEvent;
 use Illuminate\Support\Facades\DB;
 
 // Action cho Admin/Mod duyệt giải ngân điểm thưởng Bounty sau khi người yêu cầu xác nhận
@@ -67,11 +68,13 @@ class ApproveBountyPayoutAction
             );
         });
 
-        // Thông báo cho người đóng góp nhận được điểm thưởng
-        $nguoiDongGop->notify(new BountyPayoutApprovedNotification(
-            maYeuCau:   $yeuCau->ma_yeu_cau,
-            diemThuong: $yeuCau->diem_thuong
-        ));
+        // Kích hoạt sự kiện hoàn tất giải ngân cho Notification Module (UC-ST-04, UC-ST-05)
+        BountyFulfillmentConfirmedEvent::dispatch(
+            $yeuCau,
+            $dapUng,
+            $yeuCau->nguoiTao,
+            $yeuCau->diem_thuong
+        );
 
         return [
             'success' => true,

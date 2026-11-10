@@ -106,6 +106,11 @@ class DanhGiaMonHoc extends Model
         return $this->hasMany(BaoCaoDanhGia::class, 'ma_danh_gia', 'ma_danh_gia');
     }
 
+    public function baoCaoDanhGias(): HasMany
+    {
+        return $this->hasMany(BaoCaoDanhGia::class, 'ma_danh_gia', 'ma_danh_gia');
+    }
+
     // Scope lấy đánh giá đã được duyệt hiển thị công khai
     public function scopeDaDuyet($query)
     {

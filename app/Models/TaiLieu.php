@@ -85,6 +85,11 @@ class TaiLieu extends Model
         return $this->hasMany(YeuCauGoBoTaiLieu::class, 'ma_tai_lieu', 'ma_tai_lieu');
     }
 
+    public function dapUngYeuCaus(): HasMany
+    {
+        return $this->hasMany(DapUngYeuCauTaiLieu::class, 'ma_tai_lieu', 'ma_tai_lieu');
+    }
+
     public function nguoiXoa(): BelongsTo
     {
         return $this->belongsTo(NguoiDung::class, 'ma_nguoi_xoa', 'ma_nguoi_dung');
@@ -93,10 +98,5 @@ class TaiLieu extends Model
     public function lichSuThungRacs(): HasMany
     {
         return $this->hasMany(LichSuThungRac::class, 'ma_tai_lieu', 'ma_tai_lieu');
-    }
-
-    public function dapUngYeuCaus(): HasMany
-    {
-        return $this->hasMany(DapUngYeuCauTaiLieu::class, 'ma_tai_lieu', 'ma_tai_lieu');
     }
 }

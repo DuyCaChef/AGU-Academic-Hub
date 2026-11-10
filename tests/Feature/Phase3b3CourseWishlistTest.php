@@ -562,6 +562,19 @@ class Phase3b3CourseWishlistTest extends TestCase
 
         $responseConfirm->assertSessionHas('success');
 
+        // Yêu cầu chuyển sang CHO_GIAI_NGAN chờ Admin/Mod phê duyệt
+        $this->assertEquals(TrangThaiYeuCauTaiLieu::CHO_GIAI_NGAN, $yeuCau->fresh()->trang_thai);
+        $this->assertEquals('NGUOI_YEU_CAU_XAC_NHAN', $dapUng->fresh()->trang_thai);
+
+        // 4. Admin phê duyệt giải ngân Bounty
+        $admin = NguoiDung::factory()->create([
+            'ma_khoa' => $this->faculty->ma_khoa,
+            'vai_tro' => 'QUAN_TRI_VIEN',
+        ]);
+        $approveAction = app(\App\Modules\Bounties\Application\Actions\ApproveBountyPayoutAction::class);
+        $approveResult = $approveAction->execute($admin, $yeuCau->ma_yeu_cau);
+        $this->assertTrue($approveResult['success']);
+
         // Yêu cầu chuyển sang DA_HOAN_THANH
         $this->assertEquals(TrangThaiYeuCauTaiLieu::DA_HOAN_THANH, $yeuCau->fresh()->trang_thai);
 

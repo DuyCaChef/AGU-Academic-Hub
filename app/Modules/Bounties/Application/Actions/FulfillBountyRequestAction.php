@@ -11,6 +11,7 @@ use App\Modules\Bounties\Domain\Services\BountyRuleEvaluator;
 use App\Modules\Bounties\Infrastructure\Persistence\WishlistBountyRepository;
 use App\Modules\Documents\Domain\Services\DocumentDeduplicationEvaluator;
 use App\Modules\Documents\Infrastructure\Storage\DocumentFileStorage;
+use App\Modules\Notifications\Domain\Events\DocumentContributedToBountyEvent;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 
@@ -76,13 +77,15 @@ class FulfillBountyRequestAction
             ];
         }
 
-        $this->bountyRepository->createSubmission([
+        $submission = $this->bountyRepository->createSubmission([
             'ma_yeu_cau'        => $yeuCau->ma_yeu_cau,
             'ma_tai_lieu'       => $documentId,
             'ma_nguoi_dong_gop' => $user->ma_nguoi_dung,
             'trang_thai'        => 'CHO_DUYET',
             'ghi_chu_dong_gop'  => $validated['ghi_chu_dong_gop'] ?? null,
         ]);
+
+        DocumentContributedToBountyEvent::dispatch($submission, $yeuCau, $user);
 
         return [
             'success' => true,
@@ -137,7 +140,7 @@ class FulfillBountyRequestAction
         }
 
         // 6. Thực hiện lưu trữ file và tạo bản ghi trong Transaction
-        return DB::transaction(function () use ($user, $yeuCau, $validated, $file, $sha256Hash, $extension) {
+        $submission = DB::transaction(function () use ($user, $yeuCau, $validated, $file, $sha256Hash, $extension) {
             $storedPath = $this->storage->store($file, 'doc');
             $sizeKb = (int) ceil($file->getSize() / 1024);
 
@@ -158,18 +161,20 @@ class FulfillBountyRequestAction
             ]);
 
             // Tạo bản ghi đóng góp liên kết tài liệu với yêu cầu Bounty
-            $this->bountyRepository->createSubmission([
+            return $this->bountyRepository->createSubmission([
                 'ma_yeu_cau'        => $yeuCau->ma_yeu_cau,
                 'ma_tai_lieu'       => $newDoc->ma_tai_lieu,
                 'ma_nguoi_dong_gop' => $user->ma_nguoi_dung,
                 'trang_thai'        => 'CHO_DUYET',
                 'ghi_chu_dong_gop'  => $validated['ghi_chu_dong_gop'] ?? null,
             ]);
-
-            return [
-                'success' => true,
-                'message' => 'Đã tải lên và gửi tài liệu đóng góp thành công. Tài liệu đang chờ Ban kiểm duyệt phê duyệt trước khi người yêu cầu có thể nghiệm thu giải ngân.',
-            ];
         });
+
+        DocumentContributedToBountyEvent::dispatch($submission, $yeuCau, $user);
+
+        return [
+            'success' => true,
+            'message' => 'Đã tải lên và gửi tài liệu đóng góp thành công. Tài liệu đang chờ Ban kiểm duyệt phê duyệt trước khi người yêu cầu có thể nghiệm thu giải ngân.',
+        ];
     }
 }
