@@ -8,7 +8,13 @@ enum NotificationType: string
     case BOUNTY_CONTRIBUTED = 'BOUNTY_CONTRIBUTED';
     case BOUNTY_CONFIRMED = 'BOUNTY_CONFIRMED';
     case BOUNTY_CANCELLED = 'BOUNTY_CANCELLED';
+    case BOUNTY_REJECTED = 'BOUNTY_REJECTED';
     case NEW_BOUNTY_REQUEST = 'NEW_BOUNTY_REQUEST';
+    case CORRECTION_REQUESTED = 'CORRECTION_REQUESTED';
+    case CORRECTION_ACCEPTED = 'CORRECTION_ACCEPTED';
+    case CORRECTION_REJECTED = 'CORRECTION_REJECTED';
+    case CORRECTION_REPLACEMENT_SUBMITTED = 'CORRECTION_REPLACEMENT_SUBMITTED';
+    case CORRECTION_COMPLETED = 'CORRECTION_COMPLETED';
 
     // Phân hệ Documents
     case DOCUMENT_APPROVED = 'DOCUMENT_APPROVED';
@@ -37,7 +43,13 @@ enum NotificationType: string
             self::BOUNTY_CONTRIBUTED => 'Có đóng góp tài liệu săn thưởng',
             self::BOUNTY_CONFIRMED => 'Nghiệm thu săn thưởng thành công',
             self::BOUNTY_CANCELLED => 'Yêu cầu săn thưởng đã bị hủy',
+            self::BOUNTY_REJECTED => 'Bài đóng góp săn thưởng bị từ chối',
             self::NEW_BOUNTY_REQUEST => 'Có yêu cầu tìm tài liệu mới',
+            self::CORRECTION_REQUESTED => 'Có yêu cầu chỉnh sửa tài liệu',
+            self::CORRECTION_ACCEPTED => 'Yêu cầu chỉnh sửa được chấp nhận',
+            self::CORRECTION_REJECTED => 'Yêu cầu chỉnh sửa bị từ chối',
+            self::CORRECTION_REPLACEMENT_SUBMITTED => 'Có phiên bản tài liệu thay thế mới',
+            self::CORRECTION_COMPLETED => 'Hoàn tất nghiệm thu chỉnh sửa tài liệu',
             self::DOCUMENT_APPROVED => 'Tài liệu đã được phê duyệt',
             self::DOCUMENT_REJECTED => 'Tài liệu bị từ chối kiểm duyệt',
             self::DOCUMENT_REVIEW_REQUIRED => 'Tài liệu cần kiểm duyệt',

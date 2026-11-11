@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Collection;
 class WishlistBountyRepository
 {
     // Lấy danh sách yêu cầu tìm tài liệu kèm bộ lọc và phân trang
-    public function getPaginatedWishlist(array $filters, int $perPage = 12): LengthAwarePaginator
+    public function getPaginatedWishlist(array $filters, int $perPage = 12, ?int $userId = null): LengthAwarePaginator
     {
         $query = YeuCauTaiLieu::whereHas('monHoc.khoa')->with([
             'monHoc:ma_mon_hoc,ma_hoc_phan,ten_mon_hoc',
@@ -21,8 +21,31 @@ class WishlistBountyRepository
             'taiLieuDapUng:ma_tai_lieu,tieu_de',
         ])->withCount('dapUngs');
 
-        // Lọc theo trạng thái (mặc định: MO)
-        $trangThai = $filters['trang_thai'] ?? TrangThaiYeuCauTaiLieu::MO->value;
+        // Phân tab danh sách (all: Tất cả, my_requests: Yêu cầu của tôi, my_contributions: Đóng góp của tôi)
+        $tab = $filters['tab'] ?? 'all';
+        if ($tab === 'my_requests' && $userId) {
+            $query->where('ma_nguoi_tao', $userId);
+        } elseif ($tab === 'my_contributions' && $userId) {
+            $query->whereHas('dapUngs', function ($q) use ($userId) {
+                $q->where('ma_nguoi_dong_gop', $userId);
+            });
+        }
+
+        // Tìm kiếm theo từ khóa tiêu đề hoặc tên môn học
+        if (!empty($filters['q'])) {
+            $kw = trim($filters['q']);
+            $query->where(function ($sub) use ($kw) {
+                $sub->where('tieu_de', 'like', "%{$kw}%")
+                    ->orWhereHas('monHoc', function ($m) use ($kw) {
+                        $m->where('ten_mon_hoc', 'like', "%{$kw}%")
+                          ->orWhere('ma_hoc_phan', 'like', "%{$kw}%");
+                    });
+            });
+        }
+
+        // Lọc theo trạng thái (mặc định: MO nếu xem toàn trường, TAT_CA nếu ở tab cá nhân)
+        $trangThaiDefault = ($tab === 'all') ? TrangThaiYeuCauTaiLieu::MO->value : 'TAT_CA';
+        $trangThai = $filters['trang_thai'] ?? $trangThaiDefault;
         if ($trangThai !== 'TAT_CA') {
             $query->where('trang_thai', $trangThai);
         }
@@ -70,8 +93,16 @@ class WishlistBountyRepository
             'monHoc',
             'nguoiTao:ma_nguoi_dung,ho_ten,mssv,anh_dai_dien,diem_uy_tin',
             'taiLieuDapUng',
+            'dapUngDuocChon.nguoiDongGop:ma_nguoi_dung,ho_ten,mssv,anh_dai_dien,diem_uy_tin',
+            'dapUngDuocChon.taiLieu:ma_tai_lieu,tieu_de,duong_dan_tep,dinh_dang_tep,dung_luong_kb,phan_loai,luot_tai,trang_thai',
             'dapUngs.nguoiDongGop:ma_nguoi_dung,ho_ten,mssv,anh_dai_dien,diem_uy_tin',
             'dapUngs.taiLieu:ma_tai_lieu,tieu_de,duong_dan_tep,dinh_dang_tep,dung_luong_kb,phan_loai,luot_tai,trang_thai',
+            'yeuCauChinhSuas' => fn($q) => $q->latest('ma_yeu_cau_chinh_sua'),
+            'yeuCauChinhSuas.nguoiYeuCau:ma_nguoi_dung,ho_ten,mssv,anh_dai_dien',
+            'yeuCauChinhSuas.nguoiDongGop:ma_nguoi_dung,ho_ten,mssv,anh_dai_dien',
+            'yeuCauChinhSuas.lanNopThayThes' => fn($q) => $q->latest('ma_lan_nop_thay_the'),
+            'yeuCauChinhSuas.lanNopThayThes.taiLieu:ma_tai_lieu,tieu_de,duong_dan_tep,dinh_dang_tep,dung_luong_kb,phan_loai,luot_tai,trang_thai',
+            'yeuCauChinhSuas.lanNopThayThes.nguoiNop:ma_nguoi_dung,ho_ten,mssv',
         ])->findOrFail($maYeuCau);
     }
 

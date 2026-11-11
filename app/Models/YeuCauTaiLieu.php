@@ -73,4 +73,9 @@ class YeuCauTaiLieu extends Model
     {
         return $this->hasMany(DapUngYeuCauTaiLieu::class, 'ma_yeu_cau', 'ma_yeu_cau');
     }
+
+    public function yeuCauChinhSuas(): HasMany
+    {
+        return $this->hasMany(YeuCauChinhSuaDongGop::class, 'ma_yeu_cau', 'ma_yeu_cau');
+    }
 }

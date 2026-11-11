@@ -9,6 +9,8 @@ use App\Models\TaiLieu;
 use App\Modules\Administration\Domain\Enums\HanhDongKiemToan;
 use App\Modules\Administration\Domain\Enums\LoaiDoiTuongKiemToan;
 use App\Modules\Administration\Domain\Services\AuditLogger;
+use App\Modules\Moderation\Domain\Services\BountySubmissionModerationSynchronizer;
+use App\Modules\Moderation\Domain\Services\UserViolationPenaltyEvaluator;
 use App\Modules\Notifications\Domain\Events\DocumentModeratedEvent;
 use Illuminate\Support\Facades\DB;
 

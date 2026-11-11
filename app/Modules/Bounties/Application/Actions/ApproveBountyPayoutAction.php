@@ -3,7 +3,9 @@
 namespace App\Modules\Bounties\Application\Actions;
 
 use App\Enums\TrangThaiYeuCauTaiLieu;
+use App\Models\DapUngYeuCauTaiLieu;
 use App\Models\NguoiDung;
+use App\Models\YeuCauTaiLieu;
 use App\Modules\Administration\Domain\Enums\HanhDongKiemToan;
 use App\Modules\Administration\Domain\Enums\LoaiDoiTuongKiemToan;
 use App\Modules\Administration\Domain\Services\AuditLogger;
@@ -29,34 +31,42 @@ class ApproveBountyPayoutAction
             abort(403, 'Bạn không có quyền duyệt giải ngân điểm Bounty.');
         }
 
-        $yeuCau = $this->bountyRepository->getPendingPayoutDetail($maYeuCau);
+        return DB::transaction(function () use ($actor, $maYeuCau) {
+            // 1. Khóa bi quan bản ghi Bounty (Pessimistic Locking)
+            $yeuCau = YeuCauTaiLieu::where('ma_yeu_cau', $maYeuCau)->lockForUpdate()->first();
+            if (!$yeuCau || $yeuCau->trang_thai !== TrangThaiYeuCauTaiLieu::CHO_GIAI_NGAN) {
+                return [
+                    'success' => false,
+                    'message' => 'Yêu cầu này không ở trạng thái chờ duyệt giải ngân hoặc đã được xử lý bởi quản trị viên khác.',
+                ];
+            }
 
-        // Yêu cầu phải đang ở trạng thái CHO_GIAI_NGAN
-        if ($yeuCau->trang_thai !== TrangThaiYeuCauTaiLieu::CHO_GIAI_NGAN) {
-            return [
-                'success' => false,
-                'message' => 'Yêu cầu này không ở trạng thái chờ duyệt giải ngân.',
-            ];
-        }
+            if (!$yeuCau->ma_dap_ung_duoc_chon) {
+                return [
+                    'success' => false,
+                    'message' => 'Không tìm thấy bài đóng góp được chọn để giải ngân.',
+                ];
+            }
 
-        $dapUng = $yeuCau->dapUngDuocChon;
-        if (!$dapUng) {
-            return [
-                'success' => false,
-                'message' => 'Không tìm thấy bài đóng góp được chọn để giải ngân.',
-            ];
-        }
+            // 2. Khóa bi quan bản ghi bài nộp đóng góp
+            $dapUng = DapUngYeuCauTaiLieu::where('ma_dap_ung', $yeuCau->ma_dap_ung_duoc_chon)->lockForUpdate()->first();
+            if (!$dapUng || $dapUng->trang_thai !== 'NGUOI_YEU_CAU_XAC_NHAN') {
+                return [
+                    'success' => false,
+                    'message' => 'Bài đóng góp không ở trạng thái hợp lệ để giải ngân.',
+                ];
+            }
 
-        $nguoiDongGop = $dapUng->nguoiDongGop;
+            $nguoiDongGop = $dapUng->nguoiDongGop;
+            $nguoiYeuCau  = $yeuCau->nguoiTao;
 
-        DB::transaction(function () use ($yeuCau, $dapUng, $actor, $nguoiDongGop) {
-            // Giải ngân điểm thưởng qua ReputationEvaluator
+            // 3. Giải ngân điểm thưởng qua ReputationEvaluator (khóa ví 2 bên và check idempotency)
             $this->reputationEvaluator->giaiNganDiemBounty($yeuCau, $nguoiDongGop);
 
-            // Cập nhật trạng thái bài nộp sang CHAP_NHAN và đóng yêu cầu DA_HOAN_THANH
+            // 4. Cập nhật trạng thái bài nộp sang CHAP_NHAN và đóng yêu cầu DA_HOAN_THANH
             $this->bountyRepository->approvePayout($yeuCau, $dapUng, $actor->ma_nguoi_dung);
 
-            // Ghi nhật ký kiểm toán về hành động duyệt giải ngân
+            // 5. Ghi nhật ký kiểm toán về hành động duyệt giải ngân
             $this->auditLogger->log(
                 $actor,
                 HanhDongKiemToan::DUYET_GIAI_NGAN_BOUNTY,
@@ -66,19 +76,21 @@ class ApproveBountyPayoutAction
                 ['trang_thai' => TrangThaiYeuCauTaiLieu::CHO_GIAI_NGAN->value],
                 ['trang_thai' => TrangThaiYeuCauTaiLieu::DA_HOAN_THANH->value]
             );
+
+            // 6. Phát sự kiện hoàn tất giải ngân sau khi commit transaction an toàn
+            DB::afterCommit(function () use ($yeuCau, $dapUng, $nguoiYeuCau) {
+                BountyFulfillmentConfirmedEvent::dispatch(
+                    $yeuCau,
+                    $dapUng,
+                    $nguoiYeuCau,
+                    $yeuCau->diem_thuong
+                );
+            });
+
+            return [
+                'success' => true,
+                'message' => "Đã duyệt giải ngân thành công! {$nguoiDongGop->ho_ten} nhận được {$yeuCau->diem_thuong} điểm thưởng.",
+            ];
         });
-
-        // Kích hoạt sự kiện hoàn tất giải ngân cho Notification Module (UC-ST-04, UC-ST-05)
-        BountyFulfillmentConfirmedEvent::dispatch(
-            $yeuCau,
-            $dapUng,
-            $yeuCau->nguoiTao,
-            $yeuCau->diem_thuong
-        );
-
-        return [
-            'success' => true,
-            'message' => "Đã duyệt giải ngân thành công! {$nguoiDongGop->ho_ten} nhận được {$yeuCau->diem_thuong} điểm thưởng.",
-        ];
     }
 }

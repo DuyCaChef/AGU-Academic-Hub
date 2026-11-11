@@ -14,8 +14,11 @@ import {
     ChevronRight,
     AlertCircle,
     AlertTriangle,
-    Check,
-    RotateCcw
+    RotateCcw,
+    Bookmark,
+    Sparkles,
+    Send,
+    Hourglass
 } from 'lucide-react';
 
 export default function WishlistIndex({ requests, filters = {}, courses = [] }) {
@@ -24,7 +27,9 @@ export default function WishlistIndex({ requests, filters = {}, courses = [] }) 
 
     // State bộ lọc
     const [filterState, setFilterState] = useState({
-        trang_thai: filters.trang_thai || 'MO',
+        tab: filters.tab || 'all',
+        q: filters.q || '',
+        trang_thai: filters.trang_thai || (filters.tab && filters.tab !== 'all' ? 'TAT_CA' : 'MO'),
         ma_mon_hoc: filters.ma_mon_hoc || '',
         phan_loai: filters.phan_loai || filters.loai_tai_lieu || '',
         sap_xep: filters.sap_xep || 'moi_nhat',
@@ -39,8 +44,31 @@ export default function WishlistIndex({ requests, filters = {}, courses = [] }) 
         });
     };
 
+    const handleTabChange = (newTab) => {
+        const nextFilters = {
+            ...filterState,
+            tab: newTab,
+            trang_thai: newTab === 'all' ? 'MO' : 'TAT_CA',
+        };
+        setFilterState(nextFilters);
+        router.get(route('document-requests.index'), nextFilters, {
+            preserveState: true,
+            replace: true,
+        });
+    };
+
+    const handleSearchSubmit = (e) => {
+        e.preventDefault();
+        router.get(route('document-requests.index'), filterState, {
+            preserveState: true,
+            replace: true,
+        });
+    };
+
     const handleResetFilters = () => {
         const defaultFilters = {
+            tab: 'all',
+            q: '',
             trang_thai: 'MO',
             ma_mon_hoc: '',
             phan_loai: '',
@@ -63,6 +91,36 @@ export default function WishlistIndex({ requests, filters = {}, courses = [] }) 
             KHAC: { label: 'Khác', bg: 'bg-slate-100 text-slate-700 border-slate-200' },
         };
         return map[category] || { label: 'Tài liệu', bg: 'bg-slate-100 text-slate-700 border-slate-200' };
+    };
+
+    const getStatusBadge = (status) => {
+        switch (status) {
+            case 'DA_HOAN_THANH':
+                return (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
+                        <CheckCircle2 className="w-3 h-3" /> Đã hoàn thành
+                    </span>
+                );
+            case 'CHO_GIAI_NGAN':
+                return (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200 flex items-center gap-1">
+                        <Hourglass className="w-3 h-3 text-purple-600" /> Chờ duyệt giải ngân
+                    </span>
+                );
+            case 'DA_HUY':
+                return (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200 flex items-center gap-1">
+                        Đã hủy
+                    </span>
+                );
+            case 'MO':
+            default:
+                return (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 flex items-center gap-1">
+                        <Clock className="w-3 h-3" /> Đang mở
+                    </span>
+                );
+        }
     };
 
     const paginationLinks = requests?.links || [];
@@ -119,7 +177,7 @@ export default function WishlistIndex({ requests, filters = {}, courses = [] }) 
 
                         <button
                             onClick={() => setIsCreateOpen(true)}
-                            className="px-5 py-3 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 shrink-0 active:scale-95"
+                            className="px-5 py-3 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 shrink-0 active:scale-95 cursor-pointer"
                         >
                             <Plus className="w-4 h-4 stroke-[3]" />
                             Tạo Yêu Cầu Mới
@@ -127,63 +185,123 @@ export default function WishlistIndex({ requests, filters = {}, courses = [] }) 
                     </div>
                 </div>
 
-                {/* Thanh Lọc & Tìm Kiếm */}
-                <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-2xs grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                    {/* Trạng thái */}
-                    <div>
-                        <select
-                            value={filterState.trang_thai}
-                            onChange={(e) => handleFilterChange('trang_thai', e.target.value)}
-                            className="w-full text-xs font-medium rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-slate-700 focus:outline-none focus:border-[#005baa] focus:ring-2 focus:ring-[#005baa]/20 transition-colors cursor-pointer shadow-2xs"
-                        >
-                            <option value="MO">🟢 Đang mở tìm kiếm</option>
-                            <option value="DA_HOAN_THANH">✅ Đã giải quyết</option>
-                            <option value="TAT_CA">Tất cả trạng thái</option>
-                        </select>
-                    </div>
+                {/* Tabs Điều Hướng Phân Nhóm (Tất cả / Yêu cầu của tôi / Đóng góp của tôi) */}
+                <div className="flex items-center gap-2 border-b border-slate-200 pb-2 overflow-x-auto">
+                    <button
+                        onClick={() => handleTabChange('all')}
+                        className={`px-4 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-2 cursor-pointer ${
+                            filterState.tab === 'all'
+                                ? 'bg-[#005baa] text-white shadow-xs'
+                                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                        }`}
+                    >
+                        <Sparkles className="w-3.5 h-3.5" />
+                        Khám Phá Tất Cả
+                    </button>
+                    <button
+                        onClick={() => handleTabChange('my_requests')}
+                        className={`px-4 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-2 cursor-pointer ${
+                            filterState.tab === 'my_requests'
+                                ? 'bg-[#005baa] text-white shadow-xs'
+                                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                        }`}
+                    >
+                        <Bookmark className="w-3.5 h-3.5" />
+                        Bounty Tôi Đã Tạo
+                    </button>
+                    <button
+                        onClick={() => handleTabChange('my_contributions')}
+                        className={`px-4 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-2 cursor-pointer ${
+                            filterState.tab === 'my_contributions'
+                                ? 'bg-[#005baa] text-white shadow-xs'
+                                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                        }`}
+                    >
+                        <Send className="w-3.5 h-3.5" />
+                        Bài Tôi Đã Đóng Góp
+                    </button>
+                </div>
 
-                    {/* Môn học */}
-                    <div>
-                        <select
-                            value={filterState.ma_mon_hoc}
-                            onChange={(e) => handleFilterChange('ma_mon_hoc', e.target.value)}
-                            className="w-full text-xs font-medium rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-slate-700 focus:outline-none focus:border-[#005baa] focus:ring-2 focus:ring-[#005baa]/20 transition-colors cursor-pointer shadow-2xs"
+                {/* Thanh Tìm Kiếm & Lọc */}
+                <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-2xs space-y-3">
+                    {/* Search bar */}
+                    <form onSubmit={handleSearchSubmit} className="relative flex items-center">
+                        <Search className="w-4 h-4 text-slate-400 absolute left-3 pointer-events-none" />
+                        <input
+                            type="text"
+                            placeholder="Tìm kiếm theo tiêu đề tài liệu, mã môn hoặc tên môn học..."
+                            value={filterState.q}
+                            onChange={(e) => setFilterState({ ...filterState, q: e.target.value })}
+                            className="w-full text-xs font-medium rounded-lg border border-slate-200 bg-white pl-9 pr-24 py-2.5 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-[#005baa] focus:ring-2 focus:ring-[#005baa]/20 shadow-2xs"
+                        />
+                        <button
+                            type="submit"
+                            className="absolute right-1.5 px-3 py-1.5 bg-[#005baa] hover:bg-blue-800 text-white font-bold text-xs rounded-md transition-colors"
                         >
-                            <option value="">Tất cả môn học</option>
-                            {courses.map((c) => (
-                                <option key={c.ma_mon_hoc} value={c.ma_mon_hoc}>
-                                    [{c.ma_hoc_phan}] {c.ten_mon_hoc}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                            Tìm kiếm
+                        </button>
+                    </form>
 
-                    {/* Phân loại tài liệu */}
-                    <div>
-                        <select
-                            value={filterState.phan_loai}
-                            onChange={(e) => handleFilterChange('phan_loai', e.target.value)}
-                            className="w-full text-xs font-medium rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-slate-700 focus:outline-none focus:border-[#005baa] focus:ring-2 focus:ring-[#005baa]/20 transition-colors cursor-pointer shadow-2xs"
-                        >
-                            <option value="">Tất cả phân loại</option>
-                            <option value="DE_THI">Đề thi / Kiểm tra</option>
-                            <option value="BAI_GIANG">Slide / Bài giảng</option>
-                            <option value="DO_AN">Đồ án / Source code</option>
-                            <option value="BAI_TAP">Bài tập / Lời giải</option>
-                            <option value="KHAC">Khác</option>
-                        </select>
-                    </div>
+                    {/* Bộ lọc chi tiết */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                        {/* Trạng thái */}
+                        <div>
+                            <select
+                                value={filterState.trang_thai}
+                                onChange={(e) => handleFilterChange('trang_thai', e.target.value)}
+                                className="w-full text-xs font-medium rounded-lg border border-slate-200 bg-white px-3 py-2 text-slate-700 focus:outline-none focus:border-[#005baa] focus:ring-2 focus:ring-[#005baa]/20 transition-colors cursor-pointer shadow-2xs"
+                            >
+                                <option value="TAT_CA">Tất cả trạng thái</option>
+                                <option value="MO">🟢 Đang mở tìm kiếm</option>
+                                <option value="CHO_GIAI_NGAN">🟣 Đang chờ giải ngân</option>
+                                <option value="DA_HOAN_THANH">✅ Đã hoàn thành</option>
+                                <option value="DA_HUY">⚪ Đã hủy</option>
+                            </select>
+                        </div>
 
-                    {/* Sắp xếp */}
-                    <div>
-                        <select
-                            value={filterState.sap_xep}
-                            onChange={(e) => handleFilterChange('sap_xep', e.target.value)}
-                            className="w-full text-xs font-medium rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-slate-700 focus:outline-none focus:border-[#005baa] focus:ring-2 focus:ring-[#005baa]/20 transition-colors cursor-pointer shadow-2xs"
-                        >
-                            <option value="moi_nhat">Mới nhất trước</option>
-                            <option value="diem_cao">Điểm thưởng cao nhất</option>
-                        </select>
+                        {/* Môn học */}
+                        <div>
+                            <select
+                                value={filterState.ma_mon_hoc}
+                                onChange={(e) => handleFilterChange('ma_mon_hoc', e.target.value)}
+                                className="w-full text-xs font-medium rounded-lg border border-slate-200 bg-white px-3 py-2 text-slate-700 focus:outline-none focus:border-[#005baa] focus:ring-2 focus:ring-[#005baa]/20 transition-colors cursor-pointer shadow-2xs"
+                            >
+                                <option value="">Tất cả môn học</option>
+                                {courses.map((c) => (
+                                    <option key={c.ma_mon_hoc} value={c.ma_mon_hoc}>
+                                        [{c.ma_hoc_phan}] {c.ten_mon_hoc}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {/* Phân loại tài liệu */}
+                        <div>
+                            <select
+                                value={filterState.phan_loai}
+                                onChange={(e) => handleFilterChange('phan_loai', e.target.value)}
+                                className="w-full text-xs font-medium rounded-lg border border-slate-200 bg-white px-3 py-2 text-slate-700 focus:outline-none focus:border-[#005baa] focus:ring-2 focus:ring-[#005baa]/20 transition-colors cursor-pointer shadow-2xs"
+                            >
+                                <option value="">Tất cả phân loại</option>
+                                <option value="DE_THI">Đề thi / Kiểm tra</option>
+                                <option value="BAI_GIANG">Slide / Bài giảng</option>
+                                <option value="DO_AN">Đồ án / Source code</option>
+                                <option value="BAI_TAP">Bài tập / Lời giải</option>
+                                <option value="KHAC">Khác</option>
+                            </select>
+                        </div>
+
+                        {/* Sắp xếp */}
+                        <div>
+                            <select
+                                value={filterState.sap_xep}
+                                onChange={(e) => handleFilterChange('sap_xep', e.target.value)}
+                                className="w-full text-xs font-medium rounded-lg border border-slate-200 bg-white px-3 py-2 text-slate-700 focus:outline-none focus:border-[#005baa] focus:ring-2 focus:ring-[#005baa]/20 transition-colors cursor-pointer shadow-2xs"
+                            >
+                                <option value="moi_nhat">Mới nhất trước</option>
+                                <option value="diem_cao">Điểm thưởng cao nhất</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
@@ -193,7 +311,6 @@ export default function WishlistIndex({ requests, filters = {}, courses = [] }) 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                             {requests.data.map((item) => {
                                 const cat = getCategoryBadge(item.phan_loai || item.loai_tai_lieu);
-                                const isClosed = item.trang_thai === 'DA_HOAN_THANH';
                                 const responsesCount = item.dap_ungs_count ?? item.danh_sach_phan_hoi_count ?? 0;
 
                                 return (
@@ -208,15 +325,7 @@ export default function WishlistIndex({ requests, filters = {}, courses = [] }) 
                                                     <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${cat.bg}`}>
                                                         {cat.label}
                                                     </span>
-                                                    {isClosed ? (
-                                                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
-                                                            <CheckCircle2 className="w-3 h-3" /> Đã chốt
-                                                        </span>
-                                                    ) : (
-                                                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 flex items-center gap-1">
-                                                            <Clock className="w-3 h-3" /> Đang mở
-                                                        </span>
-                                                    )}
+                                                    {getStatusBadge(item.trang_thai)}
                                                 </div>
 
                                                 {/* Bounty Points Badge */}
@@ -300,12 +409,16 @@ export default function WishlistIndex({ requests, filters = {}, courses = [] }) 
                         <div>
                             <h3 className="text-base font-bold text-slate-700">Chưa có yêu cầu nào phù hợp</h3>
                             <p className="text-xs text-slate-500 mt-1">
-                                Hãy thay đổi bộ lọc hoặc là người đầu tiên tạo yêu cầu tìm tài liệu!
+                                {filterState.tab === 'my_requests'
+                                    ? 'Bạn chưa đăng yêu cầu tìm tài liệu nào.'
+                                    : filterState.tab === 'my_contributions'
+                                    ? 'Bạn chưa tham gia đóng góp tài liệu cho yêu cầu nào.'
+                                    : 'Hãy thay đổi bộ lọc hoặc là người đầu tiên tạo yêu cầu tìm tài liệu!'}
                             </p>
                         </div>
                         <button
                             onClick={handleResetFilters}
-                            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-[#005baa] bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors"
+                            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-[#005baa] bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors cursor-pointer"
                         >
                             <RotateCcw className="w-3.5 h-3.5" />
                             Đặt lại bộ lọc

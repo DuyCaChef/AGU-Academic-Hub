@@ -219,6 +219,24 @@ export default function CreateRequestModal({ isOpen, onClose, courses = [], defa
                             </p>
                         </div>
 
+                        {/* Bảng minh họa biến động số dư ví điểm */}
+                        <div className="mt-3 grid grid-cols-3 gap-2 p-2.5 bg-white/80 rounded-lg border border-amber-200/80 text-center">
+                            <div>
+                                <span className="block text-[10px] uppercase font-bold text-slate-500">Số dư hiện tại</span>
+                                <span className="text-xs font-black text-slate-700">{availablePoints} điểm</span>
+                            </div>
+                            <div className="border-x border-amber-200/60">
+                                <span className="block text-[10px] uppercase font-bold text-amber-600">Đóng băng</span>
+                                <span className="text-xs font-black text-amber-600">-{Number(data.diem_thuong) || 0} điểm</span>
+                            </div>
+                            <div>
+                                <span className="block text-[10px] uppercase font-bold text-emerald-600">Dư còn lại</span>
+                                <span className={`text-xs font-black ${(availablePoints - (Number(data.diem_thuong) || 0) < 0) ? 'text-rose-600' : 'text-emerald-700'}`}>
+                                    {availablePoints - (Number(data.diem_thuong) || 0)} điểm
+                                </span>
+                            </div>
+                        </div>
+
                         {data.diem_thuong !== '' && Number(data.diem_thuong) < 10 && (
                             <p className="text-rose-500 text-xs mt-2 flex items-center gap-1">
                                 <AlertCircle className="w-4 h-4 shrink-0" />

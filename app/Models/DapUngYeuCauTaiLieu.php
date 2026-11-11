@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class DapUngYeuCauTaiLieu extends Model
 {
@@ -20,6 +21,7 @@ class DapUngYeuCauTaiLieu extends Model
         'trang_thai',
         'ghi_chu_dong_gop',
         'ly_do_tu_choi_giai_ngan',
+        'ly_do_nguoi_tao_tu_choi',
         'nguoi_duyet',
         'thoi_gian_duyet',
     ];
@@ -49,5 +51,10 @@ class DapUngYeuCauTaiLieu extends Model
     public function nguoiDuyet(): BelongsTo
     {
         return $this->belongsTo(NguoiDung::class, 'nguoi_duyet', 'ma_nguoi_dung');
+    }
+
+    public function yeuCauChinhSuas(): HasMany
+    {
+        return $this->hasMany(YeuCauChinhSuaDongGop::class, 'ma_dap_ung', 'ma_dap_ung');
     }
 }
