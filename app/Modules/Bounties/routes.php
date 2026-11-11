@@ -1,6 +1,7 @@
 <?php
 
 use App\Modules\Bounties\Presentation\Http\Controllers\AdminBountyPayoutController;
+use App\Modules\Bounties\Presentation\Http\Controllers\CorrectionRequestController;
 use App\Modules\Bounties\Presentation\Http\Controllers\WalletController;
 use App\Modules\Bounties\Presentation\Http\Controllers\WishlistBountyController;
 use Illuminate\Support\Facades\Route;
@@ -14,7 +15,18 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/{ma_yeu_cau}', [WishlistBountyController::class, 'show'])->name('show');
         Route::post('/{ma_yeu_cau}/dong-gop', [WishlistBountyController::class, 'fulfill'])->name('fulfill');
         Route::post('/{ma_yeu_cau}/xac-nhan', [WishlistBountyController::class, 'confirm'])->name('confirm');
+        Route::post('/{ma_yeu_cau}/tu-choi-dong-gop', [WishlistBountyController::class, 'rejectFulfillment'])->name('reject-fulfillment');
         Route::delete('/{ma_yeu_cau}', [WishlistBountyController::class, 'destroy'])->name('destroy');
+
+        // Yêu cầu chỉnh sửa tài liệu sau khi hoàn thành Bounty
+        Route::post('/{ma_yeu_cau}/yeu-cau-chinh-sua', [CorrectionRequestController::class, 'store'])->name('corrections.store');
+    });
+
+    // Luồng xử lý yêu cầu chỉnh sửa và các phiên bản thay thế
+    Route::prefix('yeu-cau-chinh-sua')->name('corrections.')->group(function (): void {
+        Route::post('/{ma_yeu_cau_chinh_sua}/phan-hoi', [CorrectionRequestController::class, 'respond'])->name('respond');
+        Route::post('/{ma_yeu_cau_chinh_sua}/nop-thay-the', [CorrectionRequestController::class, 'submitReplacement'])->name('submit-replacement');
+        Route::post('/{ma_yeu_cau_chinh_sua}/xac-nhan-hoan-thanh', [CorrectionRequestController::class, 'confirmCompletion'])->name('confirm-completion');
     });
 
     // Ví điểm cá nhân và lịch sử biến động

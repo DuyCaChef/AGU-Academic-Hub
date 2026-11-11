@@ -14,8 +14,9 @@ class GetWishlistBountyListQuery
 
     public function execute(Request $request): array
     {
-        $filters = $request->only(['trang_thai', 'ma_mon_hoc', 'phan_loai', 'sap_xep']);
-        $danhSachYeuCau = $this->bountyRepository->getPaginatedWishlist($filters, 12);
+        $filters = $request->only(['tab', 'q', 'trang_thai', 'ma_mon_hoc', 'phan_loai', 'sap_xep']);
+        $userId = $request->user()?->ma_nguoi_dung;
+        $danhSachYeuCau = $this->bountyRepository->getPaginatedWishlist($filters, 12, $userId);
         $danhSachYeuCau->appends($request->query());
 
         $courses = $this->bountyRepository->getActiveCourses();

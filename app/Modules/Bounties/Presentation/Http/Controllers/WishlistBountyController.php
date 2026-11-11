@@ -7,10 +7,12 @@ use App\Modules\Bounties\Application\Actions\CancelBountyRequestAction;
 use App\Modules\Bounties\Application\Actions\ConfirmBountyFulfillmentAction;
 use App\Modules\Bounties\Application\Actions\CreateBountyRequestAction;
 use App\Modules\Bounties\Application\Actions\FulfillBountyRequestAction;
+use App\Modules\Bounties\Application\Actions\RejectBountyFulfillmentAction;
 use App\Modules\Bounties\Application\Queries\GetWishlistBountyDetailQuery;
 use App\Modules\Bounties\Application\Queries\GetWishlistBountyListQuery;
 use App\Modules\Bounties\Presentation\Http\Requests\ConfirmBountyRequest;
 use App\Modules\Bounties\Presentation\Http\Requests\FulfillBountyRequest;
+use App\Modules\Bounties\Presentation\Http\Requests\RejectBountyFulfillmentRequest;
 use App\Modules\Bounties\Presentation\Http\Requests\StoreBountyRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -80,10 +82,27 @@ class WishlistBountyController extends Controller
         return back()->with('success', $result['message']);
     }
 
-    // Xác nhận tài liệu hợp lệ -> Giải ngân Bounty Points (POST /yeu-cau-tai-lieu/{ma_yeu_cau}/xac-nhan)
+    // Xác nhận tài liệu hợp lệ -> Chuyển duyệt giải ngân (POST /yeu-cau-tai-lieu/{ma_yeu_cau}/xac-nhan)
     public function confirm(ConfirmBountyRequest $request, int $ma_yeu_cau, ConfirmBountyFulfillmentAction $action): RedirectResponse
     {
         $result = $action->execute($request->user(), $ma_yeu_cau, (int) $request->input('ma_dap_ung'));
+
+        if (!$result['success']) {
+            return back()->with('error', $result['message']);
+        }
+
+        return back()->with('success', $result['message']);
+    }
+
+    // Từ chối bài đóng góp kèm lý do (POST /yeu-cau-tai-lieu/{ma_yeu_cau}/tu-choi-dong-gop)
+    public function rejectFulfillment(RejectBountyFulfillmentRequest $request, int $ma_yeu_cau, RejectBountyFulfillmentAction $action): RedirectResponse
+    {
+        $result = $action->execute(
+            $request->user(),
+            $ma_yeu_cau,
+            (int) $request->input('ma_dap_ung'),
+            $request->input('ly_do')
+        );
 
         if (!$result['success']) {
             return back()->with('error', $result['message']);
