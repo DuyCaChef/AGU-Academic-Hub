@@ -50,25 +50,30 @@ class RejectBountyPayoutAction
         $nguoiYeuCau  = $yeuCau->nguoiTao;
 
         DB::transaction(function () use ($yeuCau, $dapUng, $actor, $lyDo) {
-            // Hoàn trả điểm tạm giữ về ví khả dụng của người yêu cầu
-            $this->reputationEvaluator->hoanDiemBounty($yeuCau, "tu_choi_giai_ngan_{$yeuCau->ma_yeu_cau}");
+            // Cập nhật trạng thái tài liệu sang TU_CHOI nếu tài liệu chưa duyệt
+            if ($dapUng->taiLieu && $dapUng->taiLieu->trang_thai === 'CHO_DUYET') {
+                $dapUng->taiLieu->update([
+                    'trang_thai'        => 'TU_CHOI',
+                    'ly_do_trang_thai' => "Bị Ban kiểm duyệt từ chối: {$lyDo}",
+                ]);
+            }
 
-            // Đánh dấu bài nộp TU_CHOI và mở lại yêu cầu sang MO
+            // Đánh dấu bài nộp TU_CHOI và mở lại yêu cầu sang MO (không hoàn điểm khả dụng, điểm vẫn nằm trong quỹ tạm giữ của A)
             $this->bountyRepository->rejectPayout($yeuCau, $dapUng, $lyDo, $actor->ma_nguoi_dung);
 
-            // Ghi nhật ký kiểm toán về hành động từ chối giải ngân
+            // Ghi nhật ký kiểm toán về hành động từ chối
             $this->auditLogger->log(
                 $actor,
                 HanhDongKiemToan::TU_CHOI_GIAI_NGAN_BOUNTY,
                 LoaiDoiTuongKiemToan::YEU_CAU_TAI_LIEU,
                 $yeuCau->ma_yeu_cau,
-                "Từ chối giải ngân Bounty - Yêu cầu #{$yeuCau->ma_yeu_cau}. Lý do: {$lyDo}",
+                "Từ chối tài liệu Bounty - Yêu cầu #{$yeuCau->ma_yeu_cau}. Lý do: {$lyDo}",
                 ['trang_thai' => TrangThaiYeuCauTaiLieu::CHO_GIAI_NGAN->value],
                 ['trang_thai' => TrangThaiYeuCauTaiLieu::MO->value, 'ly_do' => $lyDo]
             );
         });
 
-        // Thông báo cho người yêu cầu - điểm đã được hoàn trả, yêu cầu mở lại
+        // Thông báo cho người yêu cầu - yêu cầu mở lại để nhận tài liệu khác
         $nguoiYeuCau->notify(new BountyPayoutRejectedNotification(
             maYeuCau:   $yeuCau->ma_yeu_cau,
             diemThuong: $yeuCau->diem_thuong,
@@ -86,7 +91,7 @@ class RejectBountyPayoutAction
 
         return [
             'success' => true,
-            'message' => "Đã từ chối giải ngân. Điểm thưởng {$yeuCau->diem_thuong} điểm đã hoàn trả về ví của người yêu cầu. Yêu cầu đã được mở lại.",
+            'message' => "Đã từ chối bài đóng góp. Điểm thưởng {$yeuCau->diem_thuong} điểm vẫn được tạm giữ trong quỹ của người yêu cầu. Yêu cầu đã được mở lại để nhận tài liệu khác.",
         ];
     }
 }

@@ -75,8 +75,8 @@ export default function PayoutQueue({ queue }) {
     };
 
     return (
-        <AdminLayout title="Duyệt giải ngân Bounty">
-            <Head title="Hàng đợi duyệt giải ngân điểm Bounty - AGU Hub Admin" />
+        <AdminLayout title="Kiểm duyệt Bounty">
+            <Head title="Hàng đợi kiểm duyệt tài liệu Bounty - AGU Hub Admin" />
 
             <div className="space-y-6">
                 {/* Banner tiêu đề trang */}
@@ -87,10 +87,10 @@ export default function PayoutQueue({ queue }) {
                         </span>
                         <div>
                             <h1 className="text-xl font-bold text-slate-900">
-                                Hàng đợi duyệt giải ngân điểm Bounty
+                                Hàng đợi kiểm duyệt tài liệu Bounty
                             </h1>
                             <p className="mt-1 text-xs text-slate-500">
-                                Kiểm tra an toàn tài liệu (mã độc, spam, đúng môn học) trước khi chính thức chuyển điểm thưởng từ người yêu cầu sang người đóng góp.
+                                Kiểm tra an toàn tài liệu (mã độc, spam, đúng môn học) và phê duyệt để giải ngân ngay điểm thưởng cho người đóng góp.
                             </p>
                         </div>
                     </div>

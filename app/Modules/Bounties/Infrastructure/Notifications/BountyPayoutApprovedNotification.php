@@ -26,7 +26,7 @@ class BountyPayoutApprovedNotification extends Notification
     {
         return new DatabaseMessage([
             'title'       => 'Điểm thưởng Bounty đã được giải ngân',
-            'message'     => "Chúc mừng! Tài liệu đóng góp của bạn cho yêu cầu #{$this->maYeuCau} đã được Admin duyệt. Bạn nhận được {$this->diemThuong} điểm thưởng.",
+            'message'     => "Chúc mừng! Tài liệu đóng góp của bạn cho yêu cầu #{$this->maYeuCau} đã được Ban kiểm duyệt xác nhận hợp lệ. Bạn nhận được {$this->diemThuong} điểm thưởng.",
             'ma_yeu_cau'  => $this->maYeuCau,
             'diem_thuong' => $this->diemThuong,
             'url'         => route('wallet.index'),

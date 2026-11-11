@@ -50,6 +50,9 @@ class DecideDocumentReviewAction
                         'ly_do' => $reason,
                     ]);
                 }
+
+                // Tự động giải ngân Bounty nếu tài liệu được khôi phục/giữ lại và có bài nộp đã được SV A xác nhận
+                $this->bountySynchronizer->syncOnDocumentApproved($document, $actor);
             } elseif ($action === 'HIDE') {
                 $document->trang_thai = 'TAM_AN_KIEM_TRA';
             } else {

@@ -9,6 +9,7 @@ use App\Models\TaiLieu;
 use App\Modules\Administration\Domain\Enums\HanhDongKiemToan;
 use App\Modules\Administration\Domain\Enums\LoaiDoiTuongKiemToan;
 use App\Modules\Administration\Domain\Services\AuditLogger;
+use App\Modules\Moderation\Domain\Services\BountySubmissionModerationSynchronizer;
 use App\Modules\Moderation\Infrastructure\Notifications\DocumentApprovedNotification;
 use Illuminate\Support\Facades\DB;
 
@@ -16,7 +17,8 @@ use Illuminate\Support\Facades\DB;
 class ApproveNewDocumentAction
 {
     public function __construct(
-        protected AuditLogger $auditLogger
+        protected AuditLogger $auditLogger,
+        protected BountySubmissionModerationSynchronizer $bountySynchronizer
     ) {}
 
     public function execute(int $documentId, NguoiDung $actor): array
@@ -36,7 +38,9 @@ class ApproveNewDocumentAction
             ];
         }
 
-        DB::transaction(function () use ($document, $actor) {
+        $bountyDisbursedCount = 0;
+
+        DB::transaction(function () use ($document, $actor, &$bountyDisbursedCount) {
             // Cập nhật trạng thái thành DA_DUYET
             $document->update([
                 'trang_thai'        => 'DA_DUYET',
@@ -59,23 +63,34 @@ class ApproveNewDocumentAction
                 $document->nguoiDang->notify(new DocumentApprovedNotification($document));
             }
 
-            // Nếu tài liệu nộp cho yêu cầu Bounty, thông báo cho người tạo yêu cầu (SV A) để họ vào nghiệm thu
-            $bountySubmission = DapUngYeuCauTaiLieu::where('ma_tai_lieu', $document->ma_tai_lieu)
-                ->with('yeuCau.nguoiTao')
-                ->first();
+            // Tự động giải ngân Bounty ngay cho người đóng góp nếu người yêu cầu (SV A) đã xác nhận tài liệu này
+            $bountyDisbursedCount = $this->bountySynchronizer->syncOnDocumentApproved($document, $actor);
 
-            if ($bountySubmission?->yeuCau?->nguoiTao) {
-                $requester = $bountySubmission->yeuCau->nguoiTao;
-                $requester->notify(new DocumentApprovedNotification(
-                    $document,
-                    "Tài liệu đóng góp \"{$document->tieu_de}\" cho yêu cầu #{$bountySubmission->ma_yeu_cau} của bạn đã được duyệt. Bạn có thể vào kiểm tra và nghiệm thu."
-                ));
+            // Nếu tài liệu nộp cho yêu cầu Bounty mà người yêu cầu chưa xác nhận, thông báo để họ vào nghiệm thu
+            if ($bountyDisbursedCount === 0) {
+                $bountySubmission = DapUngYeuCauTaiLieu::where('ma_tai_lieu', $document->ma_tai_lieu)
+                    ->where('trang_thai', 'CHO_DUYET')
+                    ->with('yeuCau.nguoiTao')
+                    ->first();
+
+                if ($bountySubmission?->yeuCau?->nguoiTao) {
+                    $requester = $bountySubmission->yeuCau->nguoiTao;
+                    $requester->notify(new DocumentApprovedNotification(
+                        $document,
+                        "Tài liệu đóng góp \"{$document->tieu_de}\" cho yêu cầu #{$bountySubmission->ma_yeu_cau} của bạn đã được duyệt. Bạn có thể vào kiểm tra và nghiệm thu."
+                    ));
+                }
             }
         });
 
+        $message = "Đã phê duyệt công khai tài liệu \"{$document->tieu_de}\" thành công.";
+        if ($bountyDisbursedCount > 0) {
+            $message .= " Điểm thưởng Bounty đã được tự động giải ngân ngay cho người đóng góp.";
+        }
+
         return [
             'success' => true,
-            'message' => "Đã phê duyệt công khai tài liệu \"{$document->tieu_de}\" thành công.",
+            'message' => $message,
         ];
     }
 }

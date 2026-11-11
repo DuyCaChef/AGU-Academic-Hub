@@ -6,20 +6,109 @@ use App\Enums\TrangThaiYeuCauTaiLieu;
 use App\Models\DapUngYeuCauTaiLieu;
 use App\Models\NguoiDung;
 use App\Models\TaiLieu;
+use App\Models\YeuCauTaiLieu;
 use App\Modules\Administration\Domain\Enums\HanhDongKiemToan;
 use App\Modules\Administration\Domain\Enums\LoaiDoiTuongKiemToan;
 use App\Modules\Administration\Domain\Services\AuditLogger;
 use App\Modules\Bounties\Domain\Services\ReputationEvaluator;
+use App\Modules\Bounties\Infrastructure\Notifications\BountyPayoutApprovedNotification;
+use App\Modules\Bounties\Infrastructure\Persistence\WishlistBountyRepository;
 use App\Modules\Moderation\Infrastructure\Notifications\BountyPayoutClawbackRefundNotification;
 use App\Modules\Moderation\Infrastructure\Notifications\BountyPayoutClawedBackNotification;
 use App\Modules\Moderation\Infrastructure\Notifications\BountySubmissionCancelledNotification;
+use App\Modules\Notifications\Domain\Events\BountyFulfillmentConfirmedEvent;
+use Illuminate\Support\Facades\DB;
 
 class BountySubmissionModerationSynchronizer
 {
     public function __construct(
         protected AuditLogger $auditLogger,
-        protected ReputationEvaluator $reputationEvaluator
+        protected ReputationEvaluator $reputationEvaluator,
+        protected WishlistBountyRepository $bountyRepository
     ) {}
+
+    // Đồng bộ duyệt và tự động giải ngân Bounty khi tài liệu đính kèm được Ban kiểm duyệt (Mod/Admin) xác nhận hợp lệ
+    public function syncOnDocumentApproved(
+        TaiLieu $document,
+        NguoiDung $actor
+    ): int {
+        // Tìm tất cả bài nộp Bounty của tài liệu này mà người yêu cầu (SV A) đã xác nhận
+        $submissions = DapUngYeuCauTaiLieu::with(['yeuCau.nguoiTao', 'nguoiDongGop'])
+            ->where('ma_tai_lieu', $document->getKey())
+            ->where('trang_thai', 'NGUOI_YEU_CAU_XAC_NHAN')
+            ->get();
+
+        if ($submissions->isEmpty()) {
+            return 0;
+        }
+
+        $count = 0;
+
+        foreach ($submissions as $submission) {
+            $yeuCau = $submission->yeuCau;
+            if (!$yeuCau) {
+                continue;
+            }
+
+            // Chỉ giải ngân nếu yêu cầu đang ở trạng thái CHO_GIAI_NGAN
+            if ($yeuCau->trang_thai !== TrangThaiYeuCauTaiLieu::CHO_GIAI_NGAN) {
+                continue;
+            }
+
+            $nguoiDongGop = $submission->nguoiDongGop;
+            $nguoiTao = $yeuCau->nguoiTao;
+
+            if (!$nguoiDongGop || !$nguoiTao) {
+                continue;
+            }
+
+            // 1. Giải ngân điểm thưởng qua ReputationEvaluator (khóa ví 2 bên, kiểm tra idempotency, trừ điểm tạm giữ A, cộng khả dụng B, tăng uy tín B)
+            $this->reputationEvaluator->giaiNganDiemBounty($yeuCau, $nguoiDongGop);
+
+            // 2. Cập nhật trạng thái bài nộp sang CHAP_NHAN và Bounty sang DA_HOAN_THANH
+            $this->bountyRepository->approvePayout($yeuCau, $submission, $actor->getKey());
+
+            // 3. Ghi nhật ký kiểm toán hành vi giải ngân ngay khi kiểm duyệt tài liệu hợp lệ
+            $this->auditLogger->log(
+                actor: $actor,
+                action: HanhDongKiemToan::DUYET_GIAI_NGAN_BOUNTY,
+                targetType: LoaiDoiTuongKiemToan::YEU_CAU_TAI_LIEU,
+                targetId: (string) $yeuCau->ma_yeu_cau,
+                description: "Ban kiểm duyệt xác nhận tài liệu \"{$document->tieu_de}\" hợp lệ, tự động giải ngân {$yeuCau->diem_thuong} điểm thưởng Bounty cho {$nguoiDongGop->ho_ten} (Yêu cầu #{$yeuCau->ma_yeu_cau})",
+                oldData: ['trang_thai' => TrangThaiYeuCauTaiLieu::CHO_GIAI_NGAN->value],
+                newData: ['trang_thai' => TrangThaiYeuCauTaiLieu::DA_HOAN_THANH->value]
+            );
+
+            // 4. Phát sự kiện hoàn tất giải ngân sau khi commit transaction an toàn
+            DB::afterCommit(function () use ($yeuCau, $submission, $nguoiTao) {
+                BountyFulfillmentConfirmedEvent::dispatch(
+                    $yeuCau,
+                    $submission,
+                    $nguoiTao,
+                    $yeuCau->diem_thuong
+                );
+            });
+
+            // 5. Gửi thông báo đến người đóng góp (B) và người tạo (A)
+            if (!$nguoiDongGop->is($actor)) {
+                $nguoiDongGop->notify(new BountyPayoutApprovedNotification(
+                    maYeuCau: $yeuCau->ma_yeu_cau,
+                    diemThuong: $yeuCau->diem_thuong
+                ));
+            }
+
+            if ($nguoiTao && !$nguoiTao->is($actor)) {
+                $nguoiTao->notify(new BountyPayoutApprovedNotification(
+                    maYeuCau: $yeuCau->ma_yeu_cau,
+                    diemThuong: $yeuCau->diem_thuong
+                ));
+            }
+
+            $count++;
+        }
+
+        return $count;
+    }
 
     // Đồng bộ từ chối hoặc thu hồi (Clawback) bài nộp Bounty liên kết khi tài liệu bị Ban kiểm duyệt gỡ bỏ do vi phạm
     public function syncOnDocumentDeleted(
