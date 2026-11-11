@@ -81,9 +81,9 @@ export default function WishlistShow({ item, is_creator = false }) {
         fire(0.1, { spread: 120, startVelocity: 45 });
     };
 
-    // 1. Xác nhận bài đóng góp -> Chuyển sang chờ Admin duyệt giải ngân
+    // 1. Xác nhận bài đóng góp -> Chuyển sang chờ Ban kiểm duyệt kiểm tra tính hợp lệ
     const handleConfirmFulfillment = (fulfillmentId) => {
-        if (!confirm('Xác nhận tài liệu này chính xác và chuyển yêu cầu tới Ban kiểm duyệt để duyệt giải ngân?')) {
+        if (!confirm('Xác nhận tài liệu này chính xác và chuyển yêu cầu tới Ban kiểm duyệt để kiểm tra? Khi tài liệu hợp lệ, điểm thưởng sẽ được cộng ngay cho người đóng góp.')) {
             return;
         }
 
@@ -286,7 +286,7 @@ export default function WishlistShow({ item, is_creator = false }) {
                     Quay lại danh sách săn thưởng
                 </Link>
 
-                {/* Banner khi yêu cầu đang chờ giải ngân (DEC-04 & Section 4.4) */}
+                {/* Banner khi yêu cầu đang chờ kiểm duyệt tài liệu (DEC-04 & Section 4.4) */}
                 {isPendingPayout && (
                     <div className="bg-gradient-to-r from-purple-700 to-indigo-700 rounded-2xl p-5 text-white shadow-md flex items-center justify-between gap-4">
                         <div className="flex items-center gap-3">
@@ -294,9 +294,9 @@ export default function WishlistShow({ item, is_creator = false }) {
                                 <Hourglass className="w-6 h-6 text-purple-200 animate-pulse" />
                             </div>
                             <div>
-                                <h3 className="font-extrabold text-base">Đang chờ Ban kiểm duyệt giải ngân</h3>
+                                <h3 className="font-extrabold text-base">Đang chờ Ban kiểm duyệt kiểm tra tài liệu</h3>
                                 <p className="text-xs text-purple-100">
-                                    Người tạo đã xác nhận tài liệu hợp lệ. Hệ thống đang chuyển yêu cầu đến hàng đợi của Quản trị viên/Kiểm duyệt viên để duyệt giải ngân {item.diem_thuong} điểm thưởng.
+                                    Người tạo đã xác nhận tài liệu phù hợp. Hệ thống đang chuyển yêu cầu đến Ban kiểm duyệt để kiểm tra tính hợp lệ của tài liệu. Khi được duyệt, điểm thưởng {item.diem_thuong} Bounty sẽ được tự động cộng ngay cho người đóng góp.
                                 </p>
                             </div>
                         </div>
@@ -366,7 +366,7 @@ export default function WishlistShow({ item, is_creator = false }) {
                                 )}
                                 {isPendingPayout && (
                                     <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200">
-                                        <Hourglass className="w-3.5 h-3.5" /> Chờ duyệt giải ngân
+                                        <Hourglass className="w-3.5 h-3.5" /> Chờ duyệt tài liệu
                                     </span>
                                 )}
                                 {isOpen && (
@@ -670,7 +670,7 @@ export default function WishlistShow({ item, is_creator = false }) {
                                                     )}
                                                     {isPendingMod && (
                                                         <span className="text-[10px] font-extrabold px-2 py-0.5 bg-purple-600 text-white rounded-md flex items-center gap-1">
-                                                            <Hourglass className="w-3 h-3" /> CHỜ ADMIN DUYỆT GIẢI NGÂN
+                                                            <Hourglass className="w-3 h-3" /> CHỜ DUYỆT TÀI LIỆU
                                                         </span>
                                                     )}
                                                     {isRejected && (

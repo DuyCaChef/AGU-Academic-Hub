@@ -47,11 +47,11 @@ class ConfirmBountyFulfillmentAction
             ];
         }
 
-        // Tài liệu đóng góp phải đã được Ban kiểm duyệt duyệt
-        if ($dapUng->taiLieu && $dapUng->taiLieu->trang_thai !== 'DA_DUYET') {
+        // Chặn nếu tài liệu đóng góp đã bị Ban kiểm duyệt từ chối
+        if ($dapUng->taiLieu && $dapUng->taiLieu->trang_thai === 'TU_CHOI') {
             return [
                 'success' => false,
-                'message' => 'Tài liệu đóng góp này chưa được Ban kiểm duyệt phê duyệt, chưa thể xác nhận.',
+                'message' => 'Tài liệu đóng góp này đã bị Ban kiểm duyệt từ chối, không thể xác nhận.',
             ];
         }
 
@@ -59,7 +59,7 @@ class ConfirmBountyFulfillmentAction
             // Đánh dấu bài nộp được người yêu cầu chọn
             $dapUng->update(['trang_thai' => 'NGUOI_YEU_CAU_XAC_NHAN']);
 
-            // Chuyển yêu cầu sang trạng thái CHO_GIAI_NGAN - điểm chưa được chuyển
+            // Chuyển yêu cầu sang trạng thái CHO_GIAI_NGAN - chờ Ban kiểm duyệt xác nhận tính hợp lệ
             $yeuCau->update([
                 'trang_thai' => TrangThaiYeuCauTaiLieu::CHO_GIAI_NGAN,
                 'ma_dap_ung_duoc_chon' => $dapUng->ma_dap_ung,
@@ -67,7 +67,7 @@ class ConfirmBountyFulfillmentAction
             ]);
         });
 
-        // Thông báo đến tất cả Admin và Kiểm duyệt viên về yêu cầu duyệt giải ngân
+        // Thông báo đến tất cả Admin và Kiểm duyệt viên về yêu cầu duyệt tài liệu Bounty
         $tenNguoiYeuCau = $yeuCau->nguoiTao->ho_ten ?? 'Sinh viên';
         $tenNguoiDongGop = $dapUng->nguoiDongGop->ho_ten ?? 'Người đóng góp';
 
@@ -84,7 +84,7 @@ class ConfirmBountyFulfillmentAction
 
         return [
             'success' => true,
-            'message' => "Đã xác nhận bài đóng góp! Hệ thống đang chờ Admin duyệt để giải ngân {$yeuCau->diem_thuong} điểm cho {$tenNguoiDongGop}.",
+            'message' => "Đã xác nhận bài đóng góp! Yêu cầu đang được gửi tới Ban kiểm duyệt để kiểm tra tài liệu. Khi tài liệu được xác nhận hợp lệ, điểm thưởng sẽ tự động cộng ngay cho {$tenNguoiDongGop}.",
         ];
     }
 }

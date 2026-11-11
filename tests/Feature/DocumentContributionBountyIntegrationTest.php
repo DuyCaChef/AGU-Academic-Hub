@@ -348,19 +348,91 @@ class DocumentContributionBountyIntegrationTest extends TestCase
             'trang_thai' => 'CHO_DUYET',
         ]);
 
-        // Requester tries to confirm disbursement for unapproved document
+        // Requester confirms fulfillment: moves to CHO_GIAI_NGAN, but points are NOT disbursed yet
         $response = $this->actingAs($this->requester)
             ->post(route('document-requests.confirm', $yeuCau->ma_yeu_cau), [
                 'ma_dap_ung' => $dapUng->ma_dap_ung,
             ]);
 
-        $response->assertSessionHas('error');
+        $response->assertSessionHas('success');
 
-        // Ensure state has NOT changed: request remains open, submission remains pending, points remain frozen
-        $this->assertEquals(TrangThaiYeuCauTaiLieu::MO, $yeuCau->fresh()->trang_thai);
-        $this->assertEquals('CHO_DUYET', $dapUng->fresh()->trang_thai);
+        // State changes to pending moderation, points remain frozen (no premature disbursement!)
+        $this->assertEquals(TrangThaiYeuCauTaiLieu::CHO_GIAI_NGAN, $yeuCau->fresh()->trang_thai);
+        $this->assertEquals('NGUOI_YEU_CAU_XAC_NHAN', $dapUng->fresh()->trang_thai);
         $this->assertEquals(50, $this->requester->viDiem->fresh()->diem_tam_giu);
-        $this->assertEquals(100, $this->contributor->viDiem->fresh()->diem_kha_dung); // Default 100, no disbursement!
+        $this->assertEquals(100, $this->contributor->viDiem->fresh()->diem_kha_dung); // Default 100, no disbursement yet!
+
+        // Moderator approves document in Document Moderation: points are disbursed IMMEDIATELY without extra payout step!
+        $modResponse = $this->actingAs($this->moderator)
+            ->put(route('admin.documents.approve', $unapprovedDoc->ma_tai_lieu));
+
+        $modResponse->assertSessionHas('success');
+
+        $this->assertEquals(TrangThaiTaiLieu::DA_DUYET->value, $unapprovedDoc->fresh()->trang_thai);
+        $this->assertEquals(TrangThaiYeuCauTaiLieu::DA_HOAN_THANH, $yeuCau->fresh()->trang_thai);
+        $this->assertEquals('CHAP_NHAN', $dapUng->fresh()->trang_thai);
+        $this->assertEquals(0, $this->requester->viDiem->fresh()->diem_tam_giu);
+        $this->assertEquals(150, $this->contributor->viDiem->fresh()->diem_kha_dung); // Disbursed 50 points!
+    }
+
+    public function test_moderator_rejecting_unapproved_document_reopens_bounty_without_disbursement(): void
+    {
+        // Requester creates bounty with 40 points frozen
+        $this->actingAs($this->requester)->post(route('document-requests.store'), [
+            'ma_mon_hoc' => $this->courseA->ma_mon_hoc,
+            'tieu_de' => 'Cần tìm đồ án kiến trúc máy tính',
+            'phan_loai' => 'DO_AN',
+            'diem_thuong' => 40,
+        ]);
+
+        $yeuCau = YeuCauTaiLieu::first();
+
+        $unapprovedDoc = TaiLieu::create([
+            'ma_mon_hoc' => $this->courseA->ma_mon_hoc,
+            'ma_nguoi_dang' => $this->contributor->ma_nguoi_dung,
+            'tieu_de' => 'Đồ án vi phạm bản quyền',
+            'duong_dan_tep' => 'documents/do_an_vi_pham.pdf',
+            'dinh_dang_tep' => 'pdf',
+            'dung_luong_kb' => 300,
+            'ma_bam_file' => hash('sha256', 'violation_content'),
+            'phan_loai' => 'DO_AN',
+            'luot_tai' => 0,
+            'trang_thai' => TrangThaiTaiLieu::CHO_DUYET->value,
+        ]);
+
+        $dapUng = DapUngYeuCauTaiLieu::create([
+            'ma_yeu_cau' => $yeuCau->ma_yeu_cau,
+            'ma_tai_lieu' => $unapprovedDoc->ma_tai_lieu,
+            'ma_nguoi_dong_gop' => $this->contributor->ma_nguoi_dung,
+            'trang_thai' => 'CHO_DUYET',
+        ]);
+
+        // A confirms fulfillment -> enters CHO_GIAI_NGAN
+        $this->actingAs($this->requester)->post(route('document-requests.confirm', $yeuCau->ma_yeu_cau), [
+            'ma_dap_ung' => $dapUng->ma_dap_ung,
+        ]);
+
+        // Moderator rejects document with reason
+        $rejectResponse = $this->actingAs($this->moderator)
+            ->put(route('admin.documents.reject', $unapprovedDoc->ma_tai_lieu), [
+                'reason' => 'Tài liệu vi phạm chính sách nội dung AGU Hub.',
+            ]);
+
+        $rejectResponse->assertSessionHas('success');
+
+        // Document -> TU_CHOI
+        $this->assertEquals(TrangThaiTaiLieu::TU_CHOI->value, $unapprovedDoc->fresh()->trang_thai);
+
+        // Bounty -> MO (reopened, points remain frozen for another contributor)
+        $this->assertEquals(TrangThaiYeuCauTaiLieu::MO, $yeuCau->fresh()->trang_thai);
+        $this->assertNull($yeuCau->fresh()->ma_dap_ung_duoc_chon);
+
+        // Submission -> TU_CHOI
+        $this->assertEquals('TU_CHOI', $dapUng->fresh()->trang_thai);
+
+        // Wallet check: A still has 40 points frozen, B receives 0 points
+        $this->assertEquals(40, $this->requester->viDiem->fresh()->diem_tam_giu);
+        $this->assertEquals(100, $this->contributor->viDiem->fresh()->diem_kha_dung);
     }
 
     public function test_requester_can_confirm_disbursement_once_document_is_approved(): void

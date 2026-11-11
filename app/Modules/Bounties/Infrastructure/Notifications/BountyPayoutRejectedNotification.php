@@ -29,16 +29,16 @@ class BountyPayoutRejectedNotification extends Notification
     {
         if ($this->recipient === 'nguoi_yeu_cau') {
             return new DatabaseMessage([
-                'title'      => 'Bài đóng góp bị từ chối bởi Admin',
-                'message'    => "Bài đóng góp bạn xác nhận cho yêu cầu #{$this->maYeuCau} đã bị Admin từ chối. Lý do: {$this->lyDo}. Điểm thưởng {$this->diemThuong} điểm đã được hoàn trả vào ví của bạn. Yêu cầu đã được mở lại.",
+                'title'      => 'Bài đóng góp bị từ chối bởi Ban kiểm duyệt',
+                'message'    => "Bài đóng góp bạn chọn cho yêu cầu #{$this->maYeuCau} đã bị Ban kiểm duyệt từ chối. Lý do: {$this->lyDo}. Điểm thưởng {$this->diemThuong} điểm vẫn được giữ trong quỹ yêu cầu. Yêu cầu đã được mở lại để nhận tài liệu khác.",
                 'ma_yeu_cau' => $this->maYeuCau,
                 'url'        => route('document-requests.show', $this->maYeuCau),
             ]);
         }
 
         return new DatabaseMessage([
-            'title'      => 'Bài đóng góp của bạn bị Admin từ chối giải ngân',
-            'message'    => "Bài đóng góp của bạn cho yêu cầu #{$this->maYeuCau} đã bị từ chối duyệt giải ngân. Lý do: {$this->lyDo}.",
+            'title'      => 'Bài đóng góp của bạn bị Ban kiểm duyệt từ chối',
+            'message'    => "Bài đóng góp của bạn cho yêu cầu #{$this->maYeuCau} đã bị Ban kiểm duyệt từ chối. Lý do: {$this->lyDo}.",
             'ma_yeu_cau' => $this->maYeuCau,
             'url'        => route('document-requests.show', $this->maYeuCau),
         ]);
