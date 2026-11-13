@@ -31,6 +31,8 @@ class GetDocumentDetailQuery
             }
         }
 
+        $document->has_upvoted = $user ? $document->daBinhChonBoi($user) : false;
+
         return $document;
     }
 }

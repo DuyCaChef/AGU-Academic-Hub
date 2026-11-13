@@ -32,7 +32,7 @@ export default function Show({ document }) {
     const [isReportModalOpen, setIsReportModalOpen] = useState(false);
     const [upvotesCount, setUpvotesCount] = useState(document.luot_thich || 0);
     const [downloadsCount, setDownloadsCount] = useState(document.luot_tai || 0);
-    const [hasUpvoted, setHasUpvoted] = useState(false);
+    const [hasUpvoted, setHasUpvoted] = useState(Boolean(document.has_upvoted || document.da_thich));
     const [isVoting, setIsVoting] = useState(false);
     const [isPdfExpanded, setIsPdfExpanded] = useState(false);
     const [isCopiedHash, setIsCopiedHash] = useState(false);
@@ -96,18 +96,24 @@ export default function Show({ document }) {
     // Handle AJAX Upvote
     const handleUpvote = async () => {
         if (isVoting) return;
+        if (isAuthor) {
+            alert('Bạn không thể tự thích tài liệu của chính mình.');
+            return;
+        }
         setIsVoting(true);
 
         try {
             const response = await window.axios.post(route('documents.upvote', document.ma_tai_lieu));
             if (response.data && response.data.success) {
                 setUpvotesCount(response.data.upvotes);
-                setHasUpvoted(true);
+                setHasUpvoted(Boolean(response.data.has_upvoted));
             }
         } catch (error) {
             console.error('Error upvoting document:', error);
+            const errMsg = error.response?.data?.message || 'Có lỗi xảy ra khi thực hiện thao tác.';
+            alert(errMsg);
         } finally {
-            setTimeout(() => setIsVoting(false), 500);
+            setTimeout(() => setIsVoting(false), 400);
         }
     };
 
@@ -151,7 +157,7 @@ export default function Show({ document }) {
                 {document.mon_hoc && (
                     <>
                         <Link
-                            href={route('courses.documents', document.mon_hoc.ma_hoc_phan)}
+                            href={route('courses.show', document.mon_hoc.ma_hoc_phan)}
                             className="hover:text-brand-primary shrink-0 transition-colors"
                         >
                             <span className="font-mono font-semibold">{document.mon_hoc.ma_hoc_phan}</span>
@@ -210,7 +216,7 @@ export default function Show({ document }) {
                                     </span>
                                 </div>
                                 <Link
-                                    href={route('courses.documents', document.mon_hoc.ma_hoc_phan)}
+                                    href={route('courses.show', document.mon_hoc.ma_hoc_phan)}
                                     className="text-brand-primary hover:underline font-semibold shrink-0 ml-2"
                                 >
                                     Xem kho môn &rarr;
@@ -348,13 +354,19 @@ export default function Show({ document }) {
                             <button
                                 type="button"
                                 onClick={handleUpvote}
-                                disabled={isVoting}
+                                disabled={isVoting || isAuthor}
                                 className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg border text-xs font-semibold transition-all ${
-                                    hasUpvoted
+                                    isAuthor
+                                        ? 'bg-surface-page/50 border-border-default/60 text-text-secondary/50 cursor-not-allowed opacity-75'
+                                        : hasUpvoted
                                         ? 'bg-brand-primary/10 border-brand-primary text-brand-primary'
                                         : 'bg-surface-page border-border-default text-text-primary hover:border-brand-primary/50'
                                 }`}
-                                title="Bình chọn tài liệu hữu ích"
+                                title={
+                                    isAuthor
+                                        ? 'Bạn không thể tự thích tài liệu của chính mình'
+                                        : (hasUpvoted ? 'Bỏ thích tài liệu' : 'Bình chọn tài liệu hữu ích')
+                                }
                             >
                                 <ThumbsUp size={15} className={hasUpvoted ? 'fill-brand-primary text-brand-primary' : ''} />
                                 <span>{upvotesCount} Thích</span>

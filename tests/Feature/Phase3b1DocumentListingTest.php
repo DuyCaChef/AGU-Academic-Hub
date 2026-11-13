@@ -341,13 +341,25 @@ class Phase3b1DocumentListingTest extends TestCase
             ->assertOk();
         $this->assertEquals(6, $document->fresh()->luot_tai);
 
-        // AC-11: Upvote tài liệu (documents.upvote)
+        // AC-11: Tác giả không thể tự thích tài liệu của chính mình
         $this->actingAs($student)
+            ->postJson(route('documents.upvote', $document->ma_tai_lieu))
+            ->assertStatus(422)
+            ->assertJson([
+                'success' => false,
+                'message' => 'Bạn không thể tự thích tài liệu của chính mình.',
+            ]);
+        $this->assertEquals(3, $document->fresh()->luot_thich);
+
+        // Sinh viên khác có thể bình chọn tài liệu (documents.upvote)
+        $otherStudent = NguoiDung::factory()->create(['vai_tro' => 'SINH_VIEN']);
+        $this->actingAs($otherStudent)
             ->postJson(route('documents.upvote', $document->ma_tai_lieu))
             ->assertOk()
             ->assertJson([
-                'success' => true,
-                'upvotes' => 4,
+                'success'     => true,
+                'has_upvoted' => true,
+                'upvotes'     => 4,
             ]);
         $this->assertEquals(4, $document->fresh()->luot_thich);
     }

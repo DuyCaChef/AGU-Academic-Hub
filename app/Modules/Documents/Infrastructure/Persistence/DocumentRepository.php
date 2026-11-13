@@ -24,6 +24,14 @@ class DocumentRepository
                 $query->where('ma_mon_hoc', $filters['course_id']);
             });
 
+        $user = auth()->user();
+        if ($user) {
+            $userId = $user->ma_nguoi_dung ?? $user->getKey();
+            $query->withExists(['binhChons as da_thich' => function ($q) use ($userId): void {
+                $q->where('ma_nguoi_dung', $userId);
+            }]);
+        }
+
         $sort = $filters['sort'] ?? 'latest';
         match ($sort) {
             'downloads' => $query->orderByDesc('luot_tai'),

@@ -37,7 +37,7 @@ export default function Index({
 
     const getFilterTargetRoute = useCallback(() => {
         return course
-            ? route("courses.documents", course.ma_hoc_phan)
+            ? route("courses.show", course.ma_hoc_phan)
             : route("documents.index");
     }, [course]);
 
