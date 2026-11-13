@@ -345,15 +345,16 @@ class DocumentManagementComprehensiveTest extends TestCase
         $response->assertInertia(fn ($page) => $page->component('Documents/Show')->has('document'));
     }
 
-    // Người dùng có thể bình chọn (Upvote) tài liệu qua API
+    // Người dùng có thể bình chọn (Upvote) tài liệu của người khác qua API
     public function test_user_can_upvote_document_via_ajax(): void
     {
-        $user = NguoiDung::factory()->create();
+        $author = NguoiDung::factory()->create();
+        $voter = NguoiDung::factory()->create();
         $course = MonHoc::factory()->create();
 
         $document = TaiLieu::create([
             'ma_mon_hoc'    => $course->ma_mon_hoc,
-            'ma_nguoi_dang' => $user->getKey(),
+            'ma_nguoi_dang' => $author->getKey(),
             'tieu_de'       => 'Tai lieu can upvote',
             'duong_dan_tep' => 'documents/upvote.pdf',
             'dinh_dang_tep' => 'pdf',
@@ -364,14 +365,81 @@ class DocumentManagementComprehensiveTest extends TestCase
             'trang_thai'    => 'DA_DUYET',
         ]);
 
-        $response = $this->actingAs($user)->postJson(route('documents.upvote', $document->getKey()));
+        $response = $this->actingAs($voter)->postJson(route('documents.upvote', $document->getKey()));
 
         $response->assertOk();
         $response->assertJson([
-            'success' => true,
-            'upvotes' => 1,
+            'success'     => true,
+            'has_upvoted' => true,
+            'upvotes'     => 1,
         ]);
 
+        $this->assertEquals(1, $document->fresh()->luot_thich);
+    }
+
+    // Tác giả không thể tự thích tài liệu của chính mình
+    public function test_author_cannot_upvote_own_document(): void
+    {
+        $author = NguoiDung::factory()->create();
+        $course = MonHoc::factory()->create();
+
+        $document = TaiLieu::create([
+            'ma_mon_hoc'    => $course->ma_mon_hoc,
+            'ma_nguoi_dang' => $author->getKey(),
+            'tieu_de'       => 'Tai lieu cua chinh tac gia',
+            'duong_dan_tep' => 'documents/self_upvote.pdf',
+            'dinh_dang_tep' => 'pdf',
+            'dung_luong_kb' => 120,
+            'ma_bam_file'   => hash('sha256', 'self_upvote_file'),
+            'luot_tai'      => 0,
+            'luot_thich'    => 0,
+            'trang_thai'    => 'DA_DUYET',
+        ]);
+
+        $response = $this->actingAs($author)->postJson(route('documents.upvote', $document->getKey()));
+
+        $response->assertStatus(422);
+        $response->assertJson([
+            'success' => false,
+            'message' => 'Bạn không thể tự thích tài liệu của chính mình.',
+        ]);
+
+        $this->assertEquals(0, $document->fresh()->luot_thich);
+    }
+
+    // Người dùng không thể spam like: Bấm lần 2 sẽ toggle bỏ thích (Unlike)
+    public function test_user_cannot_spam_upvote_and_second_click_unlikes(): void
+    {
+        $author = NguoiDung::factory()->create();
+        $voter = NguoiDung::factory()->create();
+        $course = MonHoc::factory()->create();
+
+        $document = TaiLieu::create([
+            'ma_mon_hoc'    => $course->ma_mon_hoc,
+            'ma_nguoi_dang' => $author->getKey(),
+            'tieu_de'       => 'Tai lieu kiem tra spam',
+            'duong_dan_tep' => 'documents/spam.pdf',
+            'dinh_dang_tep' => 'pdf',
+            'dung_luong_kb' => 120,
+            'ma_bam_file'   => hash('sha256', 'spam_file'),
+            'luot_tai'      => 0,
+            'luot_thich'    => 0,
+            'trang_thai'    => 'DA_DUYET',
+        ]);
+
+        // Lần 1: Like
+        $res1 = $this->actingAs($voter)->postJson(route('documents.upvote', $document->getKey()));
+        $res1->assertOk()->assertJson(['success' => true, 'has_upvoted' => true, 'upvotes' => 1]);
+        $this->assertEquals(1, $document->fresh()->luot_thich);
+
+        // Lần 2: Click lại -> Unlike (Hủy thích)
+        $res2 = $this->actingAs($voter)->postJson(route('documents.upvote', $document->getKey()));
+        $res2->assertOk()->assertJson(['success' => true, 'has_upvoted' => false, 'upvotes' => 0]);
+        $this->assertEquals(0, $document->fresh()->luot_thich);
+
+        // Lần 3: Click lại -> Like lại
+        $res3 = $this->actingAs($voter)->postJson(route('documents.upvote', $document->getKey()));
+        $res3->assertOk()->assertJson(['success' => true, 'has_upvoted' => true, 'upvotes' => 1]);
         $this->assertEquals(1, $document->fresh()->luot_thich);
     }
 

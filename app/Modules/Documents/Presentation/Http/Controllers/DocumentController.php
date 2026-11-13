@@ -124,15 +124,19 @@ class DocumentController extends Controller
         return $action->execute($id, $request->user());
     }
 
-    // Bình chọn / Thích tài liệu (Upvote)
+    // Bình chọn / Thích tài liệu (Upvote) - Chặn tự like và chống spam like
     public function upvote(Request $request, int $id, UpvoteDocumentAction $action): JsonResponse
     {
-        $count = $action->execute($id, $request->user());
+        try {
+            $result = $action->execute($id, $request->user());
 
-        return response()->json([
-            'success'   => true,
-            'upvotes'   => $count,
-        ]);
+            return response()->json($result);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->validator->errors()->first('message') ?? 'Thao tác không hợp lệ.',
+            ], 422);
+        }
     }
 
     // Chỉnh sửa thông tin tài liệu

@@ -75,23 +75,12 @@ class CourseController extends Controller
         ]);
     }
 
-    // Danh sách tài liệu thuộc môn học
-    public function documents(Request $request, string $course_code): Response
+    // Danh sách tài liệu thuộc môn học - Chuyển hướng chuẩn hóa về trang chi tiết môn học chính thức (Courses/Show)
+    public function documents(Request $request, string $course_code): \Illuminate\Http\RedirectResponse
     {
-        $course = $this->coursesQuery->findActiveCourseByCode($course_code);
-        $faculties = $this->coursesQuery->getPublicFaculties($request->user());
-
-        $docFilters = array_merge(
-            $request->only(['search', 'category', 'sort']),
-            ['course_id' => $course->ma_mon_hoc]
-        );
-        $documents = $this->coursesQuery->getPaginatedDocuments($docFilters);
-
-        return Inertia::render('Documents/Index', [
-            'faculties' => $faculties,
-            'course'    => $course,
-            'documents' => $documents,
-            'filters'   => $request->only(['search', 'category', 'sort']),
-        ]);
+        return redirect()->route('courses.show', array_merge(
+            ['course_code' => $course_code],
+            $request->query()
+        ));
     }
 }

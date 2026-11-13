@@ -68,47 +68,59 @@ export default function NotificationDropdown({ variant = 'student' }) {
 
     // Đánh dấu 1 thông báo đã đọc
     const handleNotificationClick = async (item) => {
+        const targetUrl = item.url || item.action_url;
         if (!item.is_read) {
             try {
-                await fetch(`/thong-bao/${item.id}/doc`, {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const response = await fetch(`/thong-bao/${item.id}/doc`, {
                     method: 'POST',
                     headers: {
                         'Accept': 'application/json',
+                        'Content-Type': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                        'X-CSRF-TOKEN': csrfToken,
                     },
                 });
 
-                // Cập nhật state local
-                setNotifications((prev) =>
-                    prev.map((n) => (n.id === item.id ? { ...n, is_read: true } : n))
-                );
-                setUnreadCount((prev) => Math.max(0, prev - 1));
+                if (response.ok) {
+                    const data = await response.json();
+                    // Cập nhật state local
+                    setNotifications((prev) =>
+                        prev.map((n) => (n.id === item.id ? { ...n, is_read: true } : n))
+                    );
+                    setUnreadCount(typeof data.unread_count === 'number' ? data.unread_count : Math.max(0, unreadCount - 1));
+                    router.reload({ only: ['auth', 'unread_count'], preserveScroll: true });
+                }
             } catch (err) {
                 console.error('Lỗi đánh dấu đã đọc:', err);
             }
         }
 
-        if (item.url) {
-            setIsOpen(false);
-            router.visit(item.url);
+        setIsOpen(false);
+        if (targetUrl) {
+            router.visit(targetUrl);
         }
     };
 
     // Đánh dấu tất cả đã đọc
     const handleMarkAllRead = async () => {
         try {
-            await fetch('/thong-bao/doc-tat-ca', {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+            const res = await fetch('/thong-bao/doc-tat-ca', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
+                    'Content-Type': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    'X-CSRF-TOKEN': csrfToken,
                 },
             });
 
-            setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
-            setUnreadCount(0);
+            if (res.ok) {
+                setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+                setUnreadCount(0);
+                router.reload({ only: ['auth', 'unread_count', 'notifications'], preserveScroll: true });
+            }
         } catch (err) {
             console.error('Lỗi đánh dấu tất cả đã đọc:', err);
         }

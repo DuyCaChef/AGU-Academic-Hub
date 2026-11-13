@@ -99,4 +99,19 @@ class TaiLieu extends Model
     {
         return $this->hasMany(LichSuThungRac::class, 'ma_tai_lieu', 'ma_tai_lieu');
     }
+
+    public function binhChons(): HasMany
+    {
+        return $this->hasMany(BinhChonTaiLieu::class, 'ma_tai_lieu', 'ma_tai_lieu');
+    }
+
+    public function daBinhChonBoi(?NguoiDung $user): bool
+    {
+        if (!$user) {
+            return false;
+        }
+
+        $userId = $user->ma_nguoi_dung ?? $user->getKey();
+        return $this->binhChons()->where('ma_nguoi_dung', $userId)->exists();
+    }
 }

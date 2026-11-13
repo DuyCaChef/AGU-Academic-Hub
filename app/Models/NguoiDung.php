@@ -193,4 +193,9 @@ class NguoiDung extends Authenticatable
     {
         return $this->trang_thai === TrangThaiNguoiDung::DANG_HOAT_DONG;
     }
+
+    public function binhChonTaiLieus(): HasMany
+    {
+        return $this->hasMany(BinhChonTaiLieu::class, 'ma_nguoi_dung', 'ma_nguoi_dung');
+    }
 }

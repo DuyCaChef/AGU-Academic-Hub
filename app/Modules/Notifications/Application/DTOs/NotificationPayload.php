@@ -32,6 +32,18 @@ class NotificationPayload
 
         $trimmed = trim($url);
 
+        // Hỗ trợ trường hợp URL tuyệt đối cùng domain nội bộ (app.url, localhost, 127.0.0.1)
+        if (preg_match('/^https?:\/\//i', $trimmed)) {
+            $parsed = parse_url($trimmed);
+            $appHost = parse_url(config('app.url'), PHP_URL_HOST);
+            $targetHost = $parsed['host'] ?? null;
+            if ($targetHost && ($targetHost === $appHost || in_array($targetHost, ['localhost', '127.0.0.1']))) {
+                $path = $parsed['path'] ?? '/';
+                $query = isset($parsed['query']) ? '?' . $parsed['query'] : '';
+                return $path . $query;
+            }
+        }
+
         // Chống open redirect: Chỉ cho phép đường dẫn tương đối bắt đầu bằng /
         // Từ chối giao thức tuyệt đối (http:, https:, javascript:) và protocol-relative (//)
         if (str_starts_with($trimmed, '//') || preg_match('/^[a-z0-9+.-]+:/i', $trimmed)) {

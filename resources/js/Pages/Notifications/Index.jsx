@@ -60,19 +60,21 @@ export default function NotificationsIndex({ notifications, unread_count = 0, fi
 
         setProcessingId(item.id);
         try {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
             const res = await fetch(`/thong-bao/${item.id}/doc`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
+                    'Content-Type': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    'X-CSRF-TOKEN': csrfToken,
                 },
             });
 
             if (res.ok) {
                 const data = await res.json();
                 setUnreadCountState(data.unread_count ?? Math.max(0, unreadCountState - 1));
-                router.reload({ only: ['notifications', 'unread_count'], preserveScroll: true });
+                router.reload({ only: ['notifications', 'unread_count', 'auth'], preserveScroll: true });
             }
         } catch (err) {
             console.error('Lỗi khi đánh dấu đã đọc:', err);
@@ -86,18 +88,20 @@ export default function NotificationsIndex({ notifications, unread_count = 0, fi
         if (unreadCountState === 0) return;
 
         try {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
             const res = await fetch('/thong-bao/doc-tat-ca', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
+                    'Content-Type': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    'X-CSRF-TOKEN': csrfToken,
                 },
             });
 
             if (res.ok) {
                 setUnreadCountState(0);
-                router.reload({ only: ['notifications', 'unread_count'], preserveScroll: true });
+                router.reload({ only: ['notifications', 'unread_count', 'auth'], preserveScroll: true });
             }
         } catch (err) {
             console.error('Lỗi khi đánh dấu tất cả đã đọc:', err);
@@ -110,19 +114,21 @@ export default function NotificationsIndex({ notifications, unread_count = 0, fi
         if (!confirm('Bạn có chắc chắn muốn xóa thông báo này?')) return;
 
         try {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
             const res = await fetch(`/thong-bao/${item.id}`, {
                 method: 'DELETE',
                 headers: {
                     'Accept': 'application/json',
+                    'Content-Type': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    'X-CSRF-TOKEN': csrfToken,
                 },
             });
 
             if (res.ok) {
                 const data = await res.json();
                 setUnreadCountState(data.unread_count ?? unreadCountState);
-                router.reload({ only: ['notifications', 'unread_count'], preserveScroll: true });
+                router.reload({ only: ['notifications', 'unread_count', 'auth'], preserveScroll: true });
             }
         } catch (err) {
             console.error('Lỗi khi xóa thông báo:', err);
@@ -131,12 +137,13 @@ export default function NotificationsIndex({ notifications, unread_count = 0, fi
 
     // Điều hướng khi click vào thông báo (An toàn nội bộ)
     const handleNotificationClick = async (item) => {
+        const targetUrl = item.action_url || item.url;
         if (!item.is_read) {
             await handleMarkAsRead(item);
         }
 
-        if (item.action_url) {
-            router.visit(item.action_url);
+        if (targetUrl) {
+            router.visit(targetUrl);
         }
     };
 

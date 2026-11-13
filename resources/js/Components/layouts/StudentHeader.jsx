@@ -138,7 +138,7 @@ export default function StudentHeader({
         <div className="bg-surface-page text-text-primary font-sans flex flex-col">
             {/* hearder cố định */}
             <header className={`
-            fixed top-0 left-0 right-0 z-99999 h-16 bg-[#005BAA] 
+            fixed top-0 left-0 right-0 z-40 h-16 bg-[#005BAA] 
             shadow-sm px-4 lg:px-6 flex items-center justify-between gap-4
             transition-transform duration-300 ease-in-out
             ${isHeaderVisible ? 'translate-y-0' : '-translate-y-full'}

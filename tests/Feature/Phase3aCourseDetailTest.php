@@ -177,4 +177,18 @@ class Phase3aCourseDetailTest extends TestCase
                 ->where('course.ma_hoc_phan', 'CHE101')
             );
     }
+
+    // AC-13: /mon-hoc/{course_code}/tai-lieu redirects to /mon-hoc/{course_code}
+    public function test_course_documents_url_redirects_to_course_detail(): void
+    {
+        $faculty = Khoa::factory()->create();
+        $course = MonHoc::factory()->create([
+            'ma_khoa' => $faculty->ma_khoa,
+            'ma_hoc_phan' => 'MTH101',
+        ]);
+
+        $response = $this->get(route('courses.documents', ['course_code' => 'MTH101', 'sort' => 'popular']));
+
+        $response->assertRedirect(route('courses.show', ['course_code' => 'MTH101', 'sort' => 'popular']));
+    }
 }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import axios from 'axios';
 import {
     FileText,
@@ -15,8 +15,17 @@ import {
 export default function DocumentCard({ document, showCourseInfo = true }) {
     if (!document) return null;
 
+    const pageProps = usePage?.()?.props || {};
+    const currentUser = pageProps.auth?.user;
+    const isAuthor = Boolean(
+        currentUser && (
+            (document.ma_nguoi_dang && (currentUser.ma_nguoi_dung === document.ma_nguoi_dang || currentUser.id === document.ma_nguoi_dang)) ||
+            (document.nguoi_dang?.ma_nguoi_dung && currentUser.ma_nguoi_dung === document.nguoi_dang.ma_nguoi_dung)
+        )
+    );
+
     const [upvotes, setUpvotes] = useState(document.luot_thich || 0);
-    const [hasUpvoted, setHasUpvoted] = useState(false);
+    const [hasUpvoted, setHasUpvoted] = useState(Boolean(document.da_thich || document.has_upvoted));
     const [isVoting, setIsVoting] = useState(false);
 
     const isCommunityOwned = (document.luot_tai || 0) >= 10 || upvotes >= 10;
@@ -77,16 +86,22 @@ export default function DocumentCard({ document, showCourseInfo = true }) {
         e.stopPropagation();
 
         if (isVoting || !document.ma_tai_lieu) return;
+        if (isAuthor) {
+            alert('Bạn không thể tự thích tài liệu của chính mình.');
+            return;
+        }
         setIsVoting(true);
 
         try {
             const response = await axios.post(route('documents.upvote', document.ma_tai_lieu));
             if (response.data && response.data.success) {
                 setUpvotes(response.data.upvotes);
-                setHasUpvoted(true);
+                setHasUpvoted(Boolean(response.data.has_upvoted));
             }
         } catch (error) {
             console.error('Error upvoting document from card:', error);
+            const errMsg = error.response?.data?.message || 'Có lỗi xảy ra.';
+            alert(errMsg);
         } finally {
             setTimeout(() => setIsVoting(false), 400);
         }
@@ -190,13 +205,19 @@ export default function DocumentCard({ document, showCourseInfo = true }) {
                     <button
                         type="button"
                         onClick={handleToggleUpvote}
-                        disabled={isVoting || !hasId}
+                        disabled={isVoting || !hasId || isAuthor}
                         className={`flex items-center gap-1 font-medium px-2 py-0.5 rounded transition-all ${
-                            hasUpvoted
+                            isAuthor
+                                ? 'text-slate-400 cursor-not-allowed opacity-60'
+                                : hasUpvoted
                                 ? 'text-[#005baa] bg-blue-50 font-semibold'
                                 : 'text-slate-600 hover:text-[#005baa] hover:bg-slate-50'
                         }`}
-                        title="Bình chọn tài liệu hữu ích"
+                        title={
+                            isAuthor
+                                ? 'Bạn không thể tự thích tài liệu của chính mình'
+                                : (hasUpvoted ? 'Bỏ thích tài liệu' : 'Bình chọn tài liệu hữu ích')
+                        }
                     >
                         <ThumbsUp size={14} className={hasUpvoted ? 'fill-[#005baa] text-[#005baa]' : 'text-slate-400'} />
                         <span>{upvotes}</span>

@@ -100,9 +100,14 @@ export default function CourseReviews({ course, mon_hoc, stats, thong_ke, review
     };
 
     // Tương tác nút Bình chọn Hữu ích
-    const handleToggleHelpful = (reviewId) => {
+    const handleToggleHelpful = (reviewId, isOwn = false) => {
         if (!auth?.user) {
             router.visit(route('login'));
+            return;
+        }
+
+        if (isOwn) {
+            alert('Bạn không thể tự bình chọn đánh giá của chính mình.');
             return;
         }
 
@@ -132,7 +137,7 @@ export default function CourseReviews({ course, mon_hoc, stats, thong_ke, review
                     <ChevronRight size={13} className="shrink-0 text-text-muted" />
 
                     <Link
-                        href={route('courses.documents', courseCode)}
+                        href={route('courses.show', courseCode)}
                         className="hover:text-brand-primary shrink-0 transition-colors"
                     >
                         <span className="font-mono font-semibold">{courseCode}</span>
@@ -196,7 +201,7 @@ export default function CourseReviews({ course, mon_hoc, stats, thong_ke, review
 
                             <div className="flex items-center gap-2 w-full sm:w-auto">
                                 <Link
-                                    href={route('courses.documents', courseCode)}
+                                    href={route('courses.show', courseCode)}
                                     className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition"
                                 >
                                     <FileText size={14} />
@@ -315,6 +320,7 @@ export default function CourseReviews({ course, mon_hoc, stats, thong_ke, review
                                 const isAnonymous = review.is_anonymous || review.an_danh;
                                 const isVerified = review.is_verified_student || review.sinh_vien_da_xac_thuc;
                                 const isVoted = review.is_helpful_voted || review.da_binh_chon_huu_ich;
+                                const isOwnReview = Boolean(review.can_modify || review.co_quyen_chinh_sua || review.is_my_review);
                                 const helpfulCount = review.helpful_votes_count || review.so_luot_huu_ich || 0;
                                 const dateFormatted = review.created_at
                                     ? new Date(review.created_at).toLocaleDateString('vi-VN', {
@@ -378,12 +384,16 @@ export default function CourseReviews({ course, mon_hoc, stats, thong_ke, review
                                         <div className="pt-2 flex items-center justify-between border-t border-slate-100 text-xs">
                                             <button
                                                 type="button"
-                                                onClick={() => handleToggleHelpful(revId)}
+                                                onClick={() => handleToggleHelpful(revId, isOwnReview)}
+                                                disabled={isOwnReview}
                                                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border font-medium transition-colors ${
-                                                    isVoted
+                                                    isOwnReview
+                                                        ? 'bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed opacity-60'
+                                                        : isVoted
                                                         ? 'bg-blue-50 border-blue-200 text-[#005baa]'
                                                         : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
                                                 }`}
+                                                title={isOwnReview ? 'Bạn không thể tự bình chọn đánh giá của chính mình' : (isVoted ? 'Bỏ bình chọn hữu ích' : 'Bình chọn hữu ích')}
                                             >
                                                 <ThumbsUp size={13} className={isVoted ? 'fill-[#005baa]' : ''} />
                                                 <span>Hữu ích ({helpfulCount})</span>
