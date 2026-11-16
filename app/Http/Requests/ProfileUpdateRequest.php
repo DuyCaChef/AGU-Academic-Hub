@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Modules\Identity\Presentation\Http\Requests\ProfileUpdateRequest as BaseProfileUpdateRequest;
+use App\Http\Requests\Auth\ProfileUpdateRequest as BaseProfileUpdateRequest;
 
 // Lớp bọc kế thừa bảo đảm tương thích ngược
 class ProfileUpdateRequest extends BaseProfileUpdateRequest

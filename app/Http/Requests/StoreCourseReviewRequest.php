@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use App\Enums\VaiTroNguoiDung;
 use App\Models\DanhGiaMonHoc;
 use App\Models\MonHoc;
-use App\Shared\Services\ProfanityFilterService;
+use App\Services\Shared\ProfanityFilterService;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
 

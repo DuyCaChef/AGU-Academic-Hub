@@ -12,7 +12,8 @@ use App\Models\NguoiDung;
 use App\Models\TaiLieu;
 use App\Models\ViDiem;
 use App\Models\YeuCauTaiLieu;
-use App\Shared\Services\ReputationService;
+use App\Services\Community\Actions\RejectBountyPayoutAction;
+use App\Services\Shared\ReputationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -122,6 +123,63 @@ class WishlistBountyTest extends TestCase
         $this->assertEquals(LoaiGiaoDichDiem::HOAN_TRA, $tx->loai_giao_dich);
         $this->assertEquals(60, $tx->thay_doi_kha_dung);
         $this->assertEquals(-60, $tx->thay_doi_tam_giu);
+    }
+
+    public function test_tu_choi_giai_ngan_hoan_diem_ky_quy_va_mo_lai_yeu_cau(): void
+    {
+        $khoa = Khoa::create(['ten_khoa' => 'Khoa CNTT', 'ky_hieu_khoa' => 'CNTT']);
+        $nguoiTao = NguoiDung::factory()->create(['ma_khoa' => $khoa->ma_khoa]);
+        $nguoiDongGop = NguoiDung::factory()->create(['ma_khoa' => $khoa->ma_khoa]);
+        $admin = NguoiDung::factory()->create([
+            'vai_tro' => 'QUAN_TRI_VIEN',
+            'ma_khoa' => $khoa->ma_khoa,
+        ]);
+        $monHoc = MonHoc::factory()->create(['ma_khoa' => $khoa->ma_khoa]);
+
+        $this->reputationService->dongBangDiemBounty($nguoiTao, 50);
+
+        $taiLieu = TaiLieu::create([
+            'ma_mon_hoc' => $monHoc->ma_mon_hoc,
+            'ma_nguoi_dang' => $nguoiDongGop->ma_nguoi_dung,
+            'tieu_de' => 'Tài liệu chờ giải ngân',
+            'duong_dan_tep' => 'documents/pending.pdf',
+            'dinh_dang_tep' => 'pdf',
+            'dung_luong_kb' => 100,
+            'ma_bam_file' => hash('sha256', 'pending'),
+            'phan_loai' => 'BAI_GIANG',
+            'trang_thai' => 'DA_DUYET',
+        ]);
+        $yeuCau = YeuCauTaiLieu::create([
+            'ma_mon_hoc' => $monHoc->ma_mon_hoc,
+            'ma_nguoi_tao' => $nguoiTao->ma_nguoi_dung,
+            'tieu_de' => 'Yêu cầu cần hoàn điểm',
+            'phan_loai' => 'BAI_GIANG',
+            'diem_thuong' => 50,
+            'trang_thai' => TrangThaiYeuCauTaiLieu::CHO_GIAI_NGAN,
+        ]);
+        $dapUng = DapUngYeuCauTaiLieu::create([
+            'ma_yeu_cau' => $yeuCau->ma_yeu_cau,
+            'ma_tai_lieu' => $taiLieu->ma_tai_lieu,
+            'ma_nguoi_dong_gop' => $nguoiDongGop->ma_nguoi_dung,
+            'trang_thai' => 'NGUOI_YEU_CAU_XAC_NHAN',
+        ]);
+        $yeuCau->update(['ma_dap_ung_duoc_chon' => $dapUng->ma_dap_ung]);
+
+        $result = app(RejectBountyPayoutAction::class)->execute(
+            $admin,
+            $yeuCau->ma_yeu_cau,
+            'Tài liệu chưa đáp ứng yêu cầu.'
+        );
+
+        $this->assertTrue($result['success']);
+        $this->assertEquals(100, $nguoiTao->viDiem->fresh()->diem_kha_dung);
+        $this->assertEquals(0, $nguoiTao->viDiem->fresh()->diem_tam_giu);
+        $this->assertDatabaseHas('giao_dich_diem', [
+            'loai_giao_dich' => LoaiGiaoDichDiem::HOAN_TRA->value,
+            'khoa_chong_trung' => "tu_choi_giai_ngan_yc_{$yeuCau->ma_yeu_cau}",
+        ]);
+        $this->assertEquals(TrangThaiYeuCauTaiLieu::MO, $yeuCau->fresh()->trang_thai);
+        $this->assertEquals('TU_CHOI', $dapUng->fresh()->trang_thai);
     }
 
     public function test_luong_controller_store_confirm_destroy(): void
