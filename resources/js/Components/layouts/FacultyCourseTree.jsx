@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link } from "@inertiajs/react";
 import { ChevronDown, FolderKanban, BookOpen, Layers } from "lucide-react";
 
-export default function FacultyCourseTree({ faculties = [], faculities = [] }) {
+export default function FacultyCourseTree({ faculties = [], faculities = [], onItemClick }) {
     // Hỗ trợ cả 2 tên prop để đảm bảo tương thích ngược
     const facultyList = faculties?.length > 0 ? faculties : (faculities || []);
 
@@ -71,6 +71,7 @@ export default function FacultyCourseTree({ faculties = [], faculities = [] }) {
                                             <Link
                                                 key={mon.ma_mon_hoc}
                                                 href={route("courses.show", mon.ma_hoc_phan)}
+                                                onClick={onItemClick}
                                                 className="block rounded-md p-1.5 text-xs text-text-secondary hover:text-brand-primary hover:bg-surface-page transition-colors"
                                             >
                                                 <div className="font-medium text-text-primary truncate">

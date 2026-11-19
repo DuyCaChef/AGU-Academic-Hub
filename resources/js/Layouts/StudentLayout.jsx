@@ -27,6 +27,7 @@ export default function StudentLayout({
             {/* Header dùng chung */}
             <StudentHeader
                 onMenuClick={handleMenuClick}
+                isMobileSidebarOpen={isMobileSidebarOpen}
             />
 
             {/* Sidebar và nội dung trang */}
