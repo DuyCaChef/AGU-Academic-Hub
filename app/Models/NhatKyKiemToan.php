@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use App\Modules\Administration\Domain\Enums\HanhDongKiemToan;
-use App\Modules\Administration\Domain\Enums\LoaiDoiTuongKiemToan;
+use App\Enums\HanhDongKiemToan;
+use App\Enums\LoaiDoiTuongKiemToan;
 use DomainException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

@@ -10,7 +10,7 @@ use App\Models\DanhSachSinhVienRaw;
 use App\Models\Khoa;
 use App\Models\NguoiDung;
 use App\Models\YeuCauXacThuc;
-use App\Modules\Identity\Infrastructure\Notifications\AlumniKycDecisionNotification;
+use App\Notifications\AlumniKycDecisionNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;

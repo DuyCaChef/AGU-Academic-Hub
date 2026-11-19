@@ -12,15 +12,15 @@ use App\Models\NguoiDung;
 use App\Models\TaiLieu;
 use App\Models\ThongBao;
 use App\Models\YeuCauTaiLieu;
-use App\Modules\Bounties\Application\Actions\CancelBountyRequestAction;
-use App\Modules\Bounties\Application\Actions\ConfirmBountyFulfillmentAction;
-use App\Modules\Bounties\Application\Actions\FulfillBountyRequestAction;
-use App\Modules\Moderation\Application\Actions\DecideDocumentReviewAction;
-use App\Modules\Notifications\Application\Contracts\NotificationDispatcherInterface;
-use App\Modules\Notifications\Application\DTOs\NotificationPayload;
-use App\Modules\Notifications\Domain\Enums\NotificationCategory;
-use App\Modules\Notifications\Domain\Enums\NotificationType;
-use App\Modules\Reviews\Application\Actions\ReportReviewViolationAction;
+use App\Services\Community\Actions\CancelBountyRequestAction;
+use App\Services\Community\Actions\ConfirmBountyFulfillmentAction;
+use App\Services\Community\Actions\FulfillBountyRequestAction;
+use App\Services\Moderation\Actions\DecideDocumentReviewAction;
+use App\Services\Community\Contracts\NotificationDispatcherInterface;
+use App\Services\Community\DTOs\NotificationPayload;
+use App\Enums\NotificationCategory;
+use App\Enums\NotificationType;
+use App\Services\Community\Actions\ReportReviewViolationAction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -439,8 +439,8 @@ class NotificationModuleIntegrationTest extends TestCase
         $this->assertTrue($result['success']);
 
         // Admin duyệt giải ngân điểm Bounty
-        /** @var \App\Modules\Bounties\Application\Actions\ApproveBountyPayoutAction $approveAction */
-        $approveAction = app(\App\Modules\Bounties\Application\Actions\ApproveBountyPayoutAction::class);
+        /** @var \App\Services\Community\Actions\ApproveBountyPayoutAction $approveAction */
+        $approveAction = app(\App\Services\Community\Actions\ApproveBountyPayoutAction::class);
         $approveResult = $approveAction->execute($this->admin, $yeuCau->ma_yeu_cau);
         $this->assertTrue($approveResult['success']);
 

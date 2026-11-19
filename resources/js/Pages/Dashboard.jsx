@@ -10,10 +10,8 @@ import {
     GraduationCap,
     Building2,
     Download,
-    BadgeCheck,
-    Compass,
-    Users,
     ShieldCheck,
+    Compass,
     Coins,
 } from "lucide-react";
 import StudentLayout from "@/Layouts/StudentLayout";
@@ -21,306 +19,270 @@ import StudentLayout from "@/Layouts/StudentLayout";
 const quickLinks = [
     {
         title: "Tìm môn học",
-        description:
-            "Tra cứu giáo trình, đề cương chi tiết và danh mục mã học phần.",
+        description: "Tra cứu giáo trình, đề cương chi tiết và danh mục mã học phần.",
         icon: Search,
         href: "courses.index",
-        iconColor: "text-blue-800",
     },
     {
         title: "Săn thưởng tài liệu",
-        description:
-            "Treo thưởng tìm tài liệu còn thiếu hoặc đóng góp tài liệu để nhận Bounty điểm ví.",
+        description: "Đăng tải tài liệu theo yêu cầu để nhận Bounty điểm ví từ cộng đồng.",
         icon: Coins,
         href: "document-requests.index",
-        iconColor: "text-amber-600",
         badge: "Bounty",
     },
     {
         title: "Duyệt danh sách khoa",
-        description:
-            "Xem tất cả các khoa, bộ môn và chương trình đào tạo tại AGU.",
+        description: "Xem các khoa, bộ môn và chương trình đào tạo hiện tại của AGU.",
         icon: Building2,
         href: "faculties.index",
-        iconColor: "text-teal-700",
     },
     {
-        title: "Đăng tài liệu",
-        description:
-            "Tải lên đề thi, slide bài giảng hoặc bài tập hỗ trợ các khóa sau.",
+        title: "Đăng tải tài liệu",
+        description: "Chia sẻ đề thi, slide bài giảng hoặc tài liệu tham khảo cho các khóa sau.",
         icon: Upload,
         href: "documents.create",
-        iconColor: "text-blue-800",
     },
 ];
+
 const gettingStarted = [
     {
-        number: "1",
-        title: "Tìm môn học của bạn",
-        description:
-            "Tra cứu theo mã môn hoặc tên khoa để truy cập đề cương học phần và danh mục giáo trình tương ứng.",
-        color: "bg-blue-100 text-blue-800",
+        step: "01",
+        title: "Tìm môn học",
+        description: "Tra cứu theo mã môn hoặc tên khoa để truy cập đề cương học phần và danh mục giáo trình tương ứng.",
     },
     {
-        number: "2",
-        title: "Khám phá tài liệu hữu ích",
-        description:
-            "Tải về đề thi mẫu, slide bài giảng tiêu chuẩn và ngân hàng bài tập thực hành được kiểm duyệt kỹ càng.",
-        color: "bg-teal-200 text-teal-800",
+        step: "02",
+        title: "Khám phá tài liệu",
+        description: "Tải về đề thi mẫu, slide bài giảng tiêu chuẩn và ngân hàng bài tập thực hành được kiểm duyệt kỹ càng.",
     },
     {
-        number: "3",
+        step: "03",
         title: "Chia sẻ cùng cộng đồng",
-        description:
-            "Đóng góp tài liệu học tập của bạn để tích lũy điểm uy tín và hỗ trợ các bạn đồng môn tại An Giang.",
-        color: "bg-orange-200 text-orange-800",
+        description: "Đóng góp tài liệu học tập để tích lũy điểm uy tín và nhận thưởng Bounty từ các bạn đồng môn.",
     },
 ];
-function SectionTitle({ children, action }) {
+
+function SectionHeader({ title, description, action }) {
     return (
-        <div className="mb-4 flex items-center justify-between gap-3">
-            <h2 className="text-xl font-bold tracking-tight text-slate-900">
-                {children}
-            </h2>
-            {action}
+        <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div>
+                <h2 className="text-base font-semibold text-slate-900 tracking-tight">
+                    {title}
+                </h2>
+                {description && (
+                    <p className="text-xs text-slate-500 mt-0.5">
+                        {description}
+                    </p>
+                )}
+            </div>
+            {action && <div>{action}</div>}
         </div>
     );
 }
-function StatCard({
-    label,
-    value,
-    description,
-    icon: Icon,
-    iconColor,
-    badge,
-    badgeColor,
-}) {
-    return (
-        <article className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:p-6">
-            <div className="flex items-center justify-between gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100">
-                    <Icon size={23} className={iconColor} />
-                </div>
 
-                {badge && (
-                    <span
-                        className={`rounded-full px-2.5 py-1 text-xs font-medium ${badgeColor}`}
-                    >
-                        {badge}
+function StatCard({ label, value, description, icon: Icon, tag }) {
+    return (
+        <article className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs transition-colors hover:border-slate-300">
+            <div className="flex items-center justify-between gap-3">
+                <span className="text-xs font-medium text-slate-500">
+                    {label}
+                </span>
+                {tag && (
+                    <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600 border border-slate-200/60">
+                        {tag}
                     </span>
                 )}
             </div>
 
-            <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-slate-600">
-                {label}
-            </p>
+            <div className="mt-3 flex items-baseline gap-2">
+                <span className="font-mono text-3xl font-semibold tracking-tight text-slate-900 tabular-nums">
+                    {value}
+                </span>
+            </div>
 
-            <p className="mt-3 text-3xl font-bold text-slate-900">
-                {value}
-            </p>
-
-            <p className="mt-3 flex items-start gap-2 text-xs leading-5 text-slate-500">
-                <Clock3 size={15} className="mt-0.5 shrink-0" />
-                {description}
-            </p>
+            <div className="mt-3 flex items-center gap-1.5 text-xs text-slate-500 border-t border-slate-100 pt-3">
+                <Icon size={14} className="shrink-0 text-slate-400" />
+                <span className="truncate">{description}</span>
+            </div>
         </article>
     );
 }
+
 export default function Dashboard() {
     const { auth, stats = {}, recentDocuments = [] } = usePage().props;
     const user = auth?.user;
 
-    const displayName =
-        user?.ho_ten || user?.name || "sinh viên";
-
+    const displayName = user?.ho_ten || user?.name || "sinh viên";
     const trustScore = stats.trustScore ?? user?.diem_uy_tin ?? "—";
+
+    const isAlumni = user?.vai_tro === "CUU_SINH_VIEN";
+    const roleTitle = isAlumni ? "Cựu sinh viên" : "Sinh viên chính quy";
+
     return (
         <StudentLayout title="Tổng quan">
-            <Head title="Tổng quan" />
+            <Head title="Tổng quan học tập" />
 
-            <div className="mx-auto max-w-[1600px] space-y-8 px-4 py-6 sm:px-6 lg:px-6">
-                {/* 1. Welcome banner */}
-                <section className="relative isolate overflow-hidden rounded-2xl bg-[#005BAA] p-6 text-white shadow-md sm:p-8">
-                    {/* Decorative background */}
-                    <div className="pointer-events-none absolute -right-8 top-1/2 -z-10 h-56 w-56 -translate-y-1/2 rotate-45 border-[3px] border-white/10 sm:right-19 sm:h-48 sm:w-48">
-                        <div className="absolute inset-5 border-2 border-white/10" />
-                    </div>
+            <div className="space-y-8">
+                {/* 1. Hero banner: Asymmetric split with Academic Passport */}
+                <section className="relative overflow-hidden rounded-2xl bg-[#005BAA] text-white shadow-xs">
+                    {/* Subtle academic architectural background grid */}
+                    <div className="pointer-events-none absolute inset-0 opacity-10 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px]" />
 
-                    <div className="grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_280px]">
-                        <div>
-                            <div className="inline-flex items-center gap-2 rounded-full bg-blue-400/30 px-3 py-1 text-[11px] font-bold tracking-widest text-blue-100">
-                                <span className="h-1.5 w-1.5 rounded-full bg-teal-300" />
-                                AGU ACADEMIC HUB
+                    <div className="relative grid items-center gap-6 p-6 sm:p-8 lg:grid-cols-[1fr_300px]">
+                        {/* Cột trái: Tiêu đề & Hành động */}
+                        <div className="space-y-4">
+                            <div className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-blue-100 backdrop-blur-xs border border-white/10">
+                                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                                <span>Cổng học tập & Tra cứu tài liệu</span>
                             </div>
 
-                            <h1 className="mt-3 text-2xl font-bold tracking-tight sm:text-3xl">
-                                Xin chào, {displayName}!
-                            </h1>
+                            <div className="space-y-1">
+                                <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl text-white">
+                                    Chào mừng trở lại, {displayName}
+                                </h1>
+                                <p className="text-sm leading-relaxed text-blue-100 max-w-xl">
+                                    Kho lưu trữ số chính thức của Đại học An Giang. Tra cứu đề cương, tải tài liệu đã kiểm duyệt và cùng cộng đồng học thuật chia sẻ tri thức.
+                                </p>
+                            </div>
 
-                            <p className="mt-3 max-w-2xl text-sm leading-6 text-blue-100 sm:text-base">
-                                {user?.vai_tro === "CUU_SINH_VIEN"
-                                    ? "Khám phá tài liệu học tập, tra cứu môn học và đồng hành chia sẻ kiến thức cùng cộng đồng sinh viên Trường Đại học An Giang."
-                                    : "Khám phá tài liệu học tập, tìm kiếm môn học và chia sẻ kiến thức cùng cộng đồng sinh viên Trường Đại học An Giang."}
-                            </p>
-
-                            <div className="mt-6 flex flex-wrap gap-3">
+                            <div className="flex flex-wrap items-center gap-3 pt-2">
                                 <Link
                                     href={route("courses.index")}
-                                    className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-[#005BAA] transition hover:bg-blue-50"
+                                    className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2.5 text-xs font-semibold text-[#005BAA] shadow-xs transition-colors hover:bg-blue-50"
                                 >
-                                    <BookOpen size={17} />
-                                    Khám phá môn học
-                                </Link>
-
-                                <Link
-                                    href={route("document-requests.index")}
-                                    className="inline-flex items-center gap-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 px-4 py-3 text-sm font-bold shadow-xs transition active:scale-95"
-                                >
-                                    <Coins size={17} />
-                                    Săn thưởng tài liệu
+                                    <BookOpen size={16} />
+                                    <span>Khám phá môn học</span>
                                 </Link>
 
                                 <Link
                                     href={route("documents.create")}
-                                    className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-4 py-3 text-sm font-semibold text-white ring-1 ring-inset ring-white/10 transition hover:bg-white/20"
+                                    className="inline-flex items-center gap-2 rounded-lg bg-white/10 px-4 py-2.5 text-xs font-semibold text-white border border-white/20 transition-colors hover:bg-white/20"
                                 >
-                                    <Upload size={17} />
-                                    Đăng tài liệu
+                                    <Upload size={16} />
+                                    <span>Đăng tải tài liệu</span>
                                 </Link>
                             </div>
                         </div>
 
-                        {/* Profile highlight */}
-                        <div className="hidden rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur-sm sm:block">
-                            <div className="flex items-center gap-3">
-                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-teal-300">
-                                    <ShieldCheck
-                                        size={27}
-                                        className="text-teal-800"
-                                    />
+                        {/* Cột phải: Thẻ Hồ sơ Học thuật (Academic Passport) */}
+                        <div className="rounded-xl border border-white/15 bg-white/10 p-5 backdrop-blur-xs text-white space-y-4">
+                            <div className="flex items-start justify-between gap-2 border-b border-white/10 pb-3">
+                                <div>
+                                    <p className="text-[11px] font-medium text-blue-200">
+                                        HỒ SƠ HỌC THUẬT
+                                    </p>
+                                    <p className="text-sm font-semibold tracking-tight text-white mt-0.5">
+                                        {user?.mssv || user?.ma_sinh_vien || "DTH225588"}
+                                    </p>
                                 </div>
+                                <span className="rounded-md bg-white/15 px-2 py-0.5 text-[10px] font-medium text-blue-100 border border-white/10">
+                                    {roleTitle}
+                                </span>
+                            </div>
 
-                                <div className="min-w-0">
-                                    <p className="text-[11px] font-medium uppercase tracking-wide text-blue-100">
-                                        {user?.vai_tro === "CUU_SINH_VIEN"
-                                            ? "Hồ sơ Cựu sinh viên"
-                                            : "Hồ sơ sinh viên"}
-                                    </p>
-                                    <p className="mt-1 font-bold leading-5 text-white">
-                                        {user?.mssv ||
-                                            user?.ma_sinh_vien ||
-                                            (user?.vai_tro === "CUU_SINH_VIEN"
-                                                ? "Cựu sinh viên AGU"
-                                                : "Sinh viên AGU")}
-                                    </p>
-                                    <p className="mt-1 text-xs text-blue-100">
-                                        Trường Đại học An Giang
-                                    </p>
+                            <div className="space-y-1.5 text-xs text-blue-100">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-blue-200">Đơn vị:</span>
+                                    <span className="font-medium text-white truncate max-w-[170px] text-right">
+                                        {user?.khoa?.ten_khoa || "Trường Đại học An Giang"}
+                                    </span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <span className="text-blue-200">Độ tin cậy:</span>
+                                    <span className="font-medium text-white flex items-center gap-1">
+                                        <ShieldCheck size={13} className="text-emerald-300" />
+                                        {trustScore} AGU Trust
+                                    </span>
                                 </div>
                             </div>
 
                             {/* Ví điểm Bounty shortcut */}
-                            {user?.vi_diem && (
-                                <Link
-                                    href={route("wallet.index")}
-                                    className="mt-3 flex items-center justify-between rounded-xl bg-white/15 hover:bg-white/25 px-3 py-2 transition text-xs font-semibold"
-                                    title="Xem chi tiết số dư và lịch sử biến động ví điểm"
-                                >
-                                    <span className="flex items-center gap-1.5 text-blue-100">
-                                        <Coins size={14} className="text-amber-300" />
-                                        Ví khả dụng:
-                                    </span>
-                                    <span className="font-bold text-amber-300 text-xs">
-                                        {user.vi_diem.diem_kha_dung || 0} pts &rarr;
-                                    </span>
-                                </Link>
-                            )}
+                            <Link
+                                href={typeof route === "function" && route().has("wallet.index") ? route("wallet.index") : "/vi-diem"}
+                                className="flex items-center justify-between rounded-lg bg-black/20 hover:bg-black/30 px-3 py-2 text-xs font-medium border border-white/10 transition-colors"
+                                title="Xem chi tiết ví điểm thưởng"
+                            >
+                                <span className="flex items-center gap-1.5 text-blue-100">
+                                    <Coins size={14} className="text-amber-300" />
+                                    Ví khả dụng:
+                                </span>
+                                <span className="font-mono font-semibold text-amber-300 text-xs">
+                                    {user?.vi_diem?.diem_kha_dung || 0} pts &rarr;
+                                </span>
+                            </Link>
                         </div>
                     </div>
                 </section>
 
-                {/* 2. Statistics */}
+                {/* 2. Thống kê học thuật (3 thẻ chỉ số) */}
                 <section>
-                    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         <StatCard
-                            label="Môn học"
+                            label="Môn học trong hệ thống"
                             value={stats.totalCourses ?? 0}
-                            description="Tổng số môn học hiện có trong hệ thống"
+                            description="Chương trình đào tạo tín chỉ AGU"
                             icon={BookOpen}
-                            iconColor="text-blue-800"
-                            badge="Kỳ 1 • 2024"
-                            badgeColor="bg-indigo-100 text-slate-500"
+                            tag="Học kỳ 1 • 2024"
                         />
 
                         <StatCard
                             label="Tài liệu đã đóng góp"
                             value={stats.myDocuments ?? 0}
-                            description="Tổng số tài liệu bạn đã đăng tải"
+                            description="Tài liệu bạn đã đăng tải và duyệt"
                             icon={FileText}
-                            iconColor="text-teal-700"
-                            badge="Kho lưu trữ"
-                            badgeColor="bg-teal-50 text-teal-700"
+                            tag="Kho lưu trữ"
                         />
 
                         <StatCard
-                            label="Điểm uy tín"
+                            label="Điểm uy tín tích lũy"
                             value={trustScore}
-                            description="Hệ thống ghi nhận đóng góp học thuật"
+                            description="Căn cứ từ đánh giá cộng đồng"
                             icon={Award}
-                            iconColor="text-amber-800"
-                            badge="AGU Trust"
-                            badgeColor="bg-amber-50 text-amber-800"
+                            tag="AGU Trust"
                         />
                     </div>
                 </section>
 
-                {/* 3. Quick access */}
+                {/* 3. Lối tắt thao tác (Quick Access) */}
                 <section>
-                    <SectionTitle>
-                        Truy cập nhanh
-                    </SectionTitle>
+                    <SectionHeader
+                        title="Truy cập nhanh"
+                        description="Lối tắt đến các chức năng học thuật chính trên nền tảng"
+                    />
 
-                    <p className="-mt-2 mb-4 text-sm text-slate-600">
-                        Lối tắt đến các tính năng học thuật thường dùng nhất
-                        trên nền tảng.
-                    </p>
-
-                    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                         {quickLinks.map((item) => {
                             const Icon = item.icon;
 
                             return (
                                 <Link
                                     key={item.title}
-                                    href={route(item.href)}
-                                    className="group flex min-h-28 items-start gap-4 rounded-xl border border-slate-100 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md"
+                                    href={typeof route === "function" && route().has(item.href) ? route(item.href) : "#"}
+                                    className="group flex flex-col justify-between rounded-xl border border-slate-200/80 bg-white p-4 shadow-xs transition-colors hover:border-slate-300 hover:shadow-xs min-h-[120px]"
                                 >
-                                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-100">
-                                        <Icon
-                                            size={23}
-                                            className={item.iconColor}
-                                        />
-                                    </div>
-
-                                    <div className="min-w-0 flex-1">
-                                        <div className="flex items-center justify-between gap-2">
-                                            <div className="flex items-center gap-1.5 flex-wrap">
-                                                <h3 className="font-bold text-slate-900">
-                                                    {item.title}
-                                                </h3>
-                                                {item.badge && (
-                                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
-                                                        {item.badge}
-                                                    </span>
-                                                )}
-                                            </div>
-                                            <ArrowRight
-                                                size={17}
-                                                className="shrink-0 text-slate-400 transition group-hover:translate-x-1 group-hover:text-blue-700"
-                                            />
+                                    <div className="flex items-start justify-between gap-2">
+                                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-700 transition-colors group-hover:bg-blue-50 group-hover:text-[#005BAA]">
+                                            <Icon size={18} />
                                         </div>
 
-                                        <p className="mt-1 text-xs leading-5 text-slate-600 sm:text-sm">
+                                        {item.badge && (
+                                            <span className="rounded-md bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-800 border border-amber-200">
+                                                {item.badge}
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    <div className="mt-3">
+                                        <div className="flex items-center justify-between gap-1">
+                                            <h3 className="text-xs font-semibold text-slate-900 group-hover:text-[#005BAA] transition-colors">
+                                                {item.title}
+                                            </h3>
+                                            <ArrowRight
+                                                size={14}
+                                                className="text-slate-400 transition-transform group-hover:translate-x-0.5 group-hover:text-[#005BAA]"
+                                            />
+                                        </div>
+                                        <p className="mt-1 text-[11px] leading-relaxed text-slate-500 line-clamp-2">
                                             {item.description}
                                         </p>
                                     </div>
@@ -330,72 +292,56 @@ export default function Dashboard() {
                     </div>
                 </section>
 
-                {/* 4. Recent learning materials */}
+                {/* 4. Tài liệu học tập mới cập nhật */}
                 <section>
-                    <SectionTitle
+                    <SectionHeader
+                        title="Tài liệu học tập mới"
+                        description="Các tài liệu vừa được ban kiểm duyệt thông qua"
                         action={
                             <Link
-                                href={route("documents.index")}
-                                className="inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-blue-800 hover:text-blue-600 hover:underline"
+                                href={typeof route === "function" && route().has("documents.index") ? route("documents.index") : "/tai-lieu"}
+                                className="inline-flex items-center gap-1 text-xs font-semibold text-[#005BAA] hover:underline"
                             >
-                                Xem tất cả tài liệu
-                                <ArrowRight size={16} />
+                                <span>Xem toàn bộ tài liệu</span>
+                                <ArrowRight size={14} />
                             </Link>
                         }
-                    >
-                        <span className="flex flex-wrap items-center gap-2">
-                            Tài liệu học tập mới
-                        </span>
-                    </SectionTitle>
+                    />
 
-                    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         {recentDocuments && recentDocuments.length > 0 ? (
                             recentDocuments.map((doc) => {
-                                const fileType = (
-                                    doc.dinh_dang_tep || "FILE"
-                                ).toUpperCase();
-                                const typeColor =
-                                    fileType === "PDF"
-                                        ? "bg-red-100 text-red-700"
-                                        : ["PPT", "PPTX"].includes(fileType)
-                                            ? "bg-orange-100 text-orange-800"
-                                            : ["DOC", "DOCX"].includes(fileType)
-                                                ? "bg-blue-100 text-blue-700"
-                                                : "bg-indigo-100 text-indigo-700";
-
+                                const fileType = (doc.dinh_dang_tep || "FILE").toUpperCase();
                                 const courseLabel = [
                                     doc.mon_hoc?.ma_hoc_phan,
                                     doc.mon_hoc?.ten_mon_hoc,
                                 ]
                                     .filter(Boolean)
-                                    .join(" • ") || "Chưa có thông tin môn học";
+                                    .join(" • ") || "Môn học chung";
 
                                 const createdDate = doc.created_at
                                     ? new Date(doc.created_at).toLocaleDateString("vi-VN")
-                                    : "Chưa có ngày đăng";
+                                    : "Vừa xong";
 
                                 return (
                                     <article
                                         key={doc.ma_tai_lieu}
-                                        className="group relative flex flex-col justify-between rounded-xl border border-slate-100 bg-white p-5 shadow-xs transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md"
+                                        className="group flex flex-col justify-between rounded-xl border border-slate-200/80 bg-white p-4 shadow-xs transition-colors hover:border-slate-300"
                                     >
-                                        <div>
-                                            <div className="flex items-center justify-between gap-3">
-                                                <span
-                                                    className={`rounded px-2.5 py-1 text-[11px] font-bold ${typeColor}`}
-                                                >
+                                        <div className="space-y-3">
+                                            <div className="flex items-center justify-between gap-2">
+                                                <span className="font-mono text-[10px] font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded border border-slate-200/80">
                                                     {fileType}
                                                 </span>
 
-                                                <span className="max-w-[70%] truncate rounded bg-blue-50 px-2.5 py-1 text-[11px] font-medium text-blue-800 border border-blue-100">
+                                                <span className="truncate max-w-[70%] font-mono text-[10px] font-medium text-[#005BAA] bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
                                                     {courseLabel}
                                                 </span>
                                             </div>
 
-                                            <h3 className="mt-4 min-h-[3.5rem] text-base font-bold leading-6 text-slate-900 group-hover:text-[#005baa] transition-colors line-clamp-2">
+                                            <h3 className="text-xs font-semibold leading-relaxed text-slate-900 group-hover:text-[#005BAA] transition-colors line-clamp-2 min-h-[2.5rem]">
                                                 <Link
-                                                    href={route("documents.show", doc.ma_tai_lieu)}
-                                                    className="focus:outline-none"
+                                                    href={typeof route === "function" && route().has("documents.show") ? route("documents.show", doc.ma_tai_lieu) : `/tai-lieu/${doc.ma_tai_lieu}`}
                                                     title={doc.tieu_de}
                                                 >
                                                     {doc.tieu_de}
@@ -403,102 +349,90 @@ export default function Dashboard() {
                                             </h3>
                                         </div>
 
-                                        <div className="mt-4 flex items-center justify-between gap-2 rounded-xl bg-slate-50 p-3 border border-slate-100">
+                                        <div className="mt-4 flex items-center justify-between gap-2 border-t border-slate-100 pt-3 text-xs text-slate-500">
                                             <div className="min-w-0">
-                                                <p className="text-xs text-slate-500">
-                                                    {createdDate}
-                                                </p>
-
-                                                <p className="mt-1 flex items-center gap-1 text-[11px] font-medium text-teal-700">
-                                                    <ShieldCheck size={13} />
-                                                    Đã kiểm duyệt
-                                                </p>
-                                                <p className="mt-0.5 text-xs text-slate-500">
-                                                    Lượt tải: {doc.luot_tai ?? 0}
+                                                <div className="flex items-center gap-1.5 text-[11px] text-emerald-700">
+                                                    <ShieldCheck size={13} className="shrink-0" />
+                                                    <span>Đã kiểm duyệt</span>
+                                                </div>
+                                                <p className="mt-0.5 text-[10px] text-slate-400">
+                                                    {createdDate} • {doc.luot_tai ?? 0} lượt tải
                                                 </p>
                                             </div>
 
                                             <a
-                                                href={route("documents.download", doc.ma_tai_lieu)}
-                                                className="relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-[#005baa] hover:bg-blue-50 border border-slate-200 shadow-xs transition-colors"
+                                                href={typeof route === "function" && route().has("documents.download") ? route("documents.download", doc.ma_tai_lieu) : `/tai-lieu/${doc.ma_tai_lieu}/tai-ve`}
+                                                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-700 hover:bg-[#005BAA] hover:text-white transition-colors"
                                                 title="Tải tệp về máy"
                                                 onClick={(e) => e.stopPropagation()}
                                             >
-                                                <Download size={16} />
+                                                <Download size={15} />
                                             </a>
                                         </div>
                                     </article>
                                 );
                             })
                         ) : (
-                            <div className="col-span-full rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center">
-                                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-50 text-slate-400 mb-3">
-                                    <FileText size={30} />
+                            <div className="col-span-full rounded-xl border border-dashed border-slate-200 bg-white p-8 text-center">
+                                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-slate-400 mb-3">
+                                    <FileText size={24} />
                                 </div>
-                                <h3 className="text-base font-bold text-slate-800">
-                                    Chưa có tài liệu học tập mới
+                                <h3 className="text-xs font-semibold text-slate-900">
+                                    Chưa có tài liệu mới
                                 </h3>
-                                <p className="mt-1 text-sm text-slate-500 max-w-md mx-auto">
-                                    Các tài liệu học tập sau khi được kiểm duyệt sẽ hiển thị tại đây. Bạn có thể là người đầu tiên chia sẻ tài liệu hữu ích!
+                                <p className="mt-1 text-xs text-slate-500 max-w-sm mx-auto">
+                                    Tài liệu sau khi được duyệt sẽ hiển thị tại đây. Bạn có thể là người đầu tiên chia sẻ tài liệu học tập!
                                 </p>
-                                <div className="mt-5">
+                                <div className="mt-4">
                                     <Link
-                                        href={route("documents.create")}
-                                        className="inline-flex items-center gap-2 rounded-xl bg-[#005baa] px-4 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-blue-700 transition-colors"
+                                        href={typeof route === "function" && route().has("documents.create") ? route("documents.create") : "/tai-lieu/dang-tai"}
+                                        className="inline-flex items-center gap-1.5 rounded-lg bg-[#005BAA] px-3.5 py-2 text-xs font-medium text-white transition-colors hover:bg-blue-700"
                                     >
                                         <Upload size={14} />
-                                        Đăng tài liệu ngay
+                                        <span>Đăng tài liệu ngay</span>
                                     </Link>
                                 </div>
                             </div>
                         )}
-
                     </div>
                 </section>
 
-                {/* 5. Getting started */}
-                <section className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm sm:p-6">
-                    <div className="mb-5 flex items-center gap-3">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-50">
-                            <Compass
-                                size={21}
-                                className="text-blue-800"
-                            />
+                {/* 5. Quy trình 3 bước (Getting Started - Academic Onboarding) */}
+                <section className="rounded-xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs">
+                    <div className="mb-4 flex items-center gap-2.5">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
+                            <Compass size={18} />
                         </div>
-
-                        <h2 className="text-lg font-bold text-slate-900">
-                            Bắt đầu với AGU Academic Hub
-                        </h2>
+                        <div>
+                            <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-900">
+                                Bắt đầu với AGU Academic Hub
+                            </h2>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                                Ba bước đơn giản để khai thác tối đa cổng tài nguyên học thuật
+                            </p>
+                        </div>
                     </div>
 
-                    <div className="grid gap-4 lg:grid-cols-3">
+                    <div className="grid gap-4 sm:grid-cols-3 pt-2">
                         {gettingStarted.map((item) => (
                             <div
-                                key={item.number}
-                                className="rounded-xl bg-indigo-50/90 p-4 sm:p-5"
+                                key={item.step}
+                                className="rounded-lg border border-slate-100 bg-slate-50/70 p-4 transition-colors hover:bg-slate-50"
                             >
-                                <div className="flex items-start gap-3">
-                                    <span
-                                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${item.color}`}
-                                    >
-                                        {item.number}
-                                    </span>
-
-                                    <div>
-                                        <h3 className="font-bold leading-5 text-slate-900">
-                                            {item.title}
-                                        </h3>
-
-                                        <p className="mt-3 text-xs leading-5 text-slate-600 sm:text-sm">
-                                            {item.description}
-                                        </p>
-                                    </div>
-                                </div>
+                                <span className="font-mono text-xs font-semibold text-slate-400">
+                                    {item.step}
+                                </span>
+                                <h3 className="mt-1 text-xs font-semibold text-slate-900">
+                                    {item.title}
+                                </h3>
+                                <p className="mt-1.5 text-xs leading-relaxed text-slate-500">
+                                    {item.description}
+                                </p>
                             </div>
                         ))}
                     </div>
                 </section>
-            </div >
-        </StudentLayout >
+            </div>
+        </StudentLayout>
     );
 }

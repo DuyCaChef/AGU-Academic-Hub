@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\MonHoc;
 use App\Models\TaiLieu;
-use App\Modules\AcademicCatalog\Application\Queries\GetPublicFacultiesQuery;
+use App\Services\Community\Queries\GetPublicFacultiesQuery;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 

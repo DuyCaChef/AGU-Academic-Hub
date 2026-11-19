@@ -571,7 +571,7 @@ class Phase3b3CourseWishlistTest extends TestCase
             'ma_khoa' => $this->faculty->ma_khoa,
             'vai_tro' => 'QUAN_TRI_VIEN',
         ]);
-        $approveAction = app(\App\Modules\Bounties\Application\Actions\ApproveBountyPayoutAction::class);
+        $approveAction = app(\App\Services\Community\Actions\ApproveBountyPayoutAction::class);
         $approveResult = $approveAction->execute($admin, $yeuCau->ma_yeu_cau);
         $this->assertTrue($approveResult['success']);
 

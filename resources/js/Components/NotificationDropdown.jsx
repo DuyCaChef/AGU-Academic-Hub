@@ -144,6 +144,22 @@ export default function NotificationDropdown({ variant = 'student' }) {
         return <Info className="w-5 h-5 text-blue-500 shrink-0" />;
     };
 
+    const formatViTime = (timeStr) => {
+        if (!timeStr) return "Vừa xong";
+        return timeStr
+            .replace(/(\d+)\s+seconds?\s+ago/i, "$1 giây trước")
+            .replace(/(\d+)\s+minutes?\s+ago/i, "$1 phút trước")
+            .replace(/(\d+)\s+hours?\s+ago/i, "$1 giờ trước")
+            .replace(/(\d+)\s+days?\s+ago/i, "$1 ngày trước")
+            .replace(/(\d+)\s+weeks?\s+ago/i, "$1 tuần trước")
+            .replace(/(\d+)\s+months?\s+ago/i, "$1 tháng trước")
+            .replace(/(\d+)\s+years?\s+ago/i, "$1 năm trước")
+            .replace(/just now/i, "Vừa xong")
+            .replace(/a minute ago/i, "1 phút trước")
+            .replace(/an hour ago/i, "1 giờ trước")
+            .replace(/yesterday/i, "Hôm qua");
+    };
+
     const isStudent = variant === 'student';
 
     return (
@@ -231,7 +247,7 @@ export default function NotificationDropdown({ variant = 'student' }) {
                                             {item.message}
                                         </p>
                                         <span className="inline-block mt-1.5 text-[10px] text-slate-400">
-                                            {item.created_at_human || 'Vừa xong'}
+                                            {formatViTime(item.created_at_human)}
                                         </span>
                                     </div>
                                 </div>

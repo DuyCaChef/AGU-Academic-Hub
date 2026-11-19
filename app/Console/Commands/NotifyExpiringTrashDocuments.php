@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Modules\Documents\Application\Actions\CheckExpiringTrashDocumentsAction;
+use App\Services\Documents\Actions\CheckExpiringTrashDocumentsAction;
 use Illuminate\Console\Command;
 
 class NotifyExpiringTrashDocuments extends Command

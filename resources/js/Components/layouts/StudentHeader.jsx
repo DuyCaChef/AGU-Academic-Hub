@@ -18,21 +18,35 @@ import {
 
 
 export default function StudentHeader({
+    onMenuClick,
+    isMobileSidebarOpen: externalIsMobileSidebarOpen,
 }) {
 
 
     // ham xử lý hiển thị role
     const roleLabels = {
         SINH_VIEN: "Sinh viên",
+        CUU_SINH_VIEN: "Cựu sinh viên",
         GIANG_VIEN: "Giảng viên",
+        KIEM_DUYET_VIEN: "Kiểm duyệt viên",
         QUAN_TRI: "Quản trị viên",
+        QUAN_TRI_VIEN: "Quản trị viên",
     };
 
     const getRoleLabel = (role) => {
         return roleLabels[role] ?? role;
     };
 
-    const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+    const [localIsMobileSidebarOpen, setLocalIsMobileSidebarOpen] = useState(false);
+    const isSidebarOpen = externalIsMobileSidebarOpen !== undefined ? externalIsMobileSidebarOpen : localIsMobileSidebarOpen;
+
+    const handleToggleMobileSidebar = () => {
+        if (onMenuClick) {
+            onMenuClick();
+        } else {
+            setLocalIsMobileSidebarOpen((prev) => !prev);
+        }
+    };
     const [searchQuery, setSearchQuery] = useState('');
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
     const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -138,24 +152,24 @@ export default function StudentHeader({
         <div className="bg-surface-page text-text-primary font-sans flex flex-col">
             {/* hearder cố định */}
             <header className={`
-            fixed top-0 left-0 right-0 z-40 h-16 bg-[#005BAA] 
-            shadow-sm px-4 lg:px-6 flex items-center justify-between gap-4
+            fixed top-0 left-0 right-0 z-100 h-16 bg-[#005BAA] 
+            shadow-sm px-2 sm:px-4 lg:px-6 flex items-center justify-between gap-1.5 sm:gap-3 lg:gap-4
             transition-transform duration-300 ease-in-out
             ${isHeaderVisible ? 'translate-y-0' : '-translate-y-full'}
             `}>
                 {/* Brand Logo & Mobile Menu Button */}
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
                     <button
                         type="button"
-                        onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
-                        className="lg:hidden p-2 text-text-secondary hover:text-brand-primary rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary"
+                        onClick={handleToggleMobileSidebar}
+                        className="lg:hidden p-1.5 sm:p-2 text-white hover:text-[#FFC72C] hover:bg-white/10 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-white/50"
                         aria-label="Toggle Navigation Drawer"
                     >
-                        {isMobileSidebarOpen ? <X size={22} /> : <Menu size={22} />}
+                        {isSidebarOpen ? <X size={20} className="sm:w-[22px] sm:h-[22px]" /> : <Menu size={20} className="sm:w-[22px] sm:h-[22px]" />}
                     </button>
 
-                    <Link href={route('courses.index')} className="flex items-center gap-2.5">
-                        <div className="w-10 h-10 flex items-center justify-center shrink-0">
+                    <Link href={route('courses.index')} className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center shrink-0">
                             <img
                                 src="/storage/imgs/logo-agu.webp"
                                 alt="Logo Trường Đại học An Giang"
@@ -169,36 +183,36 @@ export default function StudentHeader({
                     </Link>
                 </div>
 
-                {/* Global Search Bar (Mã học phần / Tên môn học) */}
-                <form onSubmit={handleGlobalSearch} className=" flex-1 text-gray-800 max-w-3xl hidden md:block">
-                    <div className="relative">
-                        <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+                {/* Global Search Bar (Mã học phần / Tên môn học) - Giữ nguyên trên mobile và thu nhỏ gọn gàng */}
+                <form onSubmit={handleGlobalSearch} className="flex-1 min-w-0 max-w-3xl mx-1 sm:mx-2 text-gray-800">
+                    <div className="relative flex items-center">
+                        <Search className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 text-gray-400 w-3.5 h-3.5 sm:w-4 sm:h-4 pointer-events-none shrink-0" />
                         <input
                             type="text"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            placeholder="Tìm theo mã HP (COS101) hoặc tên môn học..."
-                            className="w-full pl-9 pr-4 py-2 text-sm bg-surface-page border border-gray-300 rounded-full focus:outline-none focus:border-[#00ff00] focus:ring-1 focus:ring-[#00ff00] transition-all placeholder:text-gray-500"
+                            placeholder="Tìm môn học, mã HP..."
+                            className="w-full pl-7 sm:pl-9 pr-2 sm:pr-4 py-1 sm:py-2 text-xs sm:text-sm bg-surface-page border border-gray-300 rounded-full focus:outline-none focus:border-[#FFC72C] focus:ring-1 focus:ring-[#FFC72C] transition-all placeholder:text-gray-400"
                         />
                     </div>
                 </form>
 
                 {/* thông tin bên phải header */}
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1.5 sm:gap-2.5 lg:gap-3 shrink-0">
                     {/* nút Săn thưởng tài liệu */}
                     <Link
                         href={typeof route === 'function' && route().has('document-requests.index') ? route('document-requests.index') : '/yeu-cau-tai-lieu'}
-                        className="flex items-center gap-1.5 bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs sm:text-sm px-3.5 py-2 rounded-full shadow-xs active:scale-95 transition-all"
+                        className="flex items-center gap-1 sm:gap-1.5 bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs sm:text-sm px-2 py-1.5 sm:px-3.5 sm:py-2 rounded-full shadow-xs active:scale-95 transition-all shrink-0"
                         title="Thị trường yêu cầu & săn thưởng Bounty"
                     >
-                        <Coins size={15} />
+                        <Coins size={14} className="sm:w-[15px] sm:h-[15px]" />
                         <span className="hidden sm:inline">Săn thưởng</span>
                     </Link>
 
                     {/* Điểm Uy Tín (Reputation Badge) */}
                     {user && (
                         <div
-                            className="hidden lg:flex items-center gap-1.5 bg-green-700 text-white px-2.5 py-1 rounded-full text-xs font-semibold"
+                            className="hidden lg:flex items-center gap-1.5 bg-green-700 text-white px-2.5 py-1 rounded-full text-xs font-semibold shrink-0"
                             title="Điểm uy tín tích lũy từ đóng góp học thuật"
                         >
                             <Shield size={14} />
@@ -219,8 +233,8 @@ export default function StudentHeader({
                                 aria-expanded={isUserMenuOpen}
                                 aria-haspopup="menu"
                                 aria-label="Mở profile"
-                                className="flex items-center gap-2 rounded-full bg-blue-800 p-1 hover:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-white/50">
-                                <div className="flex w-8 h-8 items-center justify-center rounded-full border border-brand-primary/20 bg-blue-600 text-sm font-bold text-white">
+                                className="flex items-center gap-1 sm:gap-2 rounded-full bg-blue-800 p-0.5 sm:p-1 hover:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-white/50">
+                                <div className="flex w-7 h-7 sm:w-8 sm:h-8 items-center justify-center rounded-full border border-brand-primary/20 bg-blue-600 text-xs sm:text-sm font-bold text-white">
                                     {user.ho_ten ? user.ho_ten.charAt(0).toUpperCase() : 'U'}
                                 </div>
                                 <ChevronDown size={14} className={`mr-1 hidden text-white transition-transform duration-200 sm:block ${isUserMenuOpen ? "rotate-180" : ""}`} />
@@ -239,7 +253,7 @@ export default function StudentHeader({
                                         <p className="font-semibold text-sm truncate">{user.ho_ten || "Người dùng"} </p>
                                         <p className="text-xs text-text-secondary truncate">{user.email || "Chưa có email"}</p>
                                         {user.vai_tro && (
-                                            <span className="inline-block mt-1 text-[10px] font-mono px-2 py-0.5 bg-brand-primary/10 text-brand-primary rounded-md uppercase font-semibold">
+                                            <span className="inline-block mt-1 text-[11px] px-2 py-0.5 bg-blue-50 text-[#005BAA] rounded-md font-medium border border-blue-100">
                                                 {getRoleLabel(user.vai_tro)}
                                             </span>
                                         )}
@@ -250,8 +264,8 @@ export default function StudentHeader({
                                         type="button"
                                         role='menuitem'
                                         onClick={() => {
-                                             setIsUserMenuOpen(false);
-                                             setIsProfileModalOpen(true);
+                                            setIsUserMenuOpen(false);
+                                            setIsProfileModalOpen(true);
                                         }}
                                         className='flex w-full items-center gap-3 px-4 py-2.5
                                         text-left text-sm text-text-secondary 

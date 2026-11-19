@@ -219,7 +219,7 @@ class CommunityComprehensiveTest extends TestCase
         ]);
 
         // Đóng băng điểm của Student A trong ví
-        app(\App\Modules\Bounties\Domain\Services\ReputationEvaluator::class)
+        app(\App\Services\Community\ReputationEvaluator::class)
             ->dongBangDiemBounty($this->studentA, 50);
 
         // Tạo tài liệu mẫu của Student B
@@ -278,7 +278,7 @@ class CommunityComprehensiveTest extends TestCase
         $this->assertEquals(TrangThaiYeuCauTaiLieu::CHO_GIAI_NGAN, $yeuCau->trang_thai);
 
         // Admin duyệt giải ngân điểm Bounty
-        $approveAction = app(\App\Modules\Bounties\Application\Actions\ApproveBountyPayoutAction::class);
+        $approveAction = app(\App\Services\Community\Actions\ApproveBountyPayoutAction::class);
         $approveResult = $approveAction->execute($this->admin, $yeuCau->ma_yeu_cau);
         $this->assertTrue($approveResult['success']);
 

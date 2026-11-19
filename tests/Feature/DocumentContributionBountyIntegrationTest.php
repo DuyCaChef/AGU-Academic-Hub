@@ -13,7 +13,7 @@ use App\Models\NguoiDung;
 use App\Models\TaiLieu;
 use App\Models\ViDiem;
 use App\Models\YeuCauTaiLieu;
-use App\Modules\Bounties\Infrastructure\Persistence\WishlistBountyRepository;
+use App\Services\Community\Repositories\WishlistBountyRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;

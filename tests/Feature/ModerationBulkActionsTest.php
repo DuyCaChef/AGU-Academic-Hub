@@ -16,7 +16,7 @@ use App\Models\NguoiDung;
 use App\Models\NhatKyKiemToan;
 use App\Models\TaiLieu;
 use App\Models\YeuCauXacThuc;
-use App\Modules\Administration\Domain\Enums\HanhDongKiemToan;
+use App\Enums\HanhDongKiemToan;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
