@@ -26,8 +26,11 @@ export default function StudentHeader({
     // ham xử lý hiển thị role
     const roleLabels = {
         SINH_VIEN: "Sinh viên",
+        CUU_SINH_VIEN: "Cựu sinh viên",
         GIANG_VIEN: "Giảng viên",
+        KIEM_DUYET_VIEN: "Kiểm duyệt viên",
         QUAN_TRI: "Quản trị viên",
+        QUAN_TRI_VIEN: "Quản trị viên",
     };
 
     const getRoleLabel = (role) => {
@@ -149,7 +152,7 @@ export default function StudentHeader({
         <div className="bg-surface-page text-text-primary font-sans flex flex-col">
             {/* hearder cố định */}
             <header className={`
-            fixed top-0 left-0 right-0 z-40 h-16 bg-[#005BAA] 
+            fixed top-0 left-0 right-0 z-100 h-16 bg-[#005BAA] 
             shadow-sm px-2 sm:px-4 lg:px-6 flex items-center justify-between gap-1.5 sm:gap-3 lg:gap-4
             transition-transform duration-300 ease-in-out
             ${isHeaderVisible ? 'translate-y-0' : '-translate-y-full'}
@@ -250,7 +253,7 @@ export default function StudentHeader({
                                         <p className="font-semibold text-sm truncate">{user.ho_ten || "Người dùng"} </p>
                                         <p className="text-xs text-text-secondary truncate">{user.email || "Chưa có email"}</p>
                                         {user.vai_tro && (
-                                            <span className="inline-block mt-1 text-[10px] font-mono px-2 py-0.5 bg-brand-primary/10 text-brand-primary rounded-md uppercase font-semibold">
+                                            <span className="inline-block mt-1 text-[11px] px-2 py-0.5 bg-blue-50 text-[#005BAA] rounded-md font-medium border border-blue-100">
                                                 {getRoleLabel(user.vai_tro)}
                                             </span>
                                         )}

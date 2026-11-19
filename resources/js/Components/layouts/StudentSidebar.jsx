@@ -14,9 +14,6 @@ export default function StudentSidebar({
     isOpen = false,
     onClose = () => { },
 }) {
-    console.log("Sidebar faculties:", faculties);
-    console.log("Số lượng khoa:", faculties.length);
-
     // Lấy URL hiện tại để xác định mục menu đang được chọn
     const page = usePage();
 
@@ -135,17 +132,17 @@ export default function StudentSidebar({
                                 href={item.href}
                                 onClick={onClose}
                                 className={`
-                                flex h-10 items-center gap-3 rounded-lg px-4 text-sm font-medium transition-colors
+                                flex h-10 items-center gap-3 rounded-lg px-3.5 text-sm font-medium transition-colors
                                 ${isActive
-                                        ? "bg-indigo-100 text-blue-800"
-                                        : "text-slate-600 hover:bg-slate-100"
+                                        ? "bg-blue-50 text-[#005baa] font-semibold border-l-2 border-[#005baa]"
+                                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                                     }
                                 `}
                             >
-                                <Icon size={18} strokeWidth={2} />
-                                <span className="flex-1">{item.label}</span>
+                                <Icon size={18} strokeWidth={isActive ? 2 : 1.75} className="shrink-0" />
+                                <span className="flex-1 truncate">{item.label}</span>
                                 {item.badge && (
-                                    <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+                                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
                                         {item.badge}
                                     </span>
                                 )}

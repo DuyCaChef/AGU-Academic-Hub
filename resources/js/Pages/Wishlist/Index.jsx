@@ -7,18 +7,20 @@ import {
     Coins,
     Plus,
     Search,
-    Filter,
     CheckCircle2,
     Clock,
     MessageSquare,
-    ChevronRight,
-    AlertCircle,
     AlertTriangle,
     RotateCcw,
     Bookmark,
     Sparkles,
     Send,
-    Hourglass
+    Hourglass,
+    ArrowRight,
+    FileQuestion,
+    ShieldCheck,
+    Calendar,
+    User,
 } from 'lucide-react';
 
 export default function WishlistIndex({ requests, filters = {}, courses = [] }) {
@@ -83,41 +85,44 @@ export default function WishlistIndex({ requests, filters = {}, courses = [] }) 
 
     const getCategoryBadge = (category) => {
         const map = {
-            DE_THI: { label: 'Đề thi', bg: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
-            BAI_GIANG: { label: 'Bài giảng', bg: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-            DO_AN: { label: 'Đồ án', bg: 'bg-purple-50 text-purple-700 border-purple-200' },
-            BAI_TAP: { label: 'Bài tập', bg: 'bg-amber-50 text-amber-700 border-amber-200' },
-            GIAO_TRINH: { label: 'Giáo trình', bg: 'bg-blue-50 text-blue-700 border-blue-200' },
-            KHAC: { label: 'Khác', bg: 'bg-slate-100 text-slate-700 border-slate-200' },
+            DE_THI: { label: 'Đề thi' },
+            BAI_GIANG: { label: 'Slide bài giảng' },
+            DO_AN: { label: 'Đồ án & Mã nguồn' },
+            BAI_TAP: { label: 'Bài tập thực hành' },
+            GIAO_TRINH: { label: 'Giáo trình' },
+            KHAC: { label: 'Tài liệu tham khảo' },
         };
-        return map[category] || { label: 'Tài liệu', bg: 'bg-slate-100 text-slate-700 border-slate-200' };
+        return map[category] || { label: 'Tài liệu học tập' };
     };
 
     const getStatusBadge = (status) => {
         switch (status) {
             case 'DA_HOAN_THANH':
                 return (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
-                        <CheckCircle2 className="w-3 h-3" /> Đã hoàn thành
+                    <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200/80 inline-flex items-center gap-1">
+                        <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                        <span>Đã hoàn thành</span>
                     </span>
                 );
             case 'CHO_GIAI_NGAN':
                 return (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200 flex items-center gap-1">
-                        <Hourglass className="w-3 h-3 text-purple-600" /> Chờ duyệt giải ngân
+                    <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200/80 inline-flex items-center gap-1">
+                        <Hourglass className="w-3 h-3 text-blue-600" />
+                        <span>Chờ giải ngân</span>
                     </span>
                 );
             case 'DA_HUY':
                 return (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200 flex items-center gap-1">
-                        Đã hủy
+                    <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 border border-slate-200 inline-flex items-center gap-1">
+                        <span>Đã hủy</span>
                     </span>
                 );
             case 'MO':
             default:
                 return (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 flex items-center gap-1">
-                        <Clock className="w-3 h-3" /> Đang mở
+                    <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200/80 inline-flex items-center gap-1">
+                        <Clock className="w-3 h-3 text-amber-600" />
+                        <span>Đang tìm kiếm</span>
                     </span>
                 );
         }
@@ -126,104 +131,119 @@ export default function WishlistIndex({ requests, filters = {}, courses = [] }) 
     const paginationLinks = requests?.links || [];
 
     return (
-        <StudentLayout>
-            <Head title="Săn Thưởng Tài Liệu - Wishlist" />
+        <StudentLayout title="Săn Thưởng Tài Liệu">
+            <Head title="Săn Thưởng Tài Liệu - Bounty" />
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+            <div className="space-y-6">
                 {/* Flash Messages */}
                 {flash?.success && (
-                    <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl text-sm font-semibold text-emerald-800 flex items-center gap-3 shadow-xs">
-                        <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                    <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-xs font-medium text-emerald-800 flex items-center gap-3 shadow-xs">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                         <span>{flash.success}</span>
                     </div>
                 )}
                 {flash?.error && (
-                    <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-sm font-semibold text-rose-800 flex items-center gap-3 shadow-xs">
-                        <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0" />
+                    <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl text-xs font-medium text-rose-800 flex items-center gap-3 shadow-xs">
+                        <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
                         <span>{flash.error}</span>
                     </div>
                 )}
 
-                {/* Banner & Ví Điểm */}
-                <div className="bg-gradient-to-r from-[#005baa] to-[#00a896] rounded-2xl p-6 text-white shadow-lg flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-                    <div>
-                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/15 backdrop-blur-md rounded-full text-xs font-semibold tracking-wide mb-3">
-                            <Coins className="w-3.5 h-3.5 text-amber-300" />
-                            Thị trường Yêu cầu & Treo thưởng AGU
-                        </div>
-                        <h1 className="text-2xl font-extrabold">Cộng Đồng Săn Thưởng Tài Liệu</h1>
-                        <p className="text-sm text-blue-100 mt-1 max-w-xl">
-                            Tìm kiếm tài liệu học tập còn thiếu hoặc hỗ trợ tài liệu cho bạn bè để nhận điểm thưởng Bounty và gia tăng điểm uy tín học thuật.
-                        </p>
-                    </div>
+                {/* 1. Hero Banner: AGU Navy Solid with Academic Ledger Split */}
+                <div className="relative overflow-hidden rounded-2xl bg-[#005BAA] text-white p-6 sm:p-7 shadow-xs">
+                    {/* Subtle dot pattern */}
+                    <div className="pointer-events-none absolute inset-0 opacity-10 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px]" />
 
-                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full md:w-auto">
-                        {/* Thẻ hiển thị ví điểm */}
-                        <div className="bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/20 flex items-center gap-4">
-                            <div>
-                                <span className="block text-[11px] text-blue-100 uppercase tracking-wider font-semibold">Khả dụng</span>
-                                <span className="text-xl font-black text-amber-300">
-                                    {auth?.user?.vi_diem?.diem_kha_dung || 0}
-                                </span>
+                    <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                        <div className="space-y-2 max-w-xl">
+                            <div className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-blue-100 backdrop-blur-xs border border-white/10">
+                                <Coins className="w-3.5 h-3.5 text-amber-300" />
+                                <span>Thị trường Yêu cầu & Săn thưởng AGU</span>
                             </div>
-                            <div className="h-8 w-px bg-white/20" />
-                            <div>
-                                <span className="block text-[11px] text-blue-100 uppercase tracking-wider font-semibold">Tạm giữ</span>
-                                <span className="text-xl font-bold text-white/80">
-                                    {auth?.user?.vi_diem?.diem_tam_giu || 0}
-                                </span>
-                            </div>
+                            <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl text-white">
+                                Săn Thưởng Tài Liệu Học Thuật
+                            </h1>
+                            <p className="text-xs sm:text-sm leading-relaxed text-blue-100">
+                                Treo thưởng điểm ví để tìm tài liệu còn thiếu, hoặc đóng góp tài liệu để nhận Bounty và gia tăng điểm uy tín học thuật cùng cộng đồng AGU.
+                            </p>
                         </div>
 
-                        <button
-                            onClick={() => setIsCreateOpen(true)}
-                            className="px-5 py-3 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 shrink-0 active:scale-95 cursor-pointer"
-                        >
-                            <Plus className="w-4 h-4 stroke-[3]" />
-                            Tạo Yêu Cầu Mới
-                        </button>
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-4 shrink-0">
+                            {/* Sổ cái ví điểm (Academic Ledger Box) */}
+                            <div className="rounded-xl border border-white/15 bg-white/10 p-3.5 backdrop-blur-xs flex items-center gap-4 text-white">
+                                <div className="space-y-0.5">
+                                    <span className="block text-[11px] font-medium text-blue-200">
+                                        Khả dụng
+                                    </span>
+                                    <span className="font-mono text-xl font-semibold text-amber-300 tabular-nums">
+                                        {auth?.user?.vi_diem?.diem_kha_dung || 0} pts
+                                    </span>
+                                </div>
+                                <div className="h-8 w-px bg-white/15" />
+                                <div className="space-y-0.5">
+                                    <span className="block text-[11px] font-medium text-blue-200">
+                                        Đang ký quỹ
+                                    </span>
+                                    <span className="font-mono text-xl font-semibold text-white/90 tabular-nums">
+                                        {auth?.user?.vi_diem?.diem_tam_giu || 0} pts
+                                    </span>
+                                </div>
+                            </div>
+
+                            <button
+                                type="button"
+                                onClick={() => setIsCreateOpen(true)}
+                                className="inline-flex items-center justify-center gap-2 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 px-4 py-3 text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+                            >
+                                <Plus size={16} />
+                                <span>Tạo yêu cầu mới</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                {/* Tabs Điều Hướng Phân Nhóm (Tất cả / Yêu cầu của tôi / Đóng góp của tôi) */}
-                <div className="flex items-center gap-2 border-b border-slate-200 pb-2 overflow-x-auto">
+                {/* 2. Tabs Phân nhóm (Segmented Navigation) */}
+                <div className="flex items-center gap-1.5 border-b border-slate-200 pb-2 overflow-x-auto">
                     <button
+                        type="button"
                         onClick={() => handleTabChange('all')}
-                        className={`px-4 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-2 cursor-pointer ${
+                        className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-medium transition-colors cursor-pointer ${
                             filterState.tab === 'all'
-                                ? 'bg-[#005baa] text-white shadow-xs'
-                                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                                ? 'bg-[#005BAA] text-white font-semibold'
+                                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                         }`}
                     >
-                        <Sparkles className="w-3.5 h-3.5" />
-                        Khám Phá Tất Cả
+                        <Sparkles size={14} />
+                        <span>Khám phá tất cả</span>
                     </button>
                     <button
+                        type="button"
                         onClick={() => handleTabChange('my_requests')}
-                        className={`px-4 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-2 cursor-pointer ${
+                        className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-medium transition-colors cursor-pointer ${
                             filterState.tab === 'my_requests'
-                                ? 'bg-[#005baa] text-white shadow-xs'
-                                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                                ? 'bg-[#005BAA] text-white font-semibold'
+                                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                         }`}
                     >
-                        <Bookmark className="w-3.5 h-3.5" />
-                        Bounty Tôi Đã Tạo
+                        <Bookmark size={14} />
+                        <span>Yêu cầu tôi đã tạo</span>
                     </button>
                     <button
+                        type="button"
                         onClick={() => handleTabChange('my_contributions')}
-                        className={`px-4 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-2 cursor-pointer ${
+                        className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-medium transition-colors cursor-pointer ${
                             filterState.tab === 'my_contributions'
-                                ? 'bg-[#005baa] text-white shadow-xs'
-                                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                                ? 'bg-[#005BAA] text-white font-semibold'
+                                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                         }`}
                     >
-                        <Send className="w-3.5 h-3.5" />
-                        Bài Tôi Đã Đóng Góp
+                        <Send size={14} />
+                        <span>Bài tôi đã đóng góp</span>
                     </button>
                 </div>
 
-                {/* Thanh Tìm Kiếm & Lọc */}
-                <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-2xs space-y-3">
+                {/* 3. Thanh Tìm Kiếm & Bộ Lọc Không Emoji */}
+                <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-xs space-y-3">
                     {/* Search bar */}
                     <form onSubmit={handleSearchSubmit} className="relative flex items-center">
                         <Search className="w-4 h-4 text-slate-400 absolute left-3 pointer-events-none" />
@@ -232,39 +252,39 @@ export default function WishlistIndex({ requests, filters = {}, courses = [] }) 
                             placeholder="Tìm kiếm theo tiêu đề tài liệu, mã môn hoặc tên môn học..."
                             value={filterState.q}
                             onChange={(e) => setFilterState({ ...filterState, q: e.target.value })}
-                            className="w-full text-xs font-medium rounded-lg border border-slate-200 bg-white pl-9 pr-24 py-2.5 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-[#005baa] focus:ring-2 focus:ring-[#005baa]/20 shadow-2xs"
+                            className="w-full text-xs font-medium rounded-lg border border-slate-200 bg-white pl-9 pr-24 py-2.5 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-[#005BAA] focus:ring-1 focus:ring-[#005BAA] transition-colors"
                         />
                         <button
                             type="submit"
-                            className="absolute right-1.5 px-3 py-1.5 bg-[#005baa] hover:bg-blue-800 text-white font-bold text-xs rounded-md transition-colors"
+                            className="absolute right-1.5 px-3 py-1.5 bg-[#005BAA] hover:bg-blue-700 text-white font-medium text-xs rounded-md transition-colors cursor-pointer"
                         >
                             Tìm kiếm
                         </button>
                     </form>
 
-                    {/* Bộ lọc chi tiết */}
+                    {/* Bộ lọc Dropdowns */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                        {/* Trạng thái */}
+                        {/* Dropdown Trạng thái: 100% không emoji */}
                         <div>
                             <select
                                 value={filterState.trang_thai}
                                 onChange={(e) => handleFilterChange('trang_thai', e.target.value)}
-                                className="w-full text-xs font-medium rounded-lg border border-slate-200 bg-white px-3 py-2 text-slate-700 focus:outline-none focus:border-[#005baa] focus:ring-2 focus:ring-[#005baa]/20 transition-colors cursor-pointer shadow-2xs"
+                                className="w-full text-xs font-medium rounded-lg border border-slate-200 bg-white px-3 py-2 text-slate-700 focus:outline-none focus:border-[#005BAA] focus:ring-1 focus:ring-[#005BAA] transition-colors cursor-pointer"
                             >
                                 <option value="TAT_CA">Tất cả trạng thái</option>
-                                <option value="MO">🟢 Đang mở tìm kiếm</option>
-                                <option value="CHO_GIAI_NGAN">🟣 Đang chờ giải ngân</option>
-                                <option value="DA_HOAN_THANH">✅ Đã hoàn thành</option>
-                                <option value="DA_HUY">⚪ Đã hủy</option>
+                                <option value="MO">Đang mở tìm kiếm</option>
+                                <option value="CHO_GIAI_NGAN">Chờ duyệt giải ngân</option>
+                                <option value="DA_HOAN_THANH">Đã hoàn thành</option>
+                                <option value="DA_HUY">Đã hủy</option>
                             </select>
                         </div>
 
-                        {/* Môn học */}
+                        {/* Dropdown Môn học */}
                         <div>
                             <select
                                 value={filterState.ma_mon_hoc}
                                 onChange={(e) => handleFilterChange('ma_mon_hoc', e.target.value)}
-                                className="w-full text-xs font-medium rounded-lg border border-slate-200 bg-white px-3 py-2 text-slate-700 focus:outline-none focus:border-[#005baa] focus:ring-2 focus:ring-[#005baa]/20 transition-colors cursor-pointer shadow-2xs"
+                                className="w-full text-xs font-medium rounded-lg border border-slate-200 bg-white px-3 py-2 text-slate-700 focus:outline-none focus:border-[#005BAA] focus:ring-1 focus:ring-[#005BAA] transition-colors cursor-pointer"
                             >
                                 <option value="">Tất cả môn học</option>
                                 {courses.map((c) => (
@@ -275,28 +295,28 @@ export default function WishlistIndex({ requests, filters = {}, courses = [] }) 
                             </select>
                         </div>
 
-                        {/* Phân loại tài liệu */}
+                        {/* Dropdown Phân loại */}
                         <div>
                             <select
                                 value={filterState.phan_loai}
                                 onChange={(e) => handleFilterChange('phan_loai', e.target.value)}
-                                className="w-full text-xs font-medium rounded-lg border border-slate-200 bg-white px-3 py-2 text-slate-700 focus:outline-none focus:border-[#005baa] focus:ring-2 focus:ring-[#005baa]/20 transition-colors cursor-pointer shadow-2xs"
+                                className="w-full text-xs font-medium rounded-lg border border-slate-200 bg-white px-3 py-2 text-slate-700 focus:outline-none focus:border-[#005BAA] focus:ring-1 focus:ring-[#005BAA] transition-colors cursor-pointer"
                             >
                                 <option value="">Tất cả phân loại</option>
                                 <option value="DE_THI">Đề thi / Kiểm tra</option>
                                 <option value="BAI_GIANG">Slide / Bài giảng</option>
                                 <option value="DO_AN">Đồ án / Source code</option>
                                 <option value="BAI_TAP">Bài tập / Lời giải</option>
-                                <option value="KHAC">Khác</option>
+                                <option value="KHAC">Tài liệu tham khảo</option>
                             </select>
                         </div>
 
-                        {/* Sắp xếp */}
+                        {/* Dropdown Sắp xếp */}
                         <div>
                             <select
                                 value={filterState.sap_xep}
                                 onChange={(e) => handleFilterChange('sap_xep', e.target.value)}
-                                className="w-full text-xs font-medium rounded-lg border border-slate-200 bg-white px-3 py-2 text-slate-700 focus:outline-none focus:border-[#005baa] focus:ring-2 focus:ring-[#005baa]/20 transition-colors cursor-pointer shadow-2xs"
+                                className="w-full text-xs font-medium rounded-lg border border-slate-200 bg-white px-3 py-2 text-slate-700 focus:outline-none focus:border-[#005BAA] focus:ring-1 focus:ring-[#005BAA] transition-colors cursor-pointer"
                             >
                                 <option value="moi_nhat">Mới nhất trước</option>
                                 <option value="diem_cao">Điểm thưởng cao nhất</option>
@@ -305,123 +325,131 @@ export default function WishlistIndex({ requests, filters = {}, courses = [] }) 
                     </div>
                 </div>
 
-                {/* Danh Sách Yêu Cầu (Grid) */}
+                {/* 4. Danh Sách Yêu Cầu (Bounty Cards Grid) */}
                 {requests?.data?.length > 0 ? (
                     <div className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {requests.data.map((item) => {
                                 const cat = getCategoryBadge(item.phan_loai || item.loai_tai_lieu);
                                 const responsesCount = item.dap_ungs_count ?? item.danh_sach_phan_hoi_count ?? 0;
+                                const createdDate = item.created_at
+                                    ? new Date(item.created_at).toLocaleDateString('vi-VN')
+                                    : 'Mới đăng';
 
                                 return (
-                                    <div
+                                    <article
                                         key={item.ma_yeu_cau}
-                                        className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-2xs hover:shadow-md transition-all flex flex-col justify-between group"
+                                        className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs transition-colors hover:border-slate-300 flex flex-col justify-between group"
                                     >
-                                        <div>
+                                        <div className="space-y-3">
                                             {/* Top Header Card */}
-                                            <div className="flex items-center justify-between gap-2 mb-3">
+                                            <div className="flex items-center justify-between gap-2">
                                                 <div className="flex items-center gap-1.5 flex-wrap">
-                                                    <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${cat.bg}`}>
+                                                    <span className="font-mono text-[10px] font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded border border-slate-200/80">
                                                         {cat.label}
                                                     </span>
                                                     {getStatusBadge(item.trang_thai)}
                                                 </div>
 
                                                 {/* Bounty Points Badge */}
-                                                <div className="flex items-center gap-1 px-2.5 py-0.5 bg-amber-50 text-amber-700 font-black text-xs sm:text-sm rounded-full border border-amber-200 shadow-2xs shrink-0">
-                                                    <Coins className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                                                    +{item.diem_thuong} Điểm
+                                                <div className="flex items-center gap-1 px-2.5 py-0.5 bg-amber-50 text-amber-800 font-mono text-xs font-semibold rounded-md border border-amber-200/80 shrink-0">
+                                                    <Coins className="w-3.5 h-3.5 text-amber-600" />
+                                                    <span>+{item.diem_thuong} pts</span>
                                                 </div>
                                             </div>
 
                                             {/* Tên môn học */}
-                                            <div className="text-xs font-semibold text-[#005baa] flex items-center gap-1.5">
-                                                <span className="font-mono bg-blue-50 px-1.5 py-0.5 rounded text-[11px]">
-                                                    {item.mon_hoc?.ma_hoc_phan}
+                                            <div className="text-xs font-medium text-[#005BAA] flex items-center gap-1.5">
+                                                <span className="font-mono bg-blue-50 px-1.5 py-0.5 rounded text-[11px] border border-blue-100">
+                                                    {item.mon_hoc?.ma_hoc_phan || 'AGU'}
                                                 </span>
-                                                <span className="truncate">{item.mon_hoc?.ten_mon_hoc}</span>
+                                                <span className="truncate text-slate-700 font-medium">
+                                                    {item.mon_hoc?.ten_mon_hoc || 'Môn học chung'}
+                                                </span>
                                             </div>
 
-                                            {/* Tiêu đề */}
+                                            {/* Tiêu đề yêu cầu */}
                                             <Link
                                                 href={route('document-requests.show', item.ma_yeu_cau)}
-                                                className="block mt-2"
+                                                className="block"
                                             >
-                                                <h3 className="text-base font-bold text-slate-800 line-clamp-2 group-hover:text-[#005baa] transition-colors">
+                                                <h3 className="text-sm font-semibold text-slate-900 group-hover:text-[#005BAA] transition-colors line-clamp-2 min-h-[2.5rem] leading-snug">
                                                     {item.tieu_de}
                                                 </h3>
                                             </Link>
 
                                             {/* Mô tả tóm tắt */}
                                             {item.mo_ta && (
-                                                <p className="text-xs text-slate-500 mt-2 line-clamp-2">
+                                                <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
                                                     {item.mo_ta}
                                                 </p>
                                             )}
                                         </div>
 
                                         {/* Footer Card */}
-                                        <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between">
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600 overflow-hidden">
-                                                    {item.nguoi_tao?.anh_dai_dien ? (
-                                                        <img src={item.nguoi_tao.anh_dai_dien} alt="avatar" className="w-full h-full object-cover" />
-                                                    ) : (
-                                                        item.nguoi_tao?.ho_ten?.charAt(0) || 'U'
-                                                    )}
+                                        <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                                            <div className="flex items-center gap-2 min-w-0">
+                                                <div className="w-6 h-6 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-[10px] font-semibold text-slate-600 shrink-0">
+                                                    {item.nguoi_tao?.ho_ten?.charAt(0) || 'U'}
                                                 </div>
-                                                <div className="text-[11px] text-slate-500 leading-tight">
-                                                    <span className="font-semibold text-slate-700 block truncate max-w-[100px]">
-                                                        {item.nguoi_tao?.ho_ten}
+                                                <div className="truncate leading-tight">
+                                                    <span className="font-medium text-slate-700 block truncate max-w-[120px]">
+                                                        {item.nguoi_tao?.ho_ten || 'Thành viên AGU'}
                                                     </span>
-                                                    <span className="text-[10px]">{item.nguoi_tao?.mssv}</span>
+                                                    <span className="text-[10px] text-slate-400">
+                                                        {createdDate}
+                                                    </span>
                                                 </div>
                                             </div>
 
-                                            <div className="flex items-center gap-3">
-                                                <div className="flex items-center gap-1 text-xs text-slate-500 font-medium">
-                                                    <MessageSquare className="w-3.5 h-3.5" />
-                                                    {responsesCount} nộp
-                                                </div>
+                                            <div className="flex items-center gap-2 shrink-0">
+                                                <span className="text-[11px] text-slate-500 flex items-center gap-1">
+                                                    <MessageSquare size={13} className="text-slate-400" />
+                                                    <span>{responsesCount} nộp</span>
+                                                </span>
 
                                                 <Link
                                                     href={route('document-requests.show', item.ma_yeu_cau)}
-                                                    className="p-1.5 text-slate-400 hover:text-[#005baa] hover:bg-blue-50 rounded-lg transition-colors"
+                                                    className="inline-flex items-center gap-1 rounded-md bg-slate-100 hover:bg-[#005BAA] hover:text-white px-2.5 py-1 text-xs font-medium text-slate-700 transition-colors"
+                                                    title="Xem chi tiết & nộp tài liệu"
                                                 >
-                                                    <ChevronRight className="w-5 h-5" />
+                                                    <span>Chi tiết</span>
+                                                    <ArrowRight size={13} />
                                                 </Link>
                                             </div>
                                         </div>
-                                    </div>
+                                    </article>
                                 );
                             })}
                         </div>
 
                         {/* Phân Trang (Pagination) */}
                         {paginationLinks.length > 3 && (
-                            <Pagination links={paginationLinks} className="border-t border-slate-100 mt-6" />
+                            <Pagination links={paginationLinks} className="border-t border-slate-100 pt-4" />
                         )}
                     </div>
                 ) : (
-                    <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center space-y-4">
-                        <AlertCircle className="w-12 h-12 text-slate-300 mx-auto" />
+                    <div className="rounded-xl border border-dashed border-slate-200 bg-white p-10 text-center space-y-3">
+                        <FileQuestion className="w-10 h-10 text-slate-400 mx-auto" />
                         <div>
-                            <h3 className="text-base font-bold text-slate-700">Chưa có yêu cầu nào phù hợp</h3>
-                            <p className="text-xs text-slate-500 mt-1">
+                            <h3 className="text-sm font-semibold text-slate-800">
+                                Chưa có yêu cầu nào phù hợp
+                            </h3>
+                            <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
                                 {filterState.tab === 'my_requests'
                                     ? 'Bạn chưa đăng yêu cầu tìm tài liệu nào.'
                                     : filterState.tab === 'my_contributions'
                                     ? 'Bạn chưa tham gia đóng góp tài liệu cho yêu cầu nào.'
-                                    : 'Hãy thay đổi bộ lọc hoặc là người đầu tiên tạo yêu cầu tìm tài liệu!'}
+                                    : 'Hãy thay đổi tiêu chí bộ lọc hoặc tạo yêu cầu mới để nhận hỗ trợ từ các bạn sinh viên AGU.'}
                             </p>
                         </div>
                         <button
+                            type="button"
                             onClick={handleResetFilters}
-                            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-[#005baa] bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors cursor-pointer"
+                            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-[#005BAA] bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors cursor-pointer"
                         >
                             <RotateCcw className="w-3.5 h-3.5" />
-                            Đặt lại bộ lọc
+                            <span>Đặt lại bộ lọc</span>
                         </button>
                     </div>
                 )}
