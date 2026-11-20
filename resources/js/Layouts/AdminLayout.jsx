@@ -347,15 +347,15 @@ export default function AdminLayout({ children, title = 'Quản trị hệ thố
                     </nav>
                 </div>
 
-                {/* Phần đáy Sidebar: Về Cổng Sinh Viên & Đăng xuất */}
+                {/* Phần đáy Sidebar: Về Cổng AGU Hub & Đăng xuất */}
                 <div className={`shrink-0 space-y-2 border-t border-slate-800/80 bg-slate-950/60 ${sidebarCollapsed ? 'p-3' : 'p-4'}`}>
                     <Link
                         href={getSafeRoute('dashboard', '/')}
-                        title={sidebarCollapsed ? 'Về Cổng Sinh Viên' : undefined}
+                        title={sidebarCollapsed ? 'Về Cổng AGU Hub' : undefined}
                         className={`flex w-full items-center justify-center rounded-md py-2 text-xs font-medium text-slate-300 transition-colors hover:bg-slate-700 hover:text-white ${sidebarCollapsed ? 'gap-2 px-3 lg:gap-0 lg:px-2' : 'gap-2 px-3'}`}
                     >
                         <GraduationCap className="w-4 h-4" />
-                        <span className={sidebarCollapsed ? 'inline lg:hidden' : 'inline'}>Về Cổng Sinh Viên</span>
+                        <span className={sidebarCollapsed ? 'inline lg:hidden' : 'inline'}>Về Cổng AGU Hub</span>
                     </Link>
 
                     <Link

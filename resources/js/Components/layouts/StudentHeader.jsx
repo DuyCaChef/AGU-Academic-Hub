@@ -52,6 +52,12 @@ export default function StudentHeader({
     const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
     const { auth } = usePage().props;
     const user = auth?.user;
+    const isStaff = Boolean(
+        user?.la_quan_tri ||
+        user?.la_kiem_duyet ||
+        user?.vai_tro === "QUAN_TRI_VIEN" ||
+        user?.vai_tro === "KIEM_DUYET_VIEN"
+    );
     // Xử lý tìm kiếm toàn cục (Global Search)
     const handleGlobalSearch = (e) => {
         e.preventDefault();
@@ -202,24 +208,39 @@ export default function StudentHeader({
 
                 {/* thông tin bên phải header */}
                 <div className="flex items-center gap-1.5 sm:gap-2.5 lg:gap-3 shrink-0">
-                    {/* nút Săn thưởng tài liệu */}
-                    <Link
-                        href={typeof route === 'function' && route().has('document-requests.index') ? route('document-requests.index') : '/yeu-cau-tai-lieu'}
-                        className="flex items-center gap-1 sm:gap-1.5 bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs sm:text-sm px-2 py-1.5 sm:px-3.5 sm:py-2 rounded-full shadow-xs active:scale-95 transition-all shrink-0"
-                        title="Thị trường yêu cầu & săn thưởng Bounty"
-                    >
-                        <Coins size={14} className="sm:w-[15px] sm:h-[15px]" />
-                        <span className="hidden sm:inline">Săn thưởng</span>
-                    </Link>
+                    {/* Nút hành động nhanh: Quản trị (nếu là Admin/Mod) hoặc Săn thưởng (nếu là Sinh viên) */}
+                    {isStaff ? (
+                        <Link
+                            href={route('admin.dashboard')}
+                            className="flex items-center gap-1 sm:gap-1.5 bg-[#FFC72C] hover:bg-amber-300 text-slate-950 font-bold text-xs sm:text-sm px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-full shadow-xs active:scale-95 transition-all shrink-0"
+                            title="Vào Bảng điều khiển Quản trị hệ thống"
+                        >
+                            <ShieldCheck size={15} className="text-slate-950" />
+                            <span className="hidden sm:inline">Trang Quản trị</span>
+                        </Link>
+                    ) : (
+                        <Link
+                            href={typeof route === 'function' && route().has('document-requests.index') ? route('document-requests.index') : '/yeu-cau-tai-lieu'}
+                            className="flex items-center gap-1 sm:gap-1.5 bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs sm:text-sm px-2 py-1.5 sm:px-3.5 sm:py-2 rounded-full shadow-xs active:scale-95 transition-all shrink-0"
+                            title="Thị trường yêu cầu & săn thưởng Bounty"
+                        >
+                            <Coins size={14} className="sm:w-[15px] sm:h-[15px]" />
+                            <span className="hidden sm:inline">Săn thưởng</span>
+                        </Link>
+                    )}
 
-                    {/* Điểm Uy Tín (Reputation Badge) */}
+                    {/* Điểm Uy Tín hoặc Huy hiệu Quản trị */}
                     {user && (
                         <div
-                            className="hidden lg:flex items-center gap-1.5 bg-green-700 text-white px-2.5 py-1 rounded-full text-xs font-semibold shrink-0"
-                            title="Điểm uy tín tích lũy từ đóng góp học thuật"
+                            className={`hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold shrink-0 border ${
+                                isStaff
+                                    ? 'bg-blue-900/80 text-white border-blue-600'
+                                    : 'bg-green-700 text-white border-green-600'
+                            }`}
+                            title={isStaff ? 'Tài khoản Quản trị hệ thống' : 'Điểm uy tín tích lũy từ đóng góp học thuật'}
                         >
-                            <Shield size={14} />
-                            <span>{user.diem_uy_tin || 100} pts</span>
+                            <Shield size={14} className={isStaff ? 'text-amber-300' : 'text-emerald-300'} />
+                            <span>{isStaff ? (user.cap_quan_tri === 'TOI_CAO' ? 'Super Admin' : 'Quản trị viên') : `${user.diem_uy_tin || 100} pts`}</span>
                         </div>
                     )}
 
@@ -262,6 +283,18 @@ export default function StudentHeader({
                                         )}
                                     </div>
 
+                                    {/* Bảng điều khiển Quản trị (nếu là Admin/Moderator) */}
+                                    {isStaff && (
+                                        <Link
+                                            href={route('admin.dashboard')}
+                                            role="menuitem"
+                                            onClick={() => setIsUserMenuOpen(false)}
+                                            className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm font-semibold text-[#005baa] bg-blue-50/70 hover:bg-blue-100/70 transition-colors border-b border-border-default/60"
+                                        >
+                                            <ShieldCheck size={16} className="text-[#005baa]" /> Bảng điều khiển Quản trị
+                                        </Link>
+                                    )}
+
                                     {/* Ho so ca nhan */}
                                     <button
                                         type="button"
@@ -289,22 +322,38 @@ export default function StudentHeader({
                                         <ShieldCheck size={16} className="text-emerald-600" /> Thiết lập tài khoản
                                     </Link>
 
-                                    {/* Săn thưởng tài liệu */}
-                                    <Link
-                                        href={typeof route === 'function' && route().has('document-requests.index') ? route('document-requests.index') : '/yeu-cau-tai-lieu'}
-                                        role='menuitem'
-                                        onClick={() => setIsUserMenuOpen(false)}
-                                        className='flex w-full items-center justify-between px-4 py-2.5 text-left text-sm text-text-secondary transition-colors hover:bg-surface-page hover:text-brand-primary'
-                                    >
-                                        <span className="flex items-center gap-3">
-                                            <Coins size={16} className="text-amber-500" /> Săn thưởng Bounty
-                                        </span>
-                                        {user.vi_diem && (
-                                            <span className="text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
-                                                {user.vi_diem.diem_kha_dung || 0} pts
+                                    {/* Săn thưởng tài liệu hoặc Duyệt Bounty */}
+                                    {isStaff ? (
+                                        <Link
+                                            href={route('admin.bounties.payout-queue')}
+                                            role='menuitem'
+                                            onClick={() => setIsUserMenuOpen(false)}
+                                            className='flex w-full items-center justify-between px-4 py-2.5 text-left text-sm text-text-secondary transition-colors hover:bg-surface-page hover:text-brand-primary'
+                                        >
+                                            <span className="flex items-center gap-3">
+                                                <Coins size={16} className="text-amber-500" /> Duyệt giải ngân Bounty
                                             </span>
-                                        )}
-                                    </Link>
+                                            <span className="text-[10px] font-bold text-[#005baa] bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full">
+                                                Admin
+                                            </span>
+                                        </Link>
+                                    ) : (
+                                        <Link
+                                            href={typeof route === 'function' && route().has('document-requests.index') ? route('document-requests.index') : '/yeu-cau-tai-lieu'}
+                                            role='menuitem'
+                                            onClick={() => setIsUserMenuOpen(false)}
+                                            className='flex w-full items-center justify-between px-4 py-2.5 text-left text-sm text-text-secondary transition-colors hover:bg-surface-page hover:text-brand-primary'
+                                        >
+                                            <span className="flex items-center gap-3">
+                                                <Coins size={16} className="text-amber-500" /> Săn thưởng Bounty
+                                            </span>
+                                            {user.vi_diem && (
+                                                <span className="text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+                                                    {user.vi_diem.diem_kha_dung || 0} pts
+                                                </span>
+                                            )}
+                                        </Link>
+                                    )}
 
                                     {/* Đăng xuất */}
                                     <div className='border-t border-border-default pt-2'>
@@ -384,14 +433,25 @@ export default function StudentHeader({
                                         {user.ho_ten || 'Chưa cập nhật'}
                                     </p>
                                 </div>
-                                <div className='rounded-lg bg-surface-page p-3'>
-                                    <p className='text-xs text-text-secondary'>
-                                        Mã số sinh viên
-                                    </p>
-                                    <p className='mt-1 text-sm font-medium'>
-                                        {user.mssv || 'Chưa cập nhật'}
-                                    </p>
-                                </div>
+                                {!isStaff ? (
+                                    <div className='rounded-lg bg-surface-page p-3'>
+                                        <p className='text-xs text-text-secondary'>
+                                            Mã số sinh viên
+                                        </p>
+                                        <p className='mt-1 text-sm font-medium font-mono text-[#005baa]'>
+                                            {user.mssv || 'Chưa cập nhật'}
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <div className='rounded-lg bg-surface-page p-3'>
+                                        <p className='text-xs text-text-secondary'>
+                                            Cấp quyền quản trị
+                                        </p>
+                                        <p className='mt-1 text-sm font-semibold text-[#005baa]'>
+                                            {user.ten_cap_quan_tri || user.ten_vai_tro || 'Quản trị viên Hệ thống'}
+                                        </p>
+                                    </div>
+                                )}
                                 <div className="rounded-lg bg-surface-page p-3">
                                     <p className="text-xs text-text-secondary">
                                         Vai trò

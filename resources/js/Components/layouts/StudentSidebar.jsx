@@ -7,6 +7,7 @@ import {
     GraduationCap,
     CloudUpload,
     Coins,
+    ShieldCheck,
     X,
 } from "lucide-react";
 export default function StudentSidebar({
@@ -16,6 +17,13 @@ export default function StudentSidebar({
 }) {
     // Lấy URL hiện tại để xác định mục menu đang được chọn
     const page = usePage();
+    const user = page.props?.auth?.user;
+    const isStaff = Boolean(
+        user?.la_quan_tri ||
+        user?.la_kiem_duyet ||
+        user?.vai_tro === "QUAN_TRI_VIEN" ||
+        user?.vai_tro === "KIEM_DUYET_VIEN"
+    );
 
     // Đóng drawer khi nhấn phím Escape và khóa cuộn body trên mobile
     useEffect(() => {
@@ -45,6 +53,12 @@ export default function StudentSidebar({
 
     // danh sách menu
     const menuItems = [
+        ...(isStaff ? [{
+            label: "Trang Quản trị",
+            href: "/quan-tri",
+            icon: ShieldCheck,
+            badge: "Admin",
+        }] : []),
         {
             label: "Tổng quan",
             href: "/trang-chu",
@@ -55,7 +69,12 @@ export default function StudentSidebar({
             href: "/mon-hoc",
             icon: BookOpen,
         },
-        {
+        isStaff ? {
+            label: "Duyệt Bounty",
+            href: "/quan-tri/yeu-cau-tai-lieu/cho-giai-ngan",
+            icon: Coins,
+            badge: "Admin",
+        } : {
             label: "Săn thưởng tài liệu",
             href: "/yeu-cau-tai-lieu",
             icon: Coins,
