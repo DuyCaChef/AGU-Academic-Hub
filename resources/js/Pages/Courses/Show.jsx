@@ -1117,25 +1117,25 @@ function CourseShowInner({
                 {activeTab === "wishlist" && (
                     <section className="space-y-6">
                         {/* 1. Header Banner & CTA Tạo yêu cầu */}
-                        <div className="bg-gradient-to-r from-[#005baa] to-[#008f88] rounded-2xl p-6 text-white shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                        <div className="bg-[#005baa] rounded-2xl p-6 sm:p-7 text-white shadow-xs border border-blue-900/10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                             <div>
-                                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/15 backdrop-blur-md rounded-full text-xs font-semibold tracking-wide mb-2">
+                                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/10 rounded-full text-xs font-medium tracking-wide mb-2.5 border border-white/15 text-blue-100">
                                     <Coins size={14} className="text-amber-300" />
-                                    <span>Treo Thưởng Bounty Cho Môn Học Này</span>
+                                    <span>Treo thưởng Bounty cho môn học này</span>
                                 </div>
-                                <h2 className="text-xl sm:text-2xl font-extrabold">
+                                <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white leading-tight">
                                     Yêu Cầu Tìm Tài Liệu Học Phần
                                 </h2>
-                                <p className="text-xs sm:text-sm text-blue-100 mt-1 max-w-xl leading-relaxed">
-                                    Bạn chưa tìm thấy đề thi cũ, slide bài giảng hay bài tập của môn học này? Hãy tạo yêu cầu và treo thưởng Bounty để bạn bè cùng khóa hỗ trợ!
+                                <p className="text-xs sm:text-sm text-blue-100/90 mt-1.5 max-w-xl leading-relaxed">
+                                    Bạn chưa tìm thấy đề thi cũ, slide bài giảng hay bài tập của môn học này? Hãy tạo yêu cầu và treo thưởng Bounty để bạn bè cùng khóa hỗ trợ.
                                 </p>
                             </div>
 
                             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full md:w-auto shrink-0">
                                 {currentUser && (
-                                    <div className="px-4 py-2 bg-white/10 backdrop-blur-md rounded-xl border border-white/20 text-xs flex items-center gap-2">
+                                    <div className="px-4 py-2 bg-white/10 rounded-xl border border-white/15 text-xs flex items-center gap-2 text-white">
                                         <Coins size={15} className="text-amber-300" />
-                                        <span>Ví khả dụng: <strong className="text-amber-300 text-sm font-mono">{availablePoints}</strong> điểm</span>
+                                        <span>Ví khả dụng: <strong className="text-amber-300 text-sm font-mono tabular-nums">{availablePoints}</strong> điểm</span>
                                     </div>
                                 )}
 
@@ -1148,7 +1148,7 @@ function CourseShowInner({
                                         }
                                         setIsWishlistModalOpen(true);
                                     }}
-                                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-amber-400 text-slate-950 hover:bg-amber-300 transition-colors shadow-sm w-full sm:w-auto"
+                                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-amber-400 text-slate-950 hover:bg-amber-300 transition-colors shadow-xs w-full sm:w-auto cursor-pointer"
                                 >
                                     <Plus size={15} />
                                     <span>Tạo yêu cầu tài liệu</span>

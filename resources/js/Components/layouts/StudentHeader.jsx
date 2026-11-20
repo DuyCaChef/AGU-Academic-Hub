@@ -168,16 +168,19 @@ export default function StudentHeader({
                         {isSidebarOpen ? <X size={20} className="sm:w-[22px] sm:h-[22px]" /> : <Menu size={20} className="sm:w-[22px] sm:h-[22px]" />}
                     </button>
 
-                    <Link href={route('courses.index')} className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+                    <Link
+                        href={user ? route('dashboard') : route('home')}
+                        className="flex items-center gap-2 sm:gap-2.5 shrink-0 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 rounded-lg p-0.5"
+                    >
                         <div className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center shrink-0">
                             <img
-                                src="/storage/imgs/logo-agu.webp"
+                                src="/storage/imgs/Logo-agu.webp"
                                 alt="Logo Trường Đại học An Giang"
-                                className="w-full h-full object-contain"
+                                className="w-full h-full object-contain group-hover:scale-105 transition-transform"
                             />
                         </div>
                         <div className="hidden sm:block">
-                            <h1 className="font-bold text-[#FFC72C] leading-tight text-base">Academic Hub</h1>
+                            <h1 className="font-bold text-[#FFC72C] leading-tight text-base group-hover:text-amber-200 transition-colors">Academic Hub</h1>
                             <p className="font-bold text-[11px] text-white">ĐHQG-HCM - Trường Đại học An Giang</p>
                         </div>
                     </Link>

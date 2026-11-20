@@ -288,15 +288,20 @@ export default function WishlistShow({ item, is_creator = false }) {
 
                 {/* Banner khi yêu cầu đang chờ kiểm duyệt tài liệu (DEC-04 & Section 4.4) */}
                 {isPendingPayout && (
-                    <div className="bg-gradient-to-r from-purple-700 to-indigo-700 rounded-2xl p-5 text-white shadow-md flex items-center justify-between gap-4">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2.5 bg-white/20 backdrop-blur-md rounded-xl">
-                                <Hourglass className="w-6 h-6 text-purple-200 animate-pulse" />
+                    <div className="bg-[#005baa] rounded-2xl p-5 sm:p-6 text-white shadow-xs border border-blue-900/10 flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-3.5">
+                            <div className="p-2.5 bg-white/10 rounded-xl text-white shrink-0">
+                                <Hourglass className="w-5 h-5 text-amber-300" />
                             </div>
                             <div>
-                                <h3 className="font-extrabold text-base">Đang chờ Ban kiểm duyệt kiểm tra tài liệu</h3>
-                                <p className="text-xs text-purple-100">
-                                    Người tạo đã xác nhận tài liệu phù hợp. Hệ thống đang chuyển yêu cầu đến Ban kiểm duyệt để kiểm tra tính hợp lệ của tài liệu. Khi được duyệt, điểm thưởng {item.diem_thuong} Bounty sẽ được tự động cộng ngay cho người đóng góp.
+                                <div className="flex items-center gap-2 mb-1">
+                                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-200 border border-amber-400/30">
+                                        Đang kiểm duyệt
+                                    </span>
+                                </div>
+                                <h3 className="font-bold text-base text-white">Đang chờ Ban kiểm duyệt kiểm tra tài liệu</h3>
+                                <p className="text-xs text-blue-100/90 mt-0.5 leading-relaxed">
+                                    Người tạo đã xác nhận tài liệu phù hợp. Hệ thống đang chuyển yêu cầu đến Ban kiểm duyệt để kiểm tra tính hợp lệ. Khi được duyệt, điểm thưởng <span className="font-bold text-amber-300 font-mono">+{item.diem_thuong}</span> Bounty sẽ được tự động giải ngân cho người đóng góp.
                                 </p>
                             </div>
                         </div>
@@ -305,29 +310,34 @@ export default function WishlistShow({ item, is_creator = false }) {
 
                 {/* Banner khi yêu cầu đã hoàn thành */}
                 {isFulfilled && (
-                    <div className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl p-5 text-white shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2.5 bg-white/20 backdrop-blur-md rounded-xl">
-                                <Sparkles className="w-6 h-6 text-amber-300" />
+                    <div className="bg-[#005baa] rounded-2xl p-5 sm:p-6 text-white shadow-xs border border-blue-900/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div className="flex items-center gap-3.5">
+                            <div className="p-2.5 bg-white/10 rounded-xl text-white shrink-0">
+                                <CheckCircle2 className="w-5 h-5 text-emerald-300" />
                             </div>
                             <div>
-                                <h3 className="font-extrabold text-base">Yêu cầu đã được giải quyết thành công!</h3>
-                                <p className="text-xs text-emerald-100">
-                                    Điểm thưởng {item.diem_thuong} Bounty đã được giải ngân chuyển tới ví người đóng góp chính xác.
+                                <div className="flex items-center gap-2 mb-1">
+                                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-200 border border-emerald-400/30">
+                                        Hoàn tất giải ngân
+                                    </span>
+                                </div>
+                                <h3 className="font-bold text-base text-white">Yêu cầu đã được giải quyết thành công</h3>
+                                <p className="text-xs text-blue-100/90 mt-0.5 leading-relaxed">
+                                    Điểm thưởng <span className="font-bold text-amber-300 font-mono">+{item.diem_thuong}</span> Bounty đã được giải ngân chuyển tới ví người đóng góp chính xác.
                                 </p>
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 shrink-0">
                             {item.ma_tai_lieu_dap_ung && (
                                 <a
                                     href={getDocumentUrl(item.ma_tai_lieu_dap_ung)}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="px-4 py-2 bg-white text-emerald-800 hover:bg-emerald-50 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 shadow-xs cursor-pointer"
+                                    className="px-4 py-2 bg-white text-slate-900 hover:bg-slate-100 rounded-xl text-xs font-semibold transition-colors flex items-center gap-1.5 shrink-0 shadow-xs cursor-pointer"
                                 >
-                                    <ExternalLink className="w-3.5 h-3.5" />
-                                    Xem tài liệu duyệt
+                                    <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
+                                    <span>Xem tài liệu duyệt</span>
                                 </a>
                             )}
 
@@ -335,10 +345,10 @@ export default function WishlistShow({ item, is_creator = false }) {
                             {is_creator && (!activeCorrection || activeCorrection.trang_thai === 'HOAN_THANH' || activeCorrection.trang_thai === 'TU_CHOI' || activeCorrection.trang_thai === 'DA_HUY') && (
                                 <button
                                     onClick={() => setCorrectionModal({ isOpen: true, reason: '', isSubmitting: false })}
-                                    className="px-4 py-2 bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold text-xs rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                                    className="px-4 py-2 bg-amber-400 hover:bg-amber-300 text-slate-950 font-semibold text-xs rounded-xl transition-colors shadow-xs flex items-center gap-1.5 cursor-pointer"
                                 >
                                     <RefreshCw className="w-3.5 h-3.5" />
-                                    Yêu cầu chỉnh sửa / bổ sung
+                                    <span>Yêu cầu chỉnh sửa</span>
                                 </button>
                             )}
                         </div>
@@ -386,14 +396,16 @@ export default function WishlistShow({ item, is_creator = false }) {
                         </div>
 
                         {/* Badge Điểm Treo Thưởng */}
-                        <div className="px-5 py-3 bg-gradient-to-br from-amber-50 to-amber-100/60 rounded-2xl border border-amber-200 flex items-center gap-3 shrink-0">
+                        <div className="px-5 py-3 bg-amber-50/80 rounded-2xl border border-amber-200/90 flex items-center gap-3 shrink-0 shadow-2xs">
                             <div className="p-2 bg-amber-500 text-white rounded-xl shadow-2xs">
-                                <Coins className="w-6 h-6" />
+                                <Coins className="w-5 h-5" />
                             </div>
                             <div>
-                                <span className="block text-[10px] font-bold text-amber-800 uppercase tracking-wider">Phần Thưởng</span>
-                                <span className="text-2xl font-black text-amber-600">+{item.diem_thuong}</span>
-                                <span className="text-xs font-bold text-amber-700 ml-1">Điểm</span>
+                                <span className="block text-[10px] font-semibold text-amber-800 uppercase tracking-wider">Phần thưởng</span>
+                                <div className="flex items-baseline gap-1">
+                                    <span className="text-2xl font-bold font-mono text-amber-700 tabular-nums">+{item.diem_thuong}</span>
+                                    <span className="text-xs font-medium text-amber-800">Điểm</span>
+                                </div>
                             </div>
                         </div>
                     </div>
