@@ -131,29 +131,29 @@ export default function UsersIndex({ users, filters = {}, faculties = [] }) {
             <Head title="Quản lý Người dùng - AGU Hub Admin" />
 
             <div className="space-y-6">
-                {/* Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
-                    <div>
-                        <div className="flex items-center gap-2">
-                            <span className="p-2 bg-blue-50 text-[#005baa] rounded-xl border border-blue-100">
-                                <Users className="w-5 h-5" />
-                            </span>
-                            <h1 className="text-xl font-bold text-slate-900">
+                {/* Header chuẩn */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-5 md:p-6 rounded-xl border border-slate-200/90 shadow-xs">
+                    <div className="flex items-center gap-3">
+                        <span className="p-2.5 bg-blue-50 text-[#005baa] rounded-lg border border-blue-100/80 flex items-center justify-center shrink-0">
+                            <Users className="w-5 h-5" />
+                        </span>
+                        <div>
+                            <h1 className="text-xl font-bold tracking-tight text-slate-900">
                                 Quản lý Tài khoản & Phân quyền Người dùng
                             </h1>
+                            <p className="text-xs text-slate-500 mt-1">
+                                Tra cứu hồ sơ thành viên toàn trường, kiểm tra ví điểm và thực hiện khóa/mở khóa tài khoản vi phạm.
+                            </p>
                         </div>
-                        <p className="text-xs text-slate-500 mt-1.5 ml-9">
-                            Tra cứu hồ sơ thành viên toàn trường, kiểm tra ví điểm và thực hiện khóa/mở khóa tài khoản vi phạm.
-                        </p>
                     </div>
 
-                    <div className="text-xs font-semibold text-slate-600 bg-slate-50 px-3 py-2 rounded-xl border border-slate-200 self-start sm:self-auto">
+                    <div className="text-xs font-semibold text-slate-600 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 self-start sm:self-auto shrink-0">
                         Tổng số: <strong className="text-slate-900">{users?.total || items.length}</strong> thành viên
                     </div>
                 </div>
 
                 {/* Thanh công cụ tìm kiếm và lọc */}
-                <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs space-y-3">
+                <div className="bg-white p-4 rounded-xl border border-slate-200/90 shadow-xs space-y-3">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
                         <div className="relative lg:col-span-2">
                             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -162,7 +162,7 @@ export default function UsersIndex({ users, filters = {}, faculties = [] }) {
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 placeholder="Tìm theo tên, email, MSSV..."
-                                className="h-11 w-full rounded-xl border-slate-200 pl-10 pr-4 text-sm caret-black focus:border-[#005baa] focus:ring-2 focus:ring-[#005baa]/20"
+                                className="h-10 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#005baa] focus:ring-2 focus:ring-[#005baa]/20 transition-all"
                             />
                         </div>
 
@@ -173,7 +173,7 @@ export default function UsersIndex({ users, filters = {}, faculties = [] }) {
                                     setSelectedRole(e.target.value);
                                     applyFilters({ vai_tro: e.target.value });
                                 }}
-                                className="h-11 w-full rounded-xl border-slate-200 px-3 text-sm text-slate-800 focus:border-[#005baa] focus:ring-2 focus:ring-[#005baa]/20"
+                                className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-800 focus:border-[#005baa] focus:ring-2 focus:ring-[#005baa]/20 transition-all"
                             >
                                 <option value="">Tất cả vai trò</option>
                                 <option value="SINH_VIEN">Sinh viên</option>
@@ -190,7 +190,7 @@ export default function UsersIndex({ users, filters = {}, faculties = [] }) {
                                     setSelectedStatus(e.target.value);
                                     applyFilters({ trang_thai: e.target.value });
                                 }}
-                                className="h-11 w-full rounded-xl border-slate-200 px-3 text-sm text-slate-800 focus:border-[#005baa] focus:ring-2 focus:ring-[#005baa]/20"
+                                className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-800 focus:border-[#005baa] focus:ring-2 focus:ring-[#005baa]/20 transition-all"
                             >
                                 <option value="">Tất cả trạng thái</option>
                                 <option value="DANG_HOAT_DONG">Đang hoạt động</option>
@@ -206,7 +206,7 @@ export default function UsersIndex({ users, filters = {}, faculties = [] }) {
                                     setSelectedFaculty(e.target.value);
                                     applyFilters({ ma_khoa: e.target.value });
                                 }}
-                                className="h-11 w-full rounded-xl border-slate-200 px-3 text-sm text-slate-800 focus:border-[#005baa] focus:ring-2 focus:ring-[#005baa]/20"
+                                className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-800 focus:border-[#005baa] focus:ring-2 focus:ring-[#005baa]/20 transition-all"
                             >
                                 <option value="">Tất cả khoa</option>
                                 {faculties.map((f) => (
@@ -224,32 +224,32 @@ export default function UsersIndex({ users, filters = {}, faculties = [] }) {
                             <button
                                 type="button"
                                 onClick={handleResetFilters}
-                                className="inline-flex items-center gap-1 text-[#005baa] hover:underline font-semibold"
+                                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#005baa] hover:underline"
                             >
                                 <RotateCcw className="w-3.5 h-3.5" />
-                                Xóa bộ lọc
+                                Đặt lại bộ lọc
                             </button>
                         </div>
                     )}
                 </div>
 
                 {/* Danh sách bảng người dùng */}
-                <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+                <div className="bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
                     {items.length === 0 ? (
-                        <div className="p-12 text-center text-slate-500 text-xs">
+                        <div className="p-12 text-center text-slate-400 text-xs">
                             Không tìm thấy tài khoản người dùng phù hợp với tiêu chí lọc.
                         </div>
                     ) : (
                         <div className="overflow-x-auto">
-                            <table className="w-full text-left text-sm text-slate-600">
-                                <thead className="bg-slate-50/75 border-b border-slate-200/80 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                            <table className="w-full text-left text-sm text-slate-700">
+                                <thead className="bg-slate-50/80 border-b border-slate-200/90 text-xs font-semibold text-slate-600 uppercase tracking-wider">
                                     <tr>
-                                        <th className="px-6 py-4">Thành viên</th>
-                                        <th className="px-6 py-4">Vai trò / Khoa</th>
-                                        <th className="px-6 py-4">Trạng thái</th>
-                                        <th className="px-6 py-4">Ví điểm / Uy tín</th>
-                                        <th className="px-6 py-4">Ngày tạo</th>
-                                        <th className="px-6 py-4 text-right">Khóa / Mở</th>
+                                        <th className="px-5 py-3.5">Thành viên</th>
+                                        <th className="px-5 py-3.5">Vai trò / Khoa</th>
+                                        <th className="px-5 py-3.5">Trạng thái</th>
+                                        <th className="px-5 py-3.5">Ví điểm / Uy tín</th>
+                                        <th className="px-5 py-3.5">Ngày tạo</th>
+                                        <th className="px-5 py-3.5 text-right">Khóa / Mở</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
@@ -263,10 +263,10 @@ export default function UsersIndex({ users, filters = {}, faculties = [] }) {
                                         const canManageAccount = !isProtectedAccount || auth?.user?.la_super_admin;
 
                                         return (
-                                            <tr key={u.id || u.ma_nguoi_dung} className="hover:bg-slate-50/50 transition-colors">
-                                                <td className="px-6 py-4">
+                                            <tr key={u.id || u.ma_nguoi_dung} className="hover:bg-slate-50/60 transition-colors">
+                                                <td className="px-5 py-3.5">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#005baa] to-[#00a896] text-white font-bold flex items-center justify-center uppercase text-xs shadow-xs">
+                                                        <div className="w-9 h-9 rounded-lg bg-blue-50 text-[#005baa] font-bold flex items-center justify-center uppercase text-xs border border-blue-100 shrink-0">
                                                             {u.ho_ten ? u.ho_ten.charAt(0) : 'U'}
                                                         </div>
                                                         <div>
@@ -290,8 +290,8 @@ export default function UsersIndex({ users, filters = {}, faculties = [] }) {
                                                     </div>
                                                 </td>
 
-                                                <td className="px-6 py-4">
-                                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${role.badge}`}>
+                                                <td className="px-5 py-3.5">
+                                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium border ${role.badge}`}>
                                                         {role.text}{u.cap_quan_tri === 'TOI_CAO' ? ' · Super Admin' : ''}
                                                     </span>
                                                     {u.khoa && (
@@ -302,8 +302,8 @@ export default function UsersIndex({ users, filters = {}, faculties = [] }) {
                                                     )}
                                                 </td>
 
-                                                <td className="px-6 py-4">
-                                                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${status.badge}`}>
+                                                <td className="px-5 py-3.5">
+                                                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium border ${status.badge}`}>
                                                         <span className="w-1.5 h-1.5 rounded-full bg-current" />
                                                         {status.text}
                                                     </span>
@@ -314,7 +314,7 @@ export default function UsersIndex({ users, filters = {}, faculties = [] }) {
                                                     )}
                                                 </td>
 
-                                                <td className="px-6 py-4">
+                                                <td className="px-5 py-3.5">
                                                     <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-700">
                                                         <Coins className="w-3.5 h-3.5 text-amber-500" />
                                                         {u.vi_diem?.diem_kha_dung ?? 0} đ
@@ -330,49 +330,49 @@ export default function UsersIndex({ users, filters = {}, faculties = [] }) {
                                                     </div>
                                                 </td>
 
-                                                <td className="px-6 py-4 text-xs text-slate-500 whitespace-nowrap">
+                                                <td className="px-5 py-3.5 text-xs text-slate-500 whitespace-nowrap">
                                                     {u.ngay_tao}
                                                 </td>
 
-                                                <td className="px-6 py-4 text-right">
-                                                    <div className="flex items-center justify-end gap-2">
+                                                <td className="px-5 py-3.5 text-right whitespace-nowrap">
+                                                    <div className="flex items-center justify-end gap-1.5">
                                                         <button
                                                             type="button"
                                                             onClick={() => router.visit(route('admin.users.show', u.ma_nguoi_dung))}
-                                                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-[#005baa] bg-blue-50 hover:bg-blue-100 border border-blue-200"
+                                                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-[#005baa] bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors"
                                                         >
                                                             <Eye className="w-3.5 h-3.5" />
                                                             Chi tiết
                                                         </button>
                                                         {isSelf ? (
-                                                            <span className="text-xs text-slate-400 italic">
+                                                            <span className="text-xs text-slate-400 italic px-2">
                                                                 Không thể khóa
                                                             </span>
                                                         ) : !canManageAccount ? (
-                                                            <span className="text-xs text-amber-600 italic">
+                                                            <span className="text-xs text-amber-600 italic px-2">
                                                                 Chỉ Super Admin
                                                             </span>
                                                         ) : (
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => setTargetUser(u)}
-                                                            className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors border ${isSuspended
-                                                                    ? 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border-emerald-200'
-                                                                    : 'text-rose-700 bg-rose-50 hover:bg-rose-100 border-rose-200'
-                                                                }`}
-                                                        >
-                                                            {isSuspended ? (
-                                                                <>
-                                                                    <Unlock className="w-3.5 h-3.5" />
-                                                                    Mở khóa
-                                                                </>
-                                                            ) : (
-                                                                <>
-                                                                    <Lock className="w-3.5 h-3.5" />
-                                                                    Khóa TK
-                                                                </>
-                                                            )}
-                                                        </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setTargetUser(u)}
+                                                                className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors border ${isSuspended
+                                                                        ? 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border-emerald-200'
+                                                                        : 'text-rose-700 bg-rose-50 hover:bg-rose-100 border-rose-200'
+                                                                    }`}
+                                                            >
+                                                                {isSuspended ? (
+                                                                    <>
+                                                                        <Unlock className="w-3.5 h-3.5" />
+                                                                        Mở khóa
+                                                                    </>
+                                                                ) : (
+                                                                    <>
+                                                                        <Lock className="w-3.5 h-3.5" />
+                                                                        Khóa TK
+                                                                    </>
+                                                                )}
+                                                            </button>
                                                         )}
                                                     </div>
                                                 </td>
@@ -384,34 +384,40 @@ export default function UsersIndex({ users, filters = {}, faculties = [] }) {
                         </div>
                     )}
 
-                    <Pagination links={users?.links} />
+                    {users && (
+                        <div className="p-4 border-t border-slate-200/90 bg-slate-50/40 flex flex-col sm:flex-row justify-between items-center gap-3">
+                            <div className="text-xs text-slate-500">
+                                Hiển thị <strong>{users.from || 0}</strong> - <strong>{users.to || 0}</strong> trên tổng số <strong>{users.total || 0}</strong> thành viên
+                            </div>
+                            <Pagination links={users?.links} />
+                        </div>
+                    )}
                 </div>
             </div>
 
             {/* MODAL XÁC NHẬN KHÓA / MỞ KHÓA TÀI KHOẢN */}
             {targetUser && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-xs animate-in fade-in duration-200">
-                    <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl p-6">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+                    <div className="relative w-full max-w-md bg-white rounded-xl shadow-xl border border-slate-200 p-6 space-y-4">
                         <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                            <div className={`flex items-center gap-2 font-bold text-base ${isTargetSuspended ? 'text-emerald-600' : 'text-rose-600'
-                                }`}>
+                            <div className={`flex items-center gap-2 font-bold text-base ${isTargetSuspended ? 'text-emerald-600' : 'text-rose-600'}`}>
                                 <AlertTriangle className="w-5 h-5" />
                                 {isTargetSuspended ? 'Mở khóa tài khoản' : 'Xác nhận khóa tài khoản'}
                             </div>
                             <button
                                 type="button"
                                 onClick={() => setTargetUser(null)}
-                                className="text-slate-400 hover:text-slate-600"
+                                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg transition-colors"
                             >
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
 
-                        <div className="mt-4 text-xs text-slate-600 space-y-3">
+                        <div className="text-xs text-slate-600 space-y-3">
                             <p>
                                 Bạn có chắc chắn muốn {isTargetSuspended ? 'mở khóa hoạt động' : 'tạm đình chỉ hoạt động'} đối với thành viên:
                             </p>
-                            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                            <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
                                 <div className="font-bold text-slate-900 text-sm">{targetUser.ho_ten}</div>
                                 <div className="text-slate-500">{targetUser.email}</div>
                                 {targetUser.mssv && (
@@ -425,12 +431,12 @@ export default function UsersIndex({ users, filters = {}, faculties = [] }) {
                             </p>
                         </div>
 
-                        <div className="flex items-center justify-end gap-2 mt-6 pt-3 border-t border-slate-100">
+                        <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
                             <button
                                 type="button"
                                 disabled={isSubmitting}
                                 onClick={() => setTargetUser(null)}
-                                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+                                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
                             >
                                 Hủy bỏ
                             </button>
@@ -438,7 +444,7 @@ export default function UsersIndex({ users, filters = {}, faculties = [] }) {
                                 type="button"
                                 disabled={isSubmitting}
                                 onClick={handleToggleStatus}
-                                className={`inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white rounded-xl transition-colors shadow-xs ${isTargetSuspended
+                                className={`inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white rounded-lg transition-colors shadow-xs ${isTargetSuspended
                                         ? 'bg-emerald-600 hover:bg-emerald-700'
                                         : 'bg-rose-600 hover:bg-rose-700'
                                     }`}

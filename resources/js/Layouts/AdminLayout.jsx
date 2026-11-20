@@ -265,15 +265,15 @@ export default function AdminLayout({ children, title = 'Quản trị hệ thố
                     </div>
 
                     {/* Thẻ thông tin vắn tắt của người dùng đăng nhập */}
-                    <div className={`my-4 mx-3 flex items-center gap-3 rounded-xl border border-slate-700/50 bg-slate-800/50 p-4 ${sidebarCollapsed ? 'lg:mx-2 lg:justify-center lg:p-3' : ''}`}>
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-brand-primary to-brand-secondary flex items-center justify-center font-bold text-white text-sm shrink-0 shadow-sm">
+                    <div className={`my-4 mx-3 flex items-center gap-3 rounded-xl border border-slate-800 bg-slate-900/60 p-3.5 ${sidebarCollapsed ? 'lg:mx-2 lg:justify-center lg:p-3' : ''}`}>
+                        <div className="w-9 h-9 rounded-full bg-[#005baa] flex items-center justify-center font-bold text-white text-xs shrink-0 shadow-xs">
                             {user?.ho_ten ? user.ho_ten.charAt(0).toUpperCase() : 'A'}
                         </div>
                         <div className={`min-w-0 flex-1 ${sidebarCollapsed ? 'lg:hidden' : ''}`}>
                             <p className="text-xs font-semibold text-white truncate">
                                 {user?.ho_ten || 'Quản trị viên'}
                             </p>
-                            <span className="inline-block mt-0.5 px-2 py-0.5 text-[10px] font-bold rounded-full bg-brand-secondary/20 text-brand-secondary border border-brand-secondary/30">
+                            <span className="inline-block mt-0.5 px-2 py-0.5 text-[10px] font-medium rounded-md bg-slate-800 text-slate-300 border border-slate-700">
                                 {user?.ten_vai_tro || 'Quản trị viên'}
                             </span>
                         </div>
@@ -315,11 +315,11 @@ export default function AdminLayout({ children, title = 'Quản trị hệ thố
                                                 key={itemIdx}
                                                 href={getSafeRoute(item.routeName, item.fallbackUrl)}
                                                 title={sidebarCollapsed ? `${item.label}: ${item.desc}` : undefined}
-                                                className={`flex items-center rounded-xl py-2 text-sm font-medium transition-all group ${sidebarCollapsed
+                                                className={`flex items-center rounded-xl py-2 text-sm font-medium transition-colors group ${sidebarCollapsed
                                                         ? 'gap-3 px-3.5 lg:justify-center lg:gap-0 lg:px-2'
                                                         : 'gap-3 px-3'
                                                     } ${active
-                                                        ? 'bg-brand-primary text-white shadow-md shadow-brand-primary/20'
+                                                        ? 'bg-[#005baa] text-white shadow-xs'
                                                         : 'text-slate-300 hover:text-white hover:bg-slate-800/80'
                                                     }`}
                                             >
