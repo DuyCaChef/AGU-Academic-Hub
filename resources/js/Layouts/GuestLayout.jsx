@@ -13,20 +13,21 @@ import { AlertTriangle, CheckCircle2, ExternalLink } from 'lucide-react';
  * - Sử dụng Icon Lucide đồng bộ cho giao diện chuyên nghiệp.
  */
 export default function GuestLayout({ children, title = 'Cổng thông tin', maxWidth = 'max-w-md' }) {
-    // Lấy thông báo flash được Laravel gửi kèm trong phiên làm việc
-    const { flash } = usePage().props;
+    // Lấy thông tin phiên làm việc và auth từ Inertia
+    const { flash, auth } = usePage().props;
 
     // Helper kiểm tra an toàn sự tồn tại của route Ziggy trước khi gọi
     const getHomeUrl = () => {
         try {
             if (typeof route === 'function') {
+                if (auth?.user && route().has('dashboard')) return route('dashboard');
                 if (route().has('home')) return route('home');
                 if (route().has('welcome')) return route('welcome');
             }
         } catch (e) {
             // Fallback an toàn nếu Ziggy chưa tải
         }
-        return '/';
+        return auth?.user ? '/trang-chu' : '/';
     };
 
     return (
@@ -39,15 +40,19 @@ export default function GuestLayout({ children, title = 'Cổng thông tin', max
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                     {/* Logo & Tên dự án */}
                     <Link href={getHomeUrl()} className="flex items-center gap-3 group">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-primary to-brand-secondary flex items-center justify-center text-white font-black text-xl shadow-md shadow-brand-primary/10 group-hover:scale-105 transition-transform">
-                            AGU
+                        <div className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center shrink-0">
+                            <img
+                                src="/storage/imgs/Logo-agu.webp"
+                                alt="Logo Trường Đại học An Giang"
+                                className="w-full h-full object-contain group-hover:scale-105 transition-transform"
+                            />
                         </div>
                         <div className="flex flex-col">
-                            <span className="font-bold text-text-primary text-base leading-tight tracking-tight">
+                            <span className="font-bold text-text-primary text-base leading-tight tracking-tight group-hover:text-brand-primary transition-colors">
                                 AGU Academic Hub
                             </span>
                             <span className="text-xs text-text-secondary font-medium">
-                                Nền tảng Tri thức Sinh viên
+                                Đại học An Giang — ĐHQG-HCM
                             </span>
                         </div>
                     </Link>

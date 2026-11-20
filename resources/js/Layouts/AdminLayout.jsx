@@ -236,8 +236,12 @@ export default function AdminLayout({ children, title = 'Quản trị hệ thố
                     {/* Phần đầu Sidebar: Logo và nhận diện quản trị */}
                     <div className={`flex h-16 items-center justify-between border-b border-slate-800/80 bg-slate-950/60 px-6 ${sidebarCollapsed ? 'lg:justify-center lg:px-3' : ''}`}>
                         <Link href={getSafeRoute('dashboard', '/')} className="flex items-center gap-3 group">
-                            <div className="w-9 h-9 rounded-lg bg-brand-primary flex items-center justify-center text-white font-extrabold text-sm shadow group-hover:scale-105 transition-transform">
-                                AGU
+                            <div className="w-9 h-9 flex items-center justify-center shrink-0">
+                                <img
+                                    src="/storage/imgs/Logo-agu.webp"
+                                    alt="Logo Trường Đại học An Giang"
+                                    className="w-full h-full object-contain group-hover:scale-105 transition-transform"
+                                />
                             </div>
                             <div className={`flex flex-col ${sidebarCollapsed ? 'lg:hidden' : ''}`}>
                                 <span className="font-bold text-white text-sm tracking-tight">
