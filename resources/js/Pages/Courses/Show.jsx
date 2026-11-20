@@ -113,6 +113,12 @@ function CourseShowInner({
     const pageProps = usePage().props;
     const currentUser = pageProps?.auth?.user || null;
     const availablePoints = currentUser?.vi_diem?.diem_kha_dung || 0;
+    const isStaff = Boolean(
+        currentUser?.la_quan_tri ||
+        currentUser?.la_kiem_duyet ||
+        currentUser?.vai_tro === "QUAN_TRI_VIEN" ||
+        currentUser?.vai_tro === "KIEM_DUYET_VIEN"
+    );
 
     // 1. CHUẨN HÓA DỮ LIỆU ĐẦU VÀO
     const safeFilters = (!Array.isArray(filters) && filters && typeof filters === "object") ? filters : {};
@@ -841,20 +847,31 @@ function CourseShowInner({
                                     </p>
                                 </div>
 
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        if (!currentUser) {
-                                            router.visit(route("login"));
-                                            return;
-                                        }
-                                        setIsReviewModalOpen(true);
-                                    }}
-                                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-[#005baa] text-white hover:bg-blue-700 transition-colors shadow-xs shrink-0"
-                                >
-                                    <MessageSquarePlus size={15} />
-                                    <span>Viết đánh giá môn học</span>
-                                </button>
+                                {isStaff ? (
+                                    <Link
+                                        href={route("admin.review-reports.index")}
+                                        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-blue-50 text-[#005baa] hover:bg-blue-100 border border-blue-200 transition-colors shadow-2xs shrink-0"
+                                        title="Quản lý kiểm duyệt báo cáo đánh giá"
+                                    >
+                                        <ShieldCheck size={15} />
+                                        <span>Kiểm duyệt đánh giá</span>
+                                    </Link>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            if (!currentUser) {
+                                                router.visit(route("login"));
+                                                return;
+                                            }
+                                            setIsReviewModalOpen(true);
+                                        }}
+                                        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-[#005baa] text-white hover:bg-blue-700 transition-colors shadow-xs shrink-0"
+                                    >
+                                        <MessageSquarePlus size={15} />
+                                        <span>Viết đánh giá môn học</span>
+                                    </button>
+                                )}
                             </div>
 
                             {/* Khối thống kê 3 tiêu chí */}
@@ -1132,27 +1149,37 @@ function CourseShowInner({
                             </div>
 
                             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full md:w-auto shrink-0">
-                                {currentUser && (
+                                {currentUser && !isStaff && (
                                     <div className="px-4 py-2 bg-white/10 rounded-xl border border-white/15 text-xs flex items-center gap-2 text-white">
                                         <Coins size={15} className="text-amber-300" />
                                         <span>Ví khả dụng: <strong className="text-amber-300 text-sm font-mono tabular-nums">{availablePoints}</strong> điểm</span>
                                     </div>
                                 )}
 
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        if (!currentUser) {
-                                            router.visit(route("login"));
-                                            return;
-                                        }
-                                        setIsWishlistModalOpen(true);
-                                    }}
-                                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-amber-400 text-slate-950 hover:bg-amber-300 transition-colors shadow-xs w-full sm:w-auto cursor-pointer"
-                                >
-                                    <Plus size={15} />
-                                    <span>Tạo yêu cầu tài liệu</span>
-                                </button>
+                                {isStaff ? (
+                                    <Link
+                                        href={route("admin.bounties.payout-queue")}
+                                        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-amber-400 text-slate-950 hover:bg-amber-300 transition-colors shadow-xs w-full sm:w-auto"
+                                    >
+                                        <ShieldCheck size={15} />
+                                        <span>Duyệt giải ngân Bounty</span>
+                                    </Link>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            if (!currentUser) {
+                                                router.visit(route("login"));
+                                                return;
+                                            }
+                                            setIsWishlistModalOpen(true);
+                                        }}
+                                        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-amber-400 text-slate-950 hover:bg-amber-300 transition-colors shadow-xs w-full sm:w-auto cursor-pointer"
+                                    >
+                                        <Plus size={15} />
+                                        <span>Tạo yêu cầu tài liệu</span>
+                                    </button>
+                                )}
                             </div>
                         </div>
 
@@ -1326,7 +1353,7 @@ function CourseShowInner({
                                                         <ExternalLink size={12} />
                                                     </Link>
 
-                                                    {req.trang_thai === "MO" && !isCreator && (
+                                                    {req.trang_thai === "MO" && !isCreator && !isStaff && (
                                                         <button
                                                             type="button"
                                                             onClick={() => handleOpenFulfillModal(reqId)}
@@ -1365,20 +1392,30 @@ function CourseShowInner({
                                         Bạn đang cần tìm đề thi các năm trước, đề cương chi tiết hay bài tập lớn? Hãy tạo yêu cầu và treo thưởng Bounty ngay để các bạn sinh viên hỗ trợ.
                                     </p>
                                     <div className="mt-5">
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                if (!currentUser) {
-                                                    router.visit(route("login"));
-                                                    return;
-                                                }
-                                                setIsWishlistModalOpen(true);
-                                            }}
-                                            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-[#005baa] text-white hover:bg-blue-700 transition-colors shadow-xs"
-                                        >
-                                            <Plus size={14} />
-                                            <span>Tạo yêu cầu đầu tiên</span>
-                                        </button>
+                                        {isStaff ? (
+                                            <Link
+                                                href={route("admin.bounties.payout-queue")}
+                                                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-[#005baa] text-white hover:bg-blue-700 transition-colors shadow-xs"
+                                            >
+                                                <ShieldCheck size={14} />
+                                                <span>Xem hàng đợi duyệt Bounty</span>
+                                            </Link>
+                                        ) : (
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    if (!currentUser) {
+                                                        router.visit(route("login"));
+                                                        return;
+                                                    }
+                                                    setIsWishlistModalOpen(true);
+                                                }}
+                                                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-[#005baa] text-white hover:bg-blue-700 transition-colors shadow-xs"
+                                            >
+                                                <Plus size={14} />
+                                                <span>Tạo yêu cầu đầu tiên</span>
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             )}

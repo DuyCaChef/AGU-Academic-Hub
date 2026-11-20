@@ -112,11 +112,62 @@ export default function Dashboard() {
     const { auth, stats = {}, recentDocuments = [] } = usePage().props;
     const user = auth?.user;
 
-    const displayName = user?.ho_ten || user?.name || "sinh viên";
+    const isAdmin = Boolean(user?.la_quan_tri || user?.vai_tro === "QUAN_TRI_VIEN");
+    const isModerator = Boolean(user?.la_kiem_duyet || user?.vai_tro === "KIEM_DUYET_VIEN");
+    const isAlumni = user?.vai_tro === "CUU_SINH_VIEN";
+    const isStaff = isAdmin || isModerator;
+
+    const displayName = user?.ho_ten || user?.name || (isStaff ? "Quản trị viên" : "sinh viên");
     const trustScore = stats.trustScore ?? user?.diem_uy_tin ?? "—";
 
-    const isAlumni = user?.vai_tro === "CUU_SINH_VIEN";
-    const roleTitle = isAlumni ? "Cựu sinh viên" : "Sinh viên chính quy";
+    let roleTitle = "Sinh viên chính quy";
+    if (isAdmin) {
+        roleTitle = user?.cap_quan_tri === "TOI_CAO" ? "Super Admin" : "Quản trị viên";
+    } else if (isModerator) {
+        roleTitle = "Kiểm duyệt viên";
+    } else if (isAlumni) {
+        roleTitle = "Cựu sinh viên";
+    }
+
+    const effectiveQuickLinks = [
+        {
+            title: "Tìm môn học",
+            description: "Tra cứu giáo trình, đề cương chi tiết và danh mục mã học phần.",
+            icon: Search,
+            href: "courses.index",
+        },
+        isStaff ? {
+            title: "Duyệt giải ngân Bounty",
+            description: "Xem và phê duyệt các yêu cầu giải ngân điểm thưởng tài liệu.",
+            icon: Coins,
+            href: "admin.bounties.payout-queue",
+            badge: "Admin",
+        } : {
+            title: "Săn thưởng tài liệu",
+            description: "Đăng tải tài liệu theo yêu cầu để nhận Bounty điểm ví từ cộng đồng.",
+            icon: Coins,
+            href: "document-requests.index",
+            badge: "Bounty",
+        },
+        {
+            title: "Duyệt danh sách khoa",
+            description: "Xem các khoa, bộ môn và chương trình đào tạo hiện tại của AGU.",
+            icon: Building2,
+            href: "faculties.index",
+        },
+        isStaff ? {
+            title: "Bảng điều khiển Quản trị",
+            description: "Quản lý toàn bộ người dùng, danh mục đào tạo và kiểm duyệt.",
+            icon: ShieldCheck,
+            href: "admin.dashboard",
+            badge: "Admin",
+        } : {
+            title: "Đăng tải tài liệu",
+            description: "Chia sẻ đề thi, slide bài giảng hoặc tài liệu tham khảo cho các khóa sau.",
+            icon: Upload,
+            href: "documents.create",
+        },
+    ];
 
     return (
         <StudentLayout title="Tổng quan">
@@ -133,7 +184,7 @@ export default function Dashboard() {
                         <div className="space-y-4">
                             <div className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-blue-100 backdrop-blur-xs border border-white/10">
                                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                                <span>Cổng học tập & Tra cứu tài liệu</span>
+                                <span>{isStaff ? "Không gian Điều hành & Tra cứu" : "Cổng học tập & Tra cứu tài liệu"}</span>
                             </div>
 
                             <div className="space-y-1">
@@ -141,41 +192,60 @@ export default function Dashboard() {
                                     Chào mừng trở lại, {displayName}
                                 </h1>
                                 <p className="text-sm leading-relaxed text-blue-100 max-w-xl">
-                                    Kho lưu trữ số chính thức của Đại học An Giang. Tra cứu đề cương, tải tài liệu đã kiểm duyệt và cùng cộng đồng học thuật chia sẻ tri thức.
+                                    {isStaff
+                                        ? "Hệ thống quản lý học liệu và danh mục học thuật Trường Đại học An Giang. Truy cập nhanh vào Bảng điều khiển Quản trị hoặc tra cứu tài nguyên đào tạo."
+                                        : "Kho lưu trữ số chính thức của Đại học An Giang. Tra cứu đề cương, tải tài liệu đã kiểm duyệt và cùng cộng đồng học thuật chia sẻ tri thức."
+                                    }
                                 </p>
                             </div>
 
                             <div className="flex flex-wrap items-center gap-3 pt-2">
+                                {isStaff && (
+                                    <Link
+                                        href={route("admin.dashboard")}
+                                        className="inline-flex items-center gap-2 rounded-lg bg-amber-400 hover:bg-amber-300 px-4 py-2.5 text-xs font-bold text-slate-950 shadow-xs transition-colors"
+                                    >
+                                        <ShieldCheck size={16} />
+                                        <span>Bảng điều khiển Quản trị</span>
+                                    </Link>
+                                )}
+
                                 <Link
                                     href={route("courses.index")}
-                                    className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2.5 text-xs font-semibold text-[#005BAA] shadow-xs transition-colors hover:bg-blue-50"
+                                    className={`inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-xs font-semibold shadow-xs transition-colors ${
+                                        isStaff
+                                            ? "bg-white/10 text-white border border-white/20 hover:bg-white/20"
+                                            : "bg-white text-[#005BAA] hover:bg-blue-50"
+                                    }`}
                                 >
                                     <BookOpen size={16} />
                                     <span>Khám phá môn học</span>
                                 </Link>
 
-                                <Link
-                                    href={route("documents.create")}
-                                    className="inline-flex items-center gap-2 rounded-lg bg-white/10 px-4 py-2.5 text-xs font-semibold text-white border border-white/20 transition-colors hover:bg-white/20"
-                                >
-                                    <Upload size={16} />
-                                    <span>Đăng tải tài liệu</span>
-                                </Link>
+                                {!isStaff && (
+                                    <Link
+                                        href={route("documents.create")}
+                                        className="inline-flex items-center gap-2 rounded-lg bg-white/10 px-4 py-2.5 text-xs font-semibold text-white border border-white/20 transition-colors hover:bg-white/20"
+                                    >
+                                        <Upload size={16} />
+                                        <span>Đăng tải tài liệu</span>
+                                    </Link>
+                                )}
                             </div>
                         </div>
 
-                        {/* Cột phải: Thẻ Hồ sơ Học thuật (Academic Passport) */}
+                        {/* Cột phải: Thẻ Hồ sơ Học thuật / Quản trị viên */}
                         <div className="rounded-xl border border-white/15 bg-white/10 p-5 backdrop-blur-xs text-white space-y-4">
                             <div className="flex items-start justify-between gap-2 border-b border-white/10 pb-3">
-                                <div>
+                                <div className="min-w-0 flex-1">
                                     <p className="text-[11px] font-medium text-blue-200">
-                                        HỒ SƠ HỌC THUẬT
+                                        {isStaff ? "HỒ SƠ QUẢN TRỊ VIÊN" : "HỒ SƠ HỌC THUẬT"}
                                     </p>
-                                    <p className="text-sm font-semibold tracking-tight text-white mt-0.5">
-                                        {user?.mssv || user?.ma_sinh_vien || "DTH225588"}
+                                    <p className="text-sm font-semibold tracking-tight text-white mt-0.5 truncate">
+                                        {isStaff ? (user?.email || "Quản trị viên AGU") : (user?.mssv || "Chưa gán MSSV")}
                                     </p>
                                 </div>
-                                <span className="rounded-md bg-white/15 px-2 py-0.5 text-[10px] font-medium text-blue-100 border border-white/10">
+                                <span className="rounded-md bg-white/15 px-2 py-0.5 text-[10px] font-medium text-blue-100 border border-white/10 shrink-0">
                                     {roleTitle}
                                 </span>
                             </div>
@@ -184,32 +254,48 @@ export default function Dashboard() {
                                 <div className="flex items-center justify-between">
                                     <span className="text-blue-200">Đơn vị:</span>
                                     <span className="font-medium text-white truncate max-w-[170px] text-right">
-                                        {user?.khoa?.ten_khoa || "Trường Đại học An Giang"}
+                                        {user?.khoa?.ten_khoa || (isStaff ? "Ban Quản Trị AGU Hub" : "Trường Đại học An Giang")}
                                     </span>
                                 </div>
                                 <div className="flex items-center justify-between">
-                                    <span className="text-blue-200">Độ tin cậy:</span>
+                                    <span className="text-blue-200">{isStaff ? "Quyền hạn:" : "Độ tin cậy:"}</span>
                                     <span className="font-medium text-white flex items-center gap-1">
                                         <ShieldCheck size={13} className="text-emerald-300" />
-                                        {trustScore} AGU Trust
+                                        {isStaff ? (user?.cap_quan_tri === "TOI_CAO" ? "Toàn quyền tối cao" : "Quản trị hệ thống") : `${trustScore} AGU Trust`}
                                     </span>
                                 </div>
                             </div>
 
-                            {/* Ví điểm Bounty shortcut */}
-                            <Link
-                                href={typeof route === "function" && route().has("wallet.index") ? route("wallet.index") : "/vi-diem"}
-                                className="flex items-center justify-between rounded-lg bg-black/20 hover:bg-black/30 px-3 py-2 text-xs font-medium border border-white/10 transition-colors"
-                                title="Xem chi tiết ví điểm thưởng"
-                            >
-                                <span className="flex items-center gap-1.5 text-blue-100">
-                                    <Coins size={14} className="text-amber-300" />
-                                    Ví khả dụng:
-                                </span>
-                                <span className="font-mono font-semibold text-amber-300 text-xs">
-                                    {user?.vi_diem?.diem_kha_dung || 0} pts &rarr;
-                                </span>
-                            </Link>
+                            {/* Nút lối tắt dưới thẻ hồ sơ */}
+                            {isStaff ? (
+                                <Link
+                                    href={route("admin.dashboard")}
+                                    className="flex items-center justify-between rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 px-3 py-2 text-xs font-bold shadow-xs transition-colors"
+                                    title="Đến Bảng điều khiển Quản trị"
+                                >
+                                    <span className="flex items-center gap-1.5">
+                                        <ShieldCheck size={14} className="text-slate-950" />
+                                        Bảng Quản trị:
+                                    </span>
+                                    <span className="text-xs">
+                                        Admin Console &rarr;
+                                    </span>
+                                </Link>
+                            ) : (
+                                <Link
+                                    href={typeof route === "function" && route().has("wallet.index") ? route("wallet.index") : "/vi-diem"}
+                                    className="flex items-center justify-between rounded-lg bg-black/20 hover:bg-black/30 px-3 py-2 text-xs font-medium border border-white/10 transition-colors"
+                                    title="Xem chi tiết ví điểm thưởng"
+                                >
+                                    <span className="flex items-center gap-1.5 text-blue-100">
+                                        <Coins size={14} className="text-amber-300" />
+                                        Ví khả dụng:
+                                    </span>
+                                    <span className="font-mono font-semibold text-amber-300 text-xs">
+                                        {user?.vi_diem?.diem_kha_dung || 0} pts &rarr;
+                                    </span>
+                                </Link>
+                            )}
                         </div>
                     </div>
                 </section>
@@ -251,7 +337,7 @@ export default function Dashboard() {
                     />
 
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                        {quickLinks.map((item) => {
+                        {effectiveQuickLinks.map((item) => {
                             const Icon = item.icon;
 
                             return (
