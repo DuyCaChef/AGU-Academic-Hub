@@ -16,6 +16,8 @@ class BaoCaoDanhGia extends Model
 
     protected $fillable = [
         'ma_danh_gia',
+        'ma_danh_gia_cu',
+        'snapshot_noi_dung',
         'loai_doi_tuong',
         'ten_giang_vien',
         'ma_nguoi_bao_cao',
@@ -31,12 +33,14 @@ class BaoCaoDanhGia extends Model
     {
         return [
             'thoi_gian_xu_ly' => 'datetime',
+            'ma_danh_gia_cu'  => 'integer',
         ];
     }
 
+    // Quan hệ với bài đánh giá môn học (hỗ trợ cả các bài đã xóa mềm)
     public function danhGia(): BelongsTo
     {
-        return $this->belongsTo(DanhGiaMonHoc::class, 'ma_danh_gia', 'ma_danh_gia');
+        return $this->belongsTo(DanhGiaMonHoc::class, 'ma_danh_gia', 'ma_danh_gia')->withTrashed();
     }
 
     public function nguoiBaoCao(): BelongsTo
@@ -47,5 +51,11 @@ class BaoCaoDanhGia extends Model
     public function nguoiXuLy(): BelongsTo
     {
         return $this->belongsTo(NguoiDung::class, 'nguoi_xu_ly', 'ma_nguoi_dung');
+    }
+
+    // Accessor lấy mã bài đánh giá (ưu tiên bài hiện tại, fallback về bài cũ nếu đã gỡ bỏ)
+    public function getMaDanhGiaHienThiAttribute(): ?int
+    {
+        return $this->ma_danh_gia ?? $this->ma_danh_gia_cu;
     }
 }

@@ -30,6 +30,7 @@ class ReviewModerationRepository
                 $query->where(function (Builder $sub) use ($term) {
                     $sub->where('chi_tiet', 'like', $term)
                         ->orWhere('ten_giang_vien', 'like', $term)
+                        ->orWhere('snapshot_noi_dung', 'like', $term)
                         ->orWhereHas('danhGia', function (Builder $dq) use ($term) {
                             $dq->where('noi_dung', 'like', $term)
                                ->orWhereHas('monHoc', function (Builder $mq) use ($term) {
@@ -101,9 +102,9 @@ class ReviewModerationRepository
                     'loai_doi_tuong'   => $typeKey,
                     'loai_nhan'        => $isLecturer ? 'Đánh giá Giảng viên' : 'Đánh giá Môn học',
                     'ma_mon_hoc'       => $course?->ma_mon_hoc ?? '—',
-                    'ten_mon_hoc'      => $course?->ten_mon_hoc ?? ('Đánh giá #' . $rep->ma_danh_gia),
+                    'ten_mon_hoc'      => $course?->ten_mon_hoc ?? ('Đánh giá #' . ($rep->ma_danh_gia ?? $rep->ma_danh_gia_cu ?? 'N/A')),
                     'ten_giang_vien'   => $rep->ten_giang_vien,
-                    'noi_dung_chinh'   => $rev?->noi_dung ?? '',
+                    'noi_dung_chinh'   => $rev?->noi_dung ?? ($rep->snapshot_noi_dung ?? 'Nội dung bài đánh giá đã được xử lý và gỡ bỏ.'),
                     'hoc_ky'           => $rev?->hoc_ky,
                     'diem_do_kho'      => $rev?->diem_do_kho ?? 0,
                     'an_danh'          => (bool) ($rev?->an_danh ?? false),
