@@ -61,7 +61,8 @@ class CourseReviewRepository
     }
 
     // Lấy danh sách đánh giá phân trang kèm thông tin người dùng và thống kê bình chọn
-    public function getPaginatedReviews(int $courseId, int $perPage = 10): LengthAwarePaginator
+    // Nhận tùy chọn page_name và page_number để hỗ trợ phân trang độc lập trên trang có nhiều tab
+    public function getPaginatedReviews(int $courseId, int $perPage = 10, string $pageName = 'page', ?int $currentPage = null): LengthAwarePaginator
     {
         return DanhGiaMonHoc::daDuyet()
             ->with(['nguoiDung.khoa', 'binhChons'])
@@ -76,7 +77,8 @@ class CourseReviewRepository
             ])
             ->where('ma_mon_hoc', $courseId)
             ->orderBy('ma_danh_gia', 'desc')
-            ->paginate($perPage);
+            // Truyền tên tham số riêng để tránh xung đột query param page giữa các tab
+            ->paginate($perPage, ['*'], $pageName, $currentPage);
     }
 
     // Lưu bài đánh giá mới

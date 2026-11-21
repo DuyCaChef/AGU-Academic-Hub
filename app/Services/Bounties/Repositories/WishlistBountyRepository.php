@@ -68,7 +68,11 @@ class WishlistBountyRepository
             $query->orderByDesc('ma_yeu_cau');
         }
 
-        return $query->paginate($perPage);
+        // Sử dụng tên tham số phân trang riêng để tránh xung đột query param page giữa các tab
+        $pageName = $filters['page_name'] ?? 'page';
+        $currentPage = isset($filters['page_number']) ? (int) $filters['page_number'] : null;
+
+        return $query->paginate($perPage, ['*'], $pageName, $currentPage);
     }
 
     // Danh sách các môn học hợp lệ dùng cho bộ lọc

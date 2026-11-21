@@ -17,10 +17,11 @@ class DocumentRemovalRequestTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_author_cannot_request_removal_before_community_ownership_threshold(): void
+    public function test_author_cannot_request_removal_when_still_eligible_for_self_delete(): void
     {
         $author = NguoiDung::factory()->create();
-        $document = $this->createDocument($author, 9);
+        // Tài liệu 0 lượt tải và tạo trong 24h: tác giả vẫn có quyền tự xóa mềm, không được gửi đơn gỡ
+        $document = $this->createDocument($author, 0);
 
         $response = $this->actingAs($author)->post(route('documents.request-removal', $document), [
             'reason' => 'Tôi muốn cập nhật tài liệu này.',
@@ -28,6 +29,23 @@ class DocumentRemovalRequestTest extends TestCase
 
         $response->assertSessionHasErrors('document');
         $this->assertDatabaseCount('yeu_cau_go_bo_tai_lieu', 0);
+    }
+
+    public function test_author_can_request_removal_in_deadlock_zone_with_prior_downloads(): void
+    {
+        Notification::fake();
+        $author = NguoiDung::factory()->create();
+        $moderator = NguoiDung::factory()->moderator()->create();
+        // Tài liệu có từ 1 đến 9 lượt tải (vùng chết trước đây): tác giả không thể tự xóa nhưng được gửi đơn gỡ
+        $document = $this->createDocument($author, 5);
+
+        $this->actingAs($author)->post(route('documents.request-removal', $document), [
+            'reason' => 'Tài liệu đã có 5 lượt tải, tôi không thể tự xóa nên gửi đơn xin gỡ.',
+        ])->assertSessionHasNoErrors();
+
+        $removalRequest = YeuCauGoBoTaiLieu::firstOrFail();
+        $this->assertSame('CHO_XU_LY', $removalRequest->trang_thai);
+        Notification::assertSentTo($moderator, DocumentRemovalRequestSubmittedNotification::class);
     }
 
     public function test_author_can_submit_community_removal_request_and_moderators_are_notified(): void

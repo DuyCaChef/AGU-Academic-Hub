@@ -39,7 +39,11 @@ class DocumentRepository
             default => $query->latest('ma_tai_lieu'),
         };
 
-        return $query->paginate($perPage)->withQueryString();
+        // Sử dụng tên tham số phân trang riêng để tránh xung đột giữa các tab trên cùng trang
+        $pageName = $filters['page_name'] ?? 'page';
+        $currentPage = isset($filters['page_number']) ? (int) $filters['page_number'] : null;
+
+        return $query->paginate($perPage, ['*'], $pageName, $currentPage)->withQueryString();
     }
 
     // Tìm tài liệu theo ID (kèm người đăng và môn học)

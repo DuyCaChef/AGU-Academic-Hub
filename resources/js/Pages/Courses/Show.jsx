@@ -171,6 +171,25 @@ function CourseShowInner({
                 wishlist_sort: typeof newFilters.wishlist_sort === "string" ? newFilters.wishlist_sort : wishlistSort,
             };
 
+            // Phân trang riêng biệt cho từng tab: tránh xung đột query param page dùng chung
+            // Mỗi tab chỉ gửi tham số page của chính mình, xóa tham số page của tab khác
+            if (targetTab === "documents") {
+                // Tab Tài liệu dùng doc_page; reset về trang 1 khi áp dụng bộ lọc mới
+                queryParams.doc_page = newFilters.doc_page || 1;
+                delete queryParams.rev_page;
+                delete queryParams.bty_page;
+            } else if (targetTab === "reviews") {
+                // Tab Đánh giá dùng rev_page; reset về trang 1 khi áp dụng bộ lọc mới
+                queryParams.rev_page = newFilters.rev_page || 1;
+                delete queryParams.doc_page;
+                delete queryParams.bty_page;
+            } else if (targetTab === "wishlist") {
+                // Tab Yêu cầu dùng bty_page; reset về trang 1 khi áp dụng bộ lọc mới
+                queryParams.bty_page = newFilters.bty_page || 1;
+                delete queryParams.doc_page;
+                delete queryParams.rev_page;
+            }
+
             if (!queryParams.search) delete queryParams.search;
             if (!queryParams.category || queryParams.category === "ALL") delete queryParams.category;
             if (!queryParams.sort || queryParams.sort === "latest") delete queryParams.sort;
@@ -178,6 +197,10 @@ function CourseShowInner({
             if (!queryParams.wishlist_status || queryParams.wishlist_status === "TAT_CA") delete queryParams.wishlist_status;
             if (!queryParams.wishlist_category || queryParams.wishlist_category === "ALL") delete queryParams.wishlist_category;
             if (!queryParams.wishlist_sort || queryParams.wishlist_sort === "moi_nhat") delete queryParams.wishlist_sort;
+            // Xóa tham số page mặc định = 1 để giữ URL gọn
+            if (queryParams.doc_page === 1) delete queryParams.doc_page;
+            if (queryParams.rev_page === 1) delete queryParams.rev_page;
+            if (queryParams.bty_page === 1) delete queryParams.bty_page;
 
             setIsLoading(true);
             router.get(

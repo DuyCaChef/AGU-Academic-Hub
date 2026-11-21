@@ -22,8 +22,9 @@ class GetCourseReviewsQuery
         // 2. Tính toán điểm trung bình 3 tiêu chí của môn học
         $thongKe = $this->reviewRepository->getCourseReviewStats($courseId);
 
-        // 3. Truy vấn danh sách đánh giá phân trang
-        $reviews = $this->reviewRepository->getPaginatedReviews($courseId, 10);
+        // 3. Truy vấn danh sách đánh giá phân trang — dùng page_name riêng để tránh xung đột tab
+        $revPage = (int) $request->get('rev_page', 1);
+        $reviews = $this->reviewRepository->getPaginatedReviews($courseId, 10, 'rev_page', $revPage);
         $reviews->appends($request->query());
 
         // 4. Chuyển đổi qua Resource để che giấu mã người dùng ở tầng public

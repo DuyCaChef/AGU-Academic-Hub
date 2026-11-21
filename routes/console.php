@@ -10,3 +10,5 @@ Artisan::command('inspire', function () {
 
 Schedule::command('documents:purge-trash')->daily();
 Schedule::command('documents:notify-expiring-trash')->daily();
+// Tự động hủy và hoàn điểm cọc cho các yêu cầu Bounty quá 30 ngày không có phản hồi
+Schedule::command('bounty:auto-refund')->dailyAt('02:00');

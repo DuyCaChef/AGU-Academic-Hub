@@ -35,23 +35,35 @@ class CourseController extends Controller
         $course = $this->coursesQuery->findActiveCourseByCode($course_code);
         $faculties = $this->coursesQuery->getPublicFaculties($request->user());
 
+        // Phân trang tài liệu dùng tham số doc_page riêng để tránh xung đột với các tab khác (tương thích ngược với page)
+        $docPage = (int) ($request->get('doc_page') ?? $request->get('page', 1));
+        $docPageName = $request->has('doc_page') ? 'doc_page' : 'page';
         $docFilters = array_merge(
             $request->only(['search', 'category', 'sort']),
-            ['course_id' => $course->ma_mon_hoc]
+            [
+                'course_id'   => $course->ma_mon_hoc,
+                'page_name'   => $docPageName,
+                'page_number' => $docPage,
+            ]
         );
         $documents = $this->coursesQuery->getPaginatedDocuments($docFilters, 8);
 
         // Lấy thống kê và danh sách đánh giá của môn học (Phase 3B2)
+        // Phân trang đánh giá dùng rev_page — được xử lý bên trong GetCourseReviewsQuery
         $reviewsQuery = app(GetCourseReviewsQuery::class);
         $reviewData = $reviewsQuery->execute($request, $course->ma_hoc_phan);
 
         // Lấy danh sách yêu cầu tài liệu thuộc môn học này (Phase 3B3)
+        // Phân trang wishlist dùng tham số bty_page riêng để tránh xung đột với các tab khác
+        $btyPage = (int) $request->get('bty_page', 1);
         $wishlistRepo = app(\App\Services\Bounties\Repositories\WishlistBountyRepository::class);
         $wishlistFilters = [
-            'ma_mon_hoc' => $course->ma_mon_hoc,
-            'trang_thai' => $request->input('wishlist_status', 'TAT_CA'),
-            'phan_loai'  => $request->input('wishlist_category'),
-            'sap_xep'    => $request->input('wishlist_sort', 'moi_nhat'),
+            'ma_mon_hoc'  => $course->ma_mon_hoc,
+            'trang_thai'  => $request->input('wishlist_status', 'TAT_CA'),
+            'phan_loai'   => $request->input('wishlist_category'),
+            'sap_xep'     => $request->input('wishlist_sort', 'moi_nhat'),
+            'page_name'   => 'bty_page',
+            'page_number' => $btyPage,
         ];
         $wishlistRequests = $wishlistRepo->getPaginatedWishlist($wishlistFilters, 8);
         $wishlistRequests->appends($request->query());

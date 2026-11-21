@@ -8,6 +8,21 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
+        // Bỏ qua toàn bộ migration này nếu đang chạy trên SQLite (môi trường test)
+        // SQLite không hỗ trợ MODIFY COLUMN, ENGINE, hay information_schema
+        if (DB::getDriverName() === 'sqlite') {
+            // Chỉ bổ sung cột mới tương thích SQLite nếu chưa có
+            Schema::table('bao_cao_danh_gia', function (Blueprint $table) {
+                if (!Schema::hasColumn('bao_cao_danh_gia', 'ma_danh_gia_cu')) {
+                    $table->unsignedBigInteger('ma_danh_gia_cu')->nullable();
+                }
+                if (!Schema::hasColumn('bao_cao_danh_gia', 'snapshot_noi_dung')) {
+                    $table->text('snapshot_noi_dung')->nullable();
+                }
+            });
+            return;
+        }
+
         // 1. Sao lưu toàn bộ dữ liệu bảng hiện tại sang bảng sao lưu an toàn nếu chưa có
         DB::statement('CREATE TABLE IF NOT EXISTS bao_cao_danh_gia_backup_20261121 AS SELECT * FROM bao_cao_danh_gia;');
 
@@ -31,7 +46,7 @@ return new class extends Migration {
         // 3. Cho phép cột ma_danh_gia nhận giá trị NULL để lưu trữ lịch sử báo cáo khi bài viết bị gỡ bỏ
         DB::statement('ALTER TABLE bao_cao_danh_gia MODIFY COLUMN ma_danh_gia BIGINT UNSIGNED NULL;');
 
-        // 4. Bảo tồn 9 bản ghi mồ côi: Ghi nhận mã đánh giá cũ, tạo snapshot và đặt ma_danh_gia = NULL
+        // 4. Bảo tồn các bản ghi mồ côi: Ghi nhận mã đánh giá cũ, tạo snapshot và đặt ma_danh_gia = NULL
         DB::statement("
             UPDATE bao_cao_danh_gia b
             SET 
@@ -68,6 +83,17 @@ return new class extends Migration {
 
     public function down(): void
     {
+        // Bỏ qua rollback trên SQLite
+        if (DB::getDriverName() === 'sqlite') {
+            Schema::table('bao_cao_danh_gia', function (Blueprint $table) {
+                $table->dropColumn(array_filter(
+                    ['ma_danh_gia_cu', 'snapshot_noi_dung'],
+                    fn($col) => Schema::hasColumn('bao_cao_danh_gia', $col)
+                ));
+            });
+            return;
+        }
+
         Schema::table('bao_cao_danh_gia', function (Blueprint $table) {
             $table->dropForeign('fk_bao_cao_danh_gia_ma_danh_gia');
         });
