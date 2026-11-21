@@ -22,7 +22,8 @@ class ApproveBountyPayoutAction
         protected WishlistBountyRepository $bountyRepository,
         protected ReputationEvaluator $reputationEvaluator,
         protected AuditLogger $auditLogger
-    ) {}
+    ) {
+    }
 
     public function execute(NguoiDung $actor, int $maYeuCau): array
     {
@@ -58,12 +59,12 @@ class ApproveBountyPayoutAction
             }
 
             $nguoiDongGop = $dapUng->nguoiDongGop;
-            $nguoiYeuCau  = $yeuCau->nguoiTao;
+            $nguoiYeuCau = $yeuCau->nguoiTao;
 
             // Đảm bảo tài liệu được đánh dấu DA_DUYET khi Ban kiểm duyệt duyệt
             if ($dapUng->taiLieu && $dapUng->taiLieu->trang_thai !== 'DA_DUYET') {
                 $dapUng->taiLieu->update([
-                    'trang_thai'        => 'DA_DUYET',
+                    'trang_thai' => 'DA_DUYET',
                     'ly_do_trang_thai' => "Được phê duyệt hợp lệ bởi {$actor->ho_ten} lúc " . now()->format('d/m/Y H:i'),
                 ]);
             }
