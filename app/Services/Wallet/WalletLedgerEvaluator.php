@@ -237,6 +237,44 @@ class WalletLedgerEvaluator
             'da_xu_ly'      => false,
         ];
     }
+
+    // Cộng điểm thưởng cống hiến tri thức khi người dùng tải lên tài liệu học tập
+    public function congDiemDongGopTaiLieu(NguoiDung $nguoiDung, \App\Models\TaiLieu $taiLieu, int $diem = 10, ?string $khoaChongLap = null): ?GiaoDichDiem
+    {
+        if ($diem <= 0) {
+            return null;
+        }
+
+        $khoaChongLap = $khoaChongLap ?? "upload_doc_{$taiLieu->getKey()}";
+
+        // Kiểm tra Idempotency: Mỗi tài liệu chỉ được thưởng 1 lần
+        $daCong = GiaoDichDiem::where('khoa_chong_trung', $khoaChongLap)->first();
+        if ($daCong) {
+            return $daCong;
+        }
+
+        // Khóa dòng ví điểm trong transaction
+        $vi = $this->khoaViDiem($nguoiDung->ma_nguoi_dung);
+        $vi->diem_kha_dung += $diem;
+        $vi->save();
+
+        // Tăng điểm uy tín học thuật
+        $nguoiDung->increment('diem_uy_tin', $diem);
+
+        // Ghi sổ cái kế toán kép
+        return GiaoDichDiem::create([
+            'ma_vi'             => $vi->ma_vi,
+            'loai_giao_dich'    => LoaiGiaoDichDiem::CONG_DIEM,
+            'so_diem'           => $diem,
+            'thay_doi_kha_dung' => $diem,
+            'thay_doi_tam_giu'  => 0,
+            'loai_tham_chieu'   => \App\Models\TaiLieu::class,
+            'ma_tham_chieu'     => $taiLieu->getKey(),
+            'khoa_chong_trung'  => $khoaChongLap,
+            'mo_ta'             => "Cộng {$diem} điểm thưởng đóng góp tài liệu học tập #{$taiLieu->getKey()} ({$taiLieu->tieu_de})",
+            'thoi_gian_tao'     => now(),
+        ]);
+    }
 }
 
 

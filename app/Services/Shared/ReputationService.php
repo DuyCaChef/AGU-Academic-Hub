@@ -39,6 +39,12 @@ class ReputationService
     {
         return $this->evaluator->hoanDiemBounty($yeuCau, $khoaChongLap);
     }
+
+    // Cộng điểm cống hiến tri thức khi tải lên tài liệu học tập
+    public function congDiemDongGopTaiLieu(NguoiDung $nguoiDung, \App\Models\TaiLieu $taiLieu, int $diem = 10, ?string $khoaChongLap = null): ?GiaoDichDiem
+    {
+        return $this->evaluator->congDiemDongGopTaiLieu($nguoiDung, $taiLieu, $diem, $khoaChongLap);
+    }
 }
 
 

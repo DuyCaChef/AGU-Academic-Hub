@@ -41,3 +41,4 @@ Thumbs.db
 /storage/app/private/kyc/*
 !/storage/app/private/kyc/.gitignore
 .agents
+tests
