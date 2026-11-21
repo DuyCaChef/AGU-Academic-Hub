@@ -13,10 +13,10 @@ use App\Listeners\BountyNotificationListener;
 use App\Listeners\DocumentModerationNotificationListener;
 use App\Listeners\KycNotificationListener;
 use App\Listeners\ReviewNotificationListener;
-use App\Services\Community\Adapters\LaravelNotificationDispatcher;
-use App\Services\Community\Contracts\NotificationDispatcherInterface;
-use App\Services\Community\NotificationPayloadBuilder;
-use App\Services\Community\NotificationRecipientPolicy;
+use App\Services\Notifications\Adapters\LaravelNotificationDispatcher;
+use App\Services\Notifications\Contracts\NotificationDispatcherInterface;
+use App\Services\Notifications\NotificationPayloadBuilder;
+use App\Services\Notifications\NotificationRecipientPolicy;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Vite;
@@ -75,3 +75,4 @@ class AppServiceProvider extends ServiceProvider
         );
     }
 }
+

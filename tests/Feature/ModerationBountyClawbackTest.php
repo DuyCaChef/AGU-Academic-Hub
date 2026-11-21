@@ -17,8 +17,8 @@ use App\Models\ViDiem;
 use App\Models\YeuCauGoBoTaiLieu;
 use App\Models\YeuCauTaiLieu;
 use App\Enums\HanhDongKiemToan;
-use App\Services\Community\Actions\ApproveBountyPayoutAction;
-use App\Services\Community\ReputationEvaluator;
+use App\Services\Bounties\Actions\ApproveBountyPayoutAction;
+use App\Services\Wallet\ReputationEvaluator;
 use App\Services\Moderation\Actions\DecideDocumentReviewAction;
 use App\Services\Moderation\Actions\DecideRemovalRequestAction;
 use App\Services\Moderation\Actions\ResolveViolationReportAction;
@@ -320,3 +320,5 @@ class ModerationBountyClawbackTest extends TestCase
         $this->assertEquals('TU_CHOI', $dapUng->fresh()->trang_thai);
     }
 }
+
+

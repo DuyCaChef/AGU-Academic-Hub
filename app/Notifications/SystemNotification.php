@@ -2,7 +2,7 @@
 
 namespace App\Notifications;
 
-use App\Services\Community\DTOs\NotificationPayload;
+use App\Services\Notifications\DTOs\NotificationPayload;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\DatabaseMessage;
 use Illuminate\Notifications\Notification;
@@ -27,4 +27,5 @@ class SystemNotification extends Notification
         return new DatabaseMessage($this->payload->toArray());
     }
 }
+
 

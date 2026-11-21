@@ -2,11 +2,11 @@
 
 namespace App\Listeners;
 
-use App\Services\Community\Contracts\NotificationDispatcherInterface;
+use App\Services\Notifications\Contracts\NotificationDispatcherInterface;
 use App\Events\KycDecisionEvent;
 use App\Events\KycSubmittedEvent;
-use App\Services\Community\NotificationPayloadBuilder;
-use App\Services\Community\NotificationRecipientPolicy;
+use App\Services\Notifications\NotificationPayloadBuilder;
+use App\Services\Notifications\NotificationRecipientPolicy;
 
 class KycNotificationListener
 {
@@ -37,4 +37,5 @@ class KycNotificationListener
         }
     }
 }
+
 

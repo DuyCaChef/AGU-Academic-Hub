@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\MonHoc;
 use App\Models\TaiLieu;
-use App\Services\Community\Queries\GetPublicFacultiesQuery;
+use App\Services\AcademicCatalog\Queries\GetPublicFacultiesQuery;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -48,3 +48,4 @@ class DashboardController extends Controller
         ]);
     }
 }
+

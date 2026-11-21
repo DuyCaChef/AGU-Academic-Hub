@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             BaoCaoViPhamSeeder::class,
             CommunitySeeder::class,
             DanhSachSinhVienRawSeeder::class,
+            KycSeeder::class,
         ]);
     }
 }

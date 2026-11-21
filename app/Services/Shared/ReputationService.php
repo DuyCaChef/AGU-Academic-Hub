@@ -6,13 +6,14 @@ use App\Models\GiaoDichDiem;
 use App\Models\NguoiDung;
 use App\Models\ViDiem;
 use App\Models\YeuCauTaiLieu;
-use App\Services\Community\ReputationEvaluator;
+use App\Services\Wallet\WalletLedgerEvaluator;
+use App\Services\Wallet\ReputationEvaluator;
 
 // Service tương thích ngược, ủy quyền xử lý sang ReputationEvaluator thuộc Module Bounties
 class ReputationService
 {
     public function __construct(
-        protected ReputationEvaluator $evaluator
+        protected WalletLedgerEvaluator $evaluator
     ) {}
 
     // Khóa dòng ví điểm trong CSDL để chống Race Condition
@@ -39,3 +40,5 @@ class ReputationService
         return $this->evaluator->hoanDiemBounty($yeuCau, $khoaChongLap);
     }
 }
+
+

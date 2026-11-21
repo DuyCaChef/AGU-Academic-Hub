@@ -20,9 +20,9 @@ use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\ProfileController;
 use App\Http\Controllers\Auth\RegisteredUserController;
-use App\Http\Controllers\Community\AcademicCatalogController;
-use App\Http\Controllers\Community\CourseController;
-use App\Http\Controllers\Community\FacultyController;
+use App\Http\Controllers\AcademicCatalog\AcademicCatalogController;
+use App\Http\Controllers\AcademicCatalog\CourseController;
+use App\Http\Controllers\AcademicCatalog\FacultyController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [

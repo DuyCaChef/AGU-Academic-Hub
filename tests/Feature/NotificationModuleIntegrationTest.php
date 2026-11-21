@@ -12,15 +12,15 @@ use App\Models\NguoiDung;
 use App\Models\TaiLieu;
 use App\Models\ThongBao;
 use App\Models\YeuCauTaiLieu;
-use App\Services\Community\Actions\CancelBountyRequestAction;
-use App\Services\Community\Actions\ConfirmBountyFulfillmentAction;
-use App\Services\Community\Actions\FulfillBountyRequestAction;
+use App\Services\Bounties\Actions\CancelBountyRequestAction;
+use App\Services\Bounties\Actions\ConfirmBountyFulfillmentAction;
+use App\Services\Bounties\Actions\FulfillBountyRequestAction;
 use App\Services\Moderation\Actions\DecideDocumentReviewAction;
-use App\Services\Community\Contracts\NotificationDispatcherInterface;
-use App\Services\Community\DTOs\NotificationPayload;
+use App\Services\Notifications\Contracts\NotificationDispatcherInterface;
+use App\Services\Notifications\DTOs\NotificationPayload;
 use App\Enums\NotificationCategory;
 use App\Enums\NotificationType;
-use App\Services\Community\Actions\ReportReviewViolationAction;
+use App\Services\Reviews\Actions\ReportReviewViolationAction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -439,8 +439,8 @@ class NotificationModuleIntegrationTest extends TestCase
         $this->assertTrue($result['success']);
 
         // Admin duyệt giải ngân điểm Bounty
-        /** @var \App\Services\Community\Actions\ApproveBountyPayoutAction $approveAction */
-        $approveAction = app(\App\Services\Community\Actions\ApproveBountyPayoutAction::class);
+        /** @var \App\Services\Bounties\Actions\ApproveBountyPayoutAction $approveAction */
+        $approveAction = app(\App\Services\Bounties\Actions\ApproveBountyPayoutAction::class);
         $approveResult = $approveAction->execute($this->admin, $yeuCau->ma_yeu_cau);
         $this->assertTrue($approveResult['success']);
 
@@ -582,3 +582,5 @@ class NotificationModuleIntegrationTest extends TestCase
         $this->assertStringNotContainsString($this->studentB->ho_ten, $modNotif->noi_dung);
     }
 }
+
+

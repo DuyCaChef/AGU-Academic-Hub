@@ -3,9 +3,9 @@
 namespace App\Listeners;
 
 use App\Enums\TrangThaiYeuCauTaiLieu;
-use App\Services\Community\Contracts\NotificationDispatcherInterface;
+use App\Services\Notifications\Contracts\NotificationDispatcherInterface;
 use App\Events\DocumentModeratedEvent;
-use App\Services\Community\NotificationPayloadBuilder;
+use App\Services\Notifications\NotificationPayloadBuilder;
 
 class DocumentModerationNotificationListener
 {
@@ -52,4 +52,5 @@ class DocumentModerationNotificationListener
         }
     }
 }
+
 

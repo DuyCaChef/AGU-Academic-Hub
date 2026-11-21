@@ -101,7 +101,7 @@ class HandleInertiaRequests extends Middleware {
 
             // Danh sách khoa và môn học trực thuộc phục vụ Sidebar sinh viên
             'faculties' => fn () => \Illuminate\Support\Facades\Schema::hasTable('khoa')
-                ? app(\App\Services\Community\Queries\GetPublicFacultiesQuery::class)->execute($user)
+                ? app(\App\Services\AcademicCatalog\Queries\GetPublicFacultiesQuery::class)->execute($user)
                 : [],
         ];
     }

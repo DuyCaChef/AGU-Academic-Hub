@@ -17,7 +17,7 @@ use App\Models\TaiLieu;
 use App\Models\ViDiem;
 use App\Models\YeuCauChinhSuaDongGop;
 use App\Models\YeuCauTaiLieu;
-use App\Services\Community\Actions\ApproveBountyPayoutAction;
+use App\Services\Bounties\Actions\ApproveBountyPayoutAction;
 use App\Services\Shared\ReputationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -62,7 +62,7 @@ class PostBountyCorrectionWorkflowTest extends TestCase
         $userB = $this->createUser(VaiTroNguoiDung::SINH_VIEN, 50);
 
         // A tạo Bounty 40 điểm (đóng băng 40 điểm)
-        $yeuCau = app(\App\Services\Community\Actions\CreateBountyRequestAction::class)->execute($userA, [
+        $yeuCau = app(\App\Services\Bounties\Actions\CreateBountyRequestAction::class)->execute($userA, [
             'ma_mon_hoc'  => $this->monHoc->ma_mon_hoc,
             'tieu_de'     => 'Cần tìm slide bài giảng tuần 5',
             'phan_loai'   => 'BAI_GIANG',
@@ -125,7 +125,7 @@ class PostBountyCorrectionWorkflowTest extends TestCase
         $admin = $this->createUser(VaiTroNguoiDung::QUAN_TRI_VIEN);
 
         // 1. Tạo và hoàn thành Bounty
-        $yeuCau = app(\App\Services\Community\Actions\CreateBountyRequestAction::class)->execute($userA, [
+        $yeuCau = app(\App\Services\Bounties\Actions\CreateBountyRequestAction::class)->execute($userA, [
             'ma_mon_hoc'  => $this->monHoc->ma_mon_hoc,
             'tieu_de'     => 'Cần tìm đề cương ôn tập CSDL',
             'phan_loai'   => 'DE_THI',
@@ -203,7 +203,7 @@ class PostBountyCorrectionWorkflowTest extends TestCase
         $userB = $this->createUser(VaiTroNguoiDung::SINH_VIEN, 50);
         $admin = $this->createUser(VaiTroNguoiDung::QUAN_TRI_VIEN);
 
-        $yeuCau = app(\App\Services\Community\Actions\CreateBountyRequestAction::class)->execute($userA, [
+        $yeuCau = app(\App\Services\Bounties\Actions\CreateBountyRequestAction::class)->execute($userA, [
             'ma_mon_hoc'  => $this->monHoc->ma_mon_hoc,
             'tieu_de'     => 'CSDL Nang Cao',
             'phan_loai'   => 'BAI_GIANG',
@@ -266,7 +266,7 @@ class PostBountyCorrectionWorkflowTest extends TestCase
         $userB = $this->createUser(VaiTroNguoiDung::SINH_VIEN, 50);
         $admin = $this->createUser(VaiTroNguoiDung::QUAN_TRI_VIEN);
 
-        $yeuCau = app(\App\Services\Community\Actions\CreateBountyRequestAction::class)->execute($userA, [
+        $yeuCau = app(\App\Services\Bounties\Actions\CreateBountyRequestAction::class)->execute($userA, [
             'ma_mon_hoc'  => $this->monHoc->ma_mon_hoc,
             'tieu_de'     => 'Học máy nâng cao',
             'phan_loai'   => 'DO_AN',
@@ -372,7 +372,7 @@ class PostBountyCorrectionWorkflowTest extends TestCase
         $alumniB = $this->createUser(VaiTroNguoiDung::CUU_SINH_VIEN, 80);
 
         // Alumni A tạo Bounty
-        $yeuCau = app(\App\Services\Community\Actions\CreateBountyRequestAction::class)->execute($alumniA, [
+        $yeuCau = app(\App\Services\Bounties\Actions\CreateBountyRequestAction::class)->execute($alumniA, [
             'ma_mon_hoc'  => $this->monHoc->ma_mon_hoc,
             'tieu_de'     => 'Kinh nghiem do an tot nghiep CNTT',
             'phan_loai'   => 'DO_AN',
@@ -384,7 +384,7 @@ class PostBountyCorrectionWorkflowTest extends TestCase
 
         // Alumni B đóng góp tài liệu từ máy tính
         $file = UploadedFile::fake()->create('kinh_nghiem.pdf', 500, 'application/pdf');
-        $fulfillResult = app(\App\Services\Community\Actions\FulfillBountyRequestAction::class)->execute(
+        $fulfillResult = app(\App\Services\Bounties\Actions\FulfillBountyRequestAction::class)->execute(
             $alumniB,
             $yeuCau->ma_yeu_cau,
             ['tieu_de' => 'Chia se kinh nghiem DATN', 'phan_loai' => 'DO_AN'],
@@ -406,7 +406,7 @@ class PostBountyCorrectionWorkflowTest extends TestCase
         $admin1 = $this->createUser(VaiTroNguoiDung::QUAN_TRI_VIEN);
         $mod2   = $this->createUser(VaiTroNguoiDung::KIEM_DUYET_VIEN);
 
-        $yeuCau = app(\App\Services\Community\Actions\CreateBountyRequestAction::class)->execute($userA, [
+        $yeuCau = app(\App\Services\Bounties\Actions\CreateBountyRequestAction::class)->execute($userA, [
             'ma_mon_hoc'  => $this->monHoc->ma_mon_hoc,
             'tieu_de'     => 'An toan mang Bounty',
             'phan_loai'   => 'BAI_GIANG',
@@ -462,4 +462,6 @@ class PostBountyCorrectionWorkflowTest extends TestCase
         $this->assertEquals(0, $userA->viDiem->fresh()->diem_tam_giu);
     }
 }
+
+
 

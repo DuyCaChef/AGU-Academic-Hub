@@ -3,12 +3,12 @@
 namespace App\Listeners;
 
 use App\Models\NguoiDung;
-use App\Services\Community\Contracts\NotificationDispatcherInterface;
+use App\Services\Notifications\Contracts\NotificationDispatcherInterface;
 use App\Events\BountyCancelledEvent;
 use App\Events\BountyFulfillmentConfirmedEvent;
 use App\Events\DocumentContributedToBountyEvent;
-use App\Services\Community\NotificationPayloadBuilder;
-use App\Services\Community\NotificationRecipientPolicy;
+use App\Services\Notifications\NotificationPayloadBuilder;
+use App\Services\Notifications\NotificationRecipientPolicy;
 
 class BountyNotificationListener
 {
@@ -71,4 +71,5 @@ class BountyNotificationListener
         }
     }
 }
+
 

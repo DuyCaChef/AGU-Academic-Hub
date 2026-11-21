@@ -13,7 +13,7 @@ use App\Models\NguoiDung;
 use App\Models\TaiLieu;
 use App\Models\ViDiem;
 use App\Models\YeuCauTaiLieu;
-use App\Services\Community\Repositories\WishlistBountyRepository;
+use App\Services\Bounties\Repositories\WishlistBountyRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
@@ -804,4 +804,5 @@ class DocumentContributionBountyIntegrationTest extends TestCase
         $responseEmpty->assertSessionHas('error');
     }
 }
+
 

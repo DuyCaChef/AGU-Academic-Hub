@@ -1,11 +1,11 @@
 <?php
 
-use App\Http\Controllers\Community\AdminBountyPayoutController;
-use App\Http\Controllers\Community\CorrectionRequestController;
-use App\Http\Controllers\Community\CourseReviewController;
-use App\Http\Controllers\Community\NotificationController;
-use App\Http\Controllers\Community\WalletController;
-use App\Http\Controllers\Community\WishlistBountyController;
+use App\Http\Controllers\Bounties\AdminBountyPayoutController;
+use App\Http\Controllers\Bounties\CorrectionRequestController;
+use App\Http\Controllers\Bounties\WishlistBountyController;
+use App\Http\Controllers\Notifications\NotificationController;
+use App\Http\Controllers\Reviews\CourseReviewController;
+use App\Http\Controllers\Wallet\WalletController;
 use Illuminate\Support\Facades\Route;
 
 

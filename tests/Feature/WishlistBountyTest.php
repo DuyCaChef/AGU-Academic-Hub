@@ -12,7 +12,7 @@ use App\Models\NguoiDung;
 use App\Models\TaiLieu;
 use App\Models\ViDiem;
 use App\Models\YeuCauTaiLieu;
-use App\Services\Community\Actions\RejectBountyPayoutAction;
+use App\Services\Bounties\Actions\RejectBountyPayoutAction;
 use App\Services\Shared\ReputationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -285,3 +285,4 @@ class WishlistBountyTest extends TestCase
         ]);
     }
 }
+

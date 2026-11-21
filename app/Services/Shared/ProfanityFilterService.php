@@ -2,7 +2,7 @@
 
 namespace App\Services\Shared;
 
-use App\Services\Community\ProfanityFilterEvaluator;
+use App\Services\Reviews\ProfanityFilterEvaluator;
 
 // Service tương thích ngược, ủy quyền xử lý sang Domain Evaluator của Module Reviews
 class ProfanityFilterService
@@ -35,3 +35,4 @@ class ProfanityFilterService
         $this->evaluator->xoaCache();
     }
 }
+
