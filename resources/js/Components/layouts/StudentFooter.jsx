@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "@inertiajs/react";
+import ApplicationLogo from "@/Components/ApplicationLogo";
 import {
     GraduationCap,
     BookOpen,
@@ -19,10 +20,9 @@ export default function StudentFooter() {
                     {/* Cột 1: Thông tin thương hiệu AGU */}
                     <div className="space-y-4">
                         <div className="flex items-center gap-3">
-                            <img
-                                src="/storage/imgs/logo-agu.webp"
+                            <ApplicationLogo
+                                className="h-10 w-10"
                                 alt="Logo AGU"
-                                className="h-10 w-10 object-contain"
                                 onError={(e) => {
                                     e.currentTarget.style.display = "none";
                                 }}

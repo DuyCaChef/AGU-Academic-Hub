@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, usePage, router } from '@inertiajs/react';
+import ApplicationLogo from '@/Components/ApplicationLogo';
 import NotificationDropdown from '@/Components/NotificationDropdown';
 import {
     Upload,
@@ -179,11 +180,7 @@ export default function StudentHeader({
                         className="flex items-center gap-2 sm:gap-2.5 shrink-0 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 rounded-lg p-0.5"
                     >
                         <div className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center shrink-0">
-                            <img
-                                src="/storage/imgs/Logo-agu.webp"
-                                alt="Logo Trường Đại học An Giang"
-                                className="w-full h-full object-contain group-hover:scale-105 transition-transform"
-                            />
+                            <ApplicationLogo className="w-full h-full group-hover:scale-105 transition-transform" />
                         </div>
                         <div className="hidden sm:block">
                             <h1 className="font-bold text-[#FFC72C] leading-tight text-base group-hover:text-amber-200 transition-colors">Academic Hub</h1>

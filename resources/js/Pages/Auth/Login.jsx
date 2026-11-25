@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
 import GuestLayout from '@/Layouts/GuestLayout';
+import ApplicationLogo from '@/Components/ApplicationLogo';
 import {
     Mail,
     Lock,
@@ -39,11 +40,7 @@ export default function Login({ status, kycStatus, canResetPassword }) {
             {/* Tiêu đề & Giới thiệu khối Form */}
             <div className="text-center mb-6">
                 <div className="inline-flex items-center justify-center w-14 h-14 mb-3">
-                    <img
-                        src="/storage/imgs/Logo-agu.webp"
-                        alt="Logo Trường Đại học An Giang"
-                        className="w-full h-full object-contain"
-                    />
+                    <ApplicationLogo className="w-full h-full" />
                 </div>
                 <h1 className="text-2xl font-bold text-text-primary tracking-tight">
                     Cổng Đăng Nhập

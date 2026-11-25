@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
+import ApplicationLogo from '@/Components/ApplicationLogo';
 import {
     GraduationCap,
     BookOpen,
@@ -36,11 +37,7 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                             className="flex items-center gap-3 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary rounded-lg p-0.5"
                         >
                             <div className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center shrink-0">
-                                <img
-                                    src="/storage/imgs/Logo-agu.webp"
-                                    alt="Logo Trường Đại học An Giang"
-                                    className="w-full h-full object-contain group-hover:scale-105 transition-transform"
-                                />
+                                <ApplicationLogo className="w-full h-full group-hover:scale-105 transition-transform" />
                             </div>
                             <div>
                                 <span className="block text-base font-bold tracking-tight text-slate-900 leading-tight group-hover:text-brand-primary transition-colors">
@@ -401,11 +398,7 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                             <div className="md:col-span-2">
                                 <div className="flex items-center gap-2 mb-2">
                                     <div className="w-6 h-6 flex items-center justify-center shrink-0">
-                                        <img
-                                            src="/storage/imgs/Logo-agu.webp"
-                                            alt="Logo Trường Đại học An Giang"
-                                            className="w-full h-full object-contain"
-                                        />
+                                        <ApplicationLogo className="w-full h-full" />
                                     </div>
                                     <span className="font-semibold text-slate-900 text-sm">
                                         Trường Đại học An Giang — ĐHQG-HCM

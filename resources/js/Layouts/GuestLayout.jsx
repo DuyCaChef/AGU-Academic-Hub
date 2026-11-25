@@ -1,5 +1,6 @@
 import React from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
+import ApplicationLogo from '@/Components/ApplicationLogo';
 import { AlertTriangle, CheckCircle2, ExternalLink } from 'lucide-react';
 
 /**
@@ -41,11 +42,7 @@ export default function GuestLayout({ children, title = 'Cổng thông tin', max
                     {/* Logo & Tên dự án */}
                     <Link href={getHomeUrl()} className="flex items-center gap-3 group">
                         <div className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center shrink-0">
-                            <img
-                                src="/storage/imgs/Logo-agu.webp"
-                                alt="Logo Trường Đại học An Giang"
-                                className="w-full h-full object-contain group-hover:scale-105 transition-transform"
-                            />
+                            <ApplicationLogo className="w-full h-full group-hover:scale-105 transition-transform" />
                         </div>
                         <div className="flex flex-col">
                             <span className="font-bold text-text-primary text-base leading-tight tracking-tight group-hover:text-brand-primary transition-colors">

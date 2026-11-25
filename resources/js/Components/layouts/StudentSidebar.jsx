@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Link, usePage } from "@inertiajs/react";
+import ApplicationLogo from "@/Components/ApplicationLogo";
 import FacultyCourseTree from "./FacultyCourseTree";
 import {
     LayoutDashboard,
@@ -119,11 +120,7 @@ export default function StudentSidebar({
                 {/* Header drawer riêng cho mobile */}
                 <div className="flex h-16 items-center justify-between border-b border-slate-200 px-4 bg-[#005BAA] text-white lg:hidden shrink-0">
                     <div className="flex items-center gap-2.5">
-                        <img
-                            src="/storage/imgs/logo-agu.webp"
-                            alt="Logo AGU"
-                            className="w-8 h-8 object-contain"
-                        />
+                        <ApplicationLogo className="w-8 h-8" alt="Logo AGU" />
                         <div>
                             <h2 className="font-bold text-[#FFC72C] leading-tight text-sm">Academic Hub</h2>
                             <p className="font-medium text-[10px] text-white">ĐHQG-HCM - AGU</p>

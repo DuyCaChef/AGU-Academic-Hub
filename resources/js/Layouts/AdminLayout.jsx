@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
+import ApplicationLogo from '@/Components/ApplicationLogo';
 import NotificationDropdown from '@/Components/NotificationDropdown';
 import {
     ShieldCheck,
@@ -237,11 +238,7 @@ export default function AdminLayout({ children, title = 'Quản trị hệ thố
                     <div className={`flex h-16 items-center justify-between border-b border-slate-800/80 bg-slate-950/60 px-6 ${sidebarCollapsed ? 'lg:justify-center lg:px-3' : ''}`}>
                         <Link href={getSafeRoute('dashboard', '/')} className="flex items-center gap-3 group">
                             <div className="w-9 h-9 flex items-center justify-center shrink-0">
-                                <img
-                                    src="/storage/imgs/Logo-agu.webp"
-                                    alt="Logo Trường Đại học An Giang"
-                                    className="w-full h-full object-contain group-hover:scale-105 transition-transform"
-                                />
+                                <ApplicationLogo className="w-full h-full group-hover:scale-105 transition-transform" />
                             </div>
                             <div className={`flex flex-col ${sidebarCollapsed ? 'lg:hidden' : ''}`}>
                                 <span className="font-bold text-white text-sm tracking-tight">
