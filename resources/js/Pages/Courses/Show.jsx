@@ -692,22 +692,23 @@ function CourseShowInner({
 
                 {/* 5A. TAB TÀI LIỆU HỌC TẬP (PHASE 3B1) */}
                 {activeTab === "documents" && (
-                    <section className="rounded-2xl border border-slate-200/80 bg-white p-6 sm:p-7 shadow-xs space-y-6">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
-                            <div className="flex items-center gap-3">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-[#005baa]">
+                    <section className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs">
+                        {/* Header Section */}
+                        <div className="flex flex-col justify-between gap-4 border-b border-slate-200/70 bg-gradient-to-r from-slate-50 via-blue-50/40 to-white px-6 py-5 sm:flex-row sm:items-center sm:px-7">
+                            <div className="flex items-center gap-3.5">
+                                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#005baa] text-white shadow-xs">
                                     <BookOpen size={20} />
                                 </div>
                                 <div>
-                                    <div className="flex items-center gap-2">
-                                        <h2 className="text-lg sm:text-xl font-bold text-slate-900">
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        <h2 className="text-lg font-bold text-slate-900 sm:text-xl">
                                             Kho Tài Liệu Học Phần
                                         </h2>
-                                        <span className="font-mono text-xs font-bold px-2.5 py-0.5 rounded-full bg-blue-50 text-[#005baa] border border-blue-200">
+                                        <span className="rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 font-mono text-xs font-bold text-[#005baa]">
                                             {totalDocs} tài liệu
                                         </span>
                                     </div>
-                                    <p className="text-xs text-slate-500 mt-0.5">
+                                    <p className="mt-0.5 text-xs text-slate-500">
                                         Danh sách bài giảng, đề thi, đồ án và tài liệu ôn tập của học phần {course.ma_hoc_phan}.
                                     </p>
                                 </div>
@@ -715,71 +716,72 @@ function CourseShowInner({
 
                             <Link
                                 href={route("documents.create")}
-                                className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-[#005baa] text-white hover:bg-blue-700 transition-colors shadow-xs shrink-0"
+                                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[#005baa] px-4 py-2.5 text-xs font-semibold text-white shadow-xs transition-all hover:bg-blue-700 active:scale-[0.98]"
                             >
                                 <Upload size={14} />
                                 <span>Đăng tải tài liệu</span>
                             </Link>
                         </div>
 
-                        {/* Toolbar: Tìm kiếm & Lọc */}
-                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pt-1">
-                            <div className="relative flex-1 max-w-md">
-                                <Search
-                                    size={16}
-                                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
-                                />
-                                <input
-                                    type="text"
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                    placeholder="Tìm kiếm tiêu đề tài liệu..."
-                                    className="w-full pl-9 pr-9 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-[#005baa] focus:ring-1 focus:ring-[#005baa] text-slate-800 placeholder-slate-400 transition-all"
-                                />
-                                {search && (
-                                    <button
-                                        type="button"
-                                        onClick={handleClearSearch}
-                                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1"
-                                        title="Xóa tìm kiếm"
-                                    >
-                                        <X size={14} />
-                                    </button>
-                                )}
-                            </div>
-
-                            <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-                                <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl overflow-x-auto max-w-full">
-                                    {categoryTabs.map((tab) => (
+                        <div className="space-y-6 p-6 sm:p-7">
+                            {/* Toolbar: Tìm kiếm & Lọc */}
+                            <div className="flex flex-col justify-between gap-2.5 rounded-xl border border-slate-200/70 bg-slate-50/80 p-2.5 lg:flex-row lg:items-center">
+                                <div className="relative flex-1 lg:max-w-sm">
+                                    <Search
+                                        size={15}
+                                        className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                                    />
+                                    <input
+                                        type="text"
+                                        value={search}
+                                        onChange={(e) => setSearch(e.target.value)}
+                                        placeholder="Tìm kiếm tiêu đề tài liệu..."
+                                        className="h-9 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-9 text-xs text-slate-800 placeholder-slate-400 shadow-2xs transition-all focus:border-[#005baa] focus:ring-1 focus:ring-[#005baa]"
+                                    />
+                                    {search && (
                                         <button
-                                            key={tab.key}
                                             type="button"
-                                            onClick={() => handleCategorySelect(tab.key)}
-                                            className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all shrink-0 ${
-                                                category === tab.key
-                                                    ? "bg-white text-[#005baa] shadow-2xs"
-                                                    : "text-slate-600 hover:text-slate-900"
-                                            }`}
+                                            onClick={handleClearSearch}
+                                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600"
+                                            title="Xóa tìm kiếm"
                                         >
-                                            {tab.label}
+                                            <X size={14} />
                                         </button>
-                                    ))}
+                                    )}
                                 </div>
 
-                                <select
-                                    value={sort}
-                                    onChange={handleSortChange}
-                                    className="text-xs font-medium border border-slate-200 rounded-xl px-3 py-1.5 bg-white text-slate-700 focus:border-[#005baa] focus:ring-1 focus:ring-[#005baa] shrink-0"
-                                >
-                                    <option value="latest">Mới nhất</option>
-                                    <option value="downloads">Lượt tải nhiều</option>
-                                    <option value="upvotes">Được thích nhiều</option>
-                                </select>
-                            </div>
-                        </div>
+                                <div className="flex flex-wrap items-center gap-2 sm:flex-nowrap">
+                                    <div className="flex max-w-full items-center gap-1 overflow-x-auto rounded-lg border border-slate-200/70 bg-white p-1">
+                                        {categoryTabs.map((tab) => (
+                                            <button
+                                                key={tab.key}
+                                                type="button"
+                                                onClick={() => handleCategorySelect(tab.key)}
+                                                className={`shrink-0 rounded-md px-3 py-1.5 text-xs font-semibold transition-all ${
+                                                    category === tab.key
+                                                        ? "bg-[#005baa] text-white shadow-2xs"
+                                                        : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                                                }`}
+                                            >
+                                                {tab.label}
+                                            </button>
+                                        ))}
+                                    </div>
 
-                        {/* Vùng danh sách tài liệu */}
-                        <div className="relative min-h-[160px]">
+                                    <select
+                                        value={sort}
+                                        onChange={handleSortChange}
+                                        className="h-9 shrink-0 rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-700 shadow-2xs focus:border-[#005baa] focus:ring-1 focus:ring-[#005baa]"
+                                    >
+                                        <option value="latest">Mới nhất</option>
+                                        <option value="downloads">Lượt tải nhiều</option>
+                                        <option value="upvotes">Được thích nhiều</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            {/* Vùng danh sách tài liệu */}
+                            <div className="relative min-h-[160px]">
                             {isLoading && (
                                 <div className="absolute inset-0 bg-white/70 backdrop-blur-[1px] flex items-center justify-center z-10 rounded-xl">
                                     <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white shadow-md border border-slate-200 text-xs font-semibold text-[#005baa]">
@@ -847,6 +849,7 @@ function CourseShowInner({
                                     </div>
                                 </div>
                             )}
+                        </div>
                         </div>
                     </section>
                 )}

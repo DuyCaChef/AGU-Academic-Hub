@@ -23,6 +23,7 @@ class TaiLieu extends Model
         'ma_mon_hoc',
         'ma_nguoi_dang',
         'tieu_de',
+        'mo_ta',
         'duong_dan_tep',
         'dinh_dang_tep',
         'dung_luong_kb',
