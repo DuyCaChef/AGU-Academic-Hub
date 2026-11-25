@@ -235,26 +235,34 @@ export default function FulfillRequestModal({ isOpen, onClose, requestId, course
     };
 
     return (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="relative bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
+        <div
+            className="fixed inset-0 z-[110] flex items-start justify-center overflow-y-auto bg-slate-900/60 p-4 backdrop-blur-xs sm:items-center"
+            onMouseDown={(event) => {
+                if (event.target === event.currentTarget) {
+                    onClose();
+                }
+            }}
+        >
+            <div className="relative my-auto w-full max-w-xl overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-6 shadow-2xl">
                 {/* Header */}
-                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                    <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center text-[#00a896]">
+                <div className="-mx-6 -mt-6 mb-5 flex items-center justify-between bg-gradient-to-br from-[#005baa] via-[#004e95] to-blue-900 px-6 py-4 text-white">
+                    <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/25 bg-white/15 text-[#FFC72C]">
                             <UploadCloud className="w-5 h-5" />
                         </div>
                         <div>
-                            <h3 className="text-base font-bold text-slate-800">
+                            <h3 className="text-base font-bold text-white">
                                 Đóng Góp Tài Liệu Săn Thưởng
                             </h3>
-                            <p className="text-[11px] text-slate-500">
+                            <p className="text-xs text-blue-100/90">
                                 {course ? `Học phần: ${course.ma_hoc_phan} — ${course.ten_mon_hoc}` : `Yêu cầu #${requestId}`}
                             </p>
                         </div>
                     </div>
                     <button
+                        type="button"
                         onClick={onClose}
-                        className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition-colors"
+                        className="cursor-pointer rounded-xl p-1.5 text-white/80 transition-colors hover:bg-white/15 hover:text-white"
                         aria-label="Đóng modal"
                     >
                         <X className="w-5 h-5" />
