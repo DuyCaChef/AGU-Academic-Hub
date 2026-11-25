@@ -81,7 +81,7 @@ class AuthenticateUserAction
         // 7. Gửi thông báo yêu cầu đổi mật khẩu lần đầu cho sinh viên đang học
         if ($this->ruleEvaluator->isFirstTimeLogin($user)) {
             $alreadyNotified = $user->notifications()
-                ->where('type', FirstTimePasswordChangeRequiredNotification::class)
+                ->where('loai', FirstTimePasswordChangeRequiredNotification::class)
                 ->exists();
 
             if (!$alreadyNotified) {

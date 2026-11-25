@@ -15,6 +15,10 @@ import {
     LogOut,
     User,
     Coins,
+    GraduationCap,
+    Hash,
+    ArrowRight,
+    Award,
 } from 'lucide-react';
 
 
@@ -379,101 +383,179 @@ export default function StudentHeader({
             {/* profile modal */}
             {isProfileModalOpen && user && (
                 <div
-                    className='fixed inset-0 z-[100] flex items-center justify-center
-                            overflow-y-auto bg-black/50 p-4 backdrop-blur-sm
-                            '
-                    onMouseDown={(Event) => {
-                        if (Event.target === Event.currentTarget) {
-                            setIsProfileModalOpen(false)
+                    className="fixed inset-0 z-[110] flex items-center justify-center overflow-y-auto bg-slate-900/60 p-4 backdrop-blur-xs"
+                    onMouseDown={(event) => {
+                        if (event.target === event.currentTarget) {
+                            setIsProfileModalOpen(false);
                         }
                     }}
                 >
                     <section
-                        role='dialog'
+                        role="dialog"
                         aria-modal="true"
-                        aria-labelledby='profile-title'
-                        className='my-auto max-w-lg rounded-2xl border border-border-default bg-surface-default shadow-2xl'
+                        aria-labelledby="profile-title"
+                        className="my-auto w-full max-w-md overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-2xl"
                     >
-                        {/* header modal */}
-                        <div className='flex items-center justify-between border-b border-border-default px-6 py-4'>
-                            <div>
-                                <h2 id='profile-title' className='text-lg font-bold'>Hồ sơ cá nhân</h2>
-                                <p className='mt-1 text-sm text-text-secondary'> Thông tin tài khoản AGU Hub</p>
+                        {/* Header Banner đồng bộ tông AGU */}
+                        <div className="relative overflow-hidden bg-gradient-to-br from-[#005baa] via-[#004f96] to-blue-900 px-6 pt-5 pb-6 text-white">
+                            <div className="pointer-events-none absolute -right-8 -bottom-10 h-36 w-36 rounded-full bg-white/10 blur-2xl" />
+                            <div className="pointer-events-none absolute -left-10 -top-10 h-28 w-28 rounded-full bg-[#FFC72C]/15 blur-2xl" />
+
+                            <div className="relative z-10 flex items-center justify-between">
+                                <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-blue-100/90">
+                                    <User size={13} className="text-[#FFC72C]" />
+                                    Hồ sơ cá nhân · AGU Hub
+                                </span>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsProfileModalOpen(false)}
+                                    aria-label="Đóng modal"
+                                    className="rounded-xl p-1.5 text-white/80 transition-colors hover:bg-white/15 hover:text-white focus:outline-none focus:ring-2 focus:ring-white/40"
+                                >
+                                    <X size={18} />
+                                </button>
                             </div>
-                            <button
-                                type='button'
-                                onClick={() => setIsProfileModalOpen(false)}
-                                aria-label='Đóng modal'
-                                className='rounded-lg p-2 text-text-secondary transition-colors
-                                    hover:bg-surface-page hover:text-text-primary'
-                            >
-                                <X size={20} />
-                            </button>
-                        </div>
-                        {/* noi dung ho so */}
-                        <div className='space-y-5 p-6'>
-                            <div className='flex items-center gap-4'>
-                                <div className='flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-blue-800 text-xl font-bold text-white'>
+
+                            <div className="relative z-10 mt-4 flex items-center gap-4">
+                                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-white/25 bg-white/15 text-xl font-bold text-white shadow-inner">
                                     {user.ho_ten?.charAt(0)?.toUpperCase() || 'U'}
                                 </div>
-                                <div className='min-w-0'>
-                                    <p className='truncate text-base font-semibold text-text-primary'>{user.ho_ten || 'Chưa cập nhật'}</p>
-                                    <p className='break-all text-sm text-text-secondary'> {user.email || 'Chưa cập nhật'}</p>
-                                </div>
-                            </div>
-                            <div className='space-y-3'>
-                                <div className='rounded-lg bg-surface-page p-3'>
-                                    <p className='text-xs text-text-secondary'>
-                                        Họ và Tên
-                                    </p>
-                                    <p className='mt-1 text-sm font-medium'>
+                                <div className="min-w-0 flex-1">
+                                    <h2
+                                        id="profile-title"
+                                        className="truncate text-lg font-bold leading-snug text-white"
+                                    >
                                         {user.ho_ten || 'Chưa cập nhật'}
+                                    </h2>
+                                    <p className="mt-0.5 flex items-center gap-1.5 truncate text-xs text-blue-100/90">
+                                        <Mail size={12} className="shrink-0 opacity-80" />
+                                        <span className="truncate">{user.email || 'Chưa cập nhật'}</span>
                                     </p>
-                                </div>
-                                {!isStaff ? (
-                                    <div className='rounded-lg bg-surface-page p-3'>
-                                        <p className='text-xs text-text-secondary'>
-                                            Mã số sinh viên
-                                        </p>
-                                        <p className='mt-1 text-sm font-medium font-mono text-[#005baa]'>
-                                            {user.mssv || 'Chưa cập nhật'}
-                                        </p>
-                                    </div>
-                                ) : (
-                                    <div className='rounded-lg bg-surface-page p-3'>
-                                        <p className='text-xs text-text-secondary'>
-                                            Cấp quyền quản trị
-                                        </p>
-                                        <p className='mt-1 text-sm font-semibold text-[#005baa]'>
-                                            {user.ten_cap_quan_tri || user.ten_vai_tro || 'Quản trị viên Hệ thống'}
-                                        </p>
-                                    </div>
-                                )}
-                                <div className="rounded-lg bg-surface-page p-3">
-                                    <p className="text-xs text-text-secondary">
-                                        Vai trò
-                                    </p>
-                                    <p className="mt-1 text-sm font-medium">
-                                        {getRoleLabel(user.vai_tro)}
-                                    </p>
+                                    {user.vai_tro && (
+                                        <span className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/15 px-2.5 py-0.5 text-[11px] font-semibold text-white">
+                                            <Shield size={11} className="text-[#FFC72C]" />
+                                            {getRoleLabel(user.vai_tro)}
+                                        </span>
+                                    )}
                                 </div>
                             </div>
                         </div>
-                        <div className="flex items-center justify-between border-t border-border-default px-6 py-4">
-                            <Link
-                                href={route('profile.edit')}
-                                onClick={() => setIsProfileModalOpen(false)}
-                                className="text-xs font-semibold text-brand-primary hover:underline flex items-center gap-1"
-                            >
-                                <span>Chỉnh sửa hồ sơ & Bảo mật &rarr;</span>
-                            </Link>
+
+                        {/* Nội dung hồ sơ */}
+                        <div className="space-y-4 p-6">
+                            {/* Chỉ số nhanh */}
+                            {!isStaff ? (
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div className="rounded-xl border border-emerald-200/70 bg-emerald-50/70 p-3.5">
+                                        <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-emerald-700">
+                                            <Award size={13} />
+                                            <span>Điểm uy tín</span>
+                                        </div>
+                                        <p className="mt-1 text-lg font-extrabold text-emerald-900">
+                                            {user.diem_uy_tin ?? 100}
+                                            <span className="ml-1 text-xs font-semibold text-emerald-700">điểm</span>
+                                        </p>
+                                    </div>
+                                    <div className="rounded-xl border border-amber-200/70 bg-amber-50/70 p-3.5">
+                                        <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-amber-700">
+                                            <Coins size={13} />
+                                            <span>Số dư ví điểm</span>
+                                        </div>
+                                        <p className="mt-1 text-lg font-extrabold text-amber-900">
+                                            {user.vi_diem?.diem_kha_dung ?? 0}
+                                            <span className="ml-1 text-xs font-semibold text-amber-700">pts</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="rounded-xl border border-blue-200/70 bg-blue-50/60 p-3.5">
+                                    <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-[#005baa]">
+                                        <ShieldCheck size={13} />
+                                        <span>Cấp quyền quản trị</span>
+                                    </div>
+                                    <p className="mt-1 text-sm font-bold text-slate-900">
+                                        {user.ten_cap_quan_tri || user.ten_vai_tro || 'Quản trị viên Hệ thống'}
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* Chi tiết định danh học thuật */}
+                            <div className="divide-y divide-slate-200/70 rounded-xl border border-slate-200/80 bg-slate-50/70">
+                                {!isStaff && (
+                                    <div className="flex items-center justify-between gap-4 px-4 py-3">
+                                        <span className="flex items-center gap-2 text-xs font-medium text-slate-500">
+                                            <Hash size={14} className="text-slate-400" />
+                                            Mã số sinh viên
+                                        </span>
+                                        <span className="font-mono text-sm font-bold text-[#005baa]">
+                                            {user.mssv || 'Chưa cập nhật'}
+                                        </span>
+                                    </div>
+                                )}
+
+                                <div className="flex items-center justify-between gap-4 px-4 py-3">
+                                    <span className="flex shrink-0 items-center gap-2 text-xs font-medium text-slate-500">
+                                        <GraduationCap size={14} className="text-slate-400" />
+                                        Khoa / Đơn vị
+                                    </span>
+                                    <span
+                                        className="truncate text-right text-sm font-semibold text-slate-800"
+                                        title={user.khoa?.ten_khoa}
+                                    >
+                                        {user.khoa?.ten_khoa || 'Chưa cập nhật khoa'}
+                                    </span>
+                                </div>
+
+                                {user.vai_tro === 'CUU_SINH_VIEN' && user.nam_tot_nghiep && (
+                                    <div className="flex items-center justify-between gap-4 px-4 py-3">
+                                        <span className="text-xs font-medium text-slate-500">
+                                            Năm tốt nghiệp
+                                        </span>
+                                        <span className="text-sm font-semibold text-slate-800">
+                                            {user.nam_tot_nghiep}
+                                        </span>
+                                    </div>
+                                )}
+
+                                <div className="flex items-center justify-between gap-4 px-4 py-3">
+                                    <span className="text-xs font-medium text-slate-500">
+                                        Trạng thái tài khoản
+                                    </span>
+                                    <span
+                                        className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                                            user.dang_hoat_dong === false
+                                                ? 'bg-amber-100/80 text-amber-800'
+                                                : 'bg-emerald-100/80 text-emerald-700'
+                                        }`}
+                                    >
+                                        <span
+                                            className={`h-1.5 w-1.5 rounded-full ${
+                                                user.dang_hoat_dong === false ? 'bg-amber-500' : 'bg-emerald-500'
+                                            }`}
+                                        />
+                                        {user.ten_trang_thai || 'Đang hoạt động'}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="flex flex-col-reverse gap-2.5 border-t border-slate-200/80 bg-slate-50/70 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
                             <button
                                 type="button"
                                 onClick={() => setIsProfileModalOpen(false)}
-                                className="rounded-lg bg-surface-page border border-border-default px-4 py-2 text-sm font-medium text-text-primary hover:bg-border-default/40"
+                                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 sm:w-auto"
                             >
                                 Đóng
                             </button>
+                            <Link
+                                href={route('profile.edit')}
+                                onClick={() => setIsProfileModalOpen(false)}
+                                className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-[#005baa] px-4 py-2 text-sm font-semibold text-white shadow-xs transition-all hover:bg-blue-700 active:scale-[0.98] sm:w-auto"
+                            >
+                                <span>Chỉnh sửa hồ sơ & Bảo mật</span>
+                                <ArrowRight size={15} />
+                            </Link>
                         </div>
                     </section>
                 </div>
