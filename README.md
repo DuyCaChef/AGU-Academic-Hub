@@ -196,27 +196,95 @@ Các thư mục `app/Modules/` và `app/Shared/` của kiến trúc cũ **không
 Không thêm nhóm `web` trùng lặp khi compose các route file. Middleware và route
 names là một phần của frontend/backend contract, không được thay đổi tùy tiện.
 
-## 5. Cài đặt và chạy local
+## 5. Yêu cầu môi trường, thư viện và cách chạy hệ thống
+
+### 5.1. Yêu cầu môi trường (Prerequisites)
+
+- **PHP:** `8.2+` (bật các extension chuẩn của Laravel: `pdo_mysql` / `pdo_sqlite`, `mbstring`, `openssl`, `fileinfo`, `tokenizer`, `xml`, `ctype`, `json`, `bcmath`).
+- **Composer:** `2.x`
+- **Node.js & npm:** Node.js `18+` (khuyên dùng `20+`) và `npm`.
+- **Cơ sở dữ liệu:** MySQL `8+` (hoặc SQLite cho môi trường local/test nhanh).
+- **Mô hình AI/ML ngoài:** Hệ thống **không yêu cầu** cài đặt thêm mô hình AI/ML, Python hay OCR service bên ngoài; toàn bộ nghiệp vụ chạy thuần trên stack Laravel + React.
+
+### 5.2. Các thư viện chính của hệ thống
+
+- **Backend (`composer.json`):**
+  - `laravel/framework` (`^11.0`), `inertiajs/inertia-laravel` (`^2.0`), `tightenco/ziggy` (`^2.0`), `laravel/sanctum` (`^4.0`), `laravel/tinker` (`^2.10.1`).
+  - Dev/Test: `phpunit/phpunit` (`^11.5.50`), `laravel/breeze`, `laravel/pail`, `laravel/pint`, `mockery/mockery`, `fakerphp/faker`.
+- **Frontend (`package.json`):**
+  - `react` (`^18.3.1`), `react-dom` (`^18.3.1`), `@inertiajs/react` (`^2.0`), `@headlessui/react` (`^2.2.10`), `lucide-react` (`^0.468.0`), `canvas-confetti` (`^1.9.4`).
+  - Build/Style: `vite` (`^7.0.7`), `@vitejs/plugin-react`, `tailwindcss` (`^4.0.0`), `@tailwindcss/vite`, `axios`, `concurrently`.
+
+### 5.3. Tải thư viện và thiết lập ban đầu
+
+1. **Tải thư viện PHP và JavaScript:**
 
 ```bash
 composer install
-copy .env.example .env
-php artisan key:generate
-php artisan migrate
 npm install
-npm run dev
 ```
 
-Chạy ứng dụng:
+2. **Tạo file cấu hình môi trường `.env` và khóa ứng dụng:**
+
+```bash
+# Windows (CMD/PowerShell)
+copy .env.example .env
+
+# macOS / Linux
+cp .env.example .env
+
+php artisan key:generate
+```
+
+3. **Cấu hình Database trong `.env`:**
+   - Mặc định `.env.example` dùng `DB_CONNECTION=sqlite` (tạo sẵn file `database/database.sqlite` nếu chưa có) và `QUEUE_CONNECTION=database`.
+   - Nếu dùng MySQL, cập nhật `DB_CONNECTION=mysql`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` tương ứng.
+
+4. **Khởi tạo bảng, dữ liệu mẫu và liên kết storage:**
+
+```bash
+php artisan migrate --seed
+php artisan storage:link
+```
+
+> Lưu ý: `composer run setup` đã cấu hình sẵn chuỗi cài đặt nhanh (`composer install`, tạo `.env`, `key:generate`, `migrate --force`, `npm install`, `npm run build`). Nếu muốn nạp cả dữ liệu mẫu (Khoa, Chuyên ngành, Môn học, Tài khoản, Tài liệu, Bounty, KYC...), hãy chạy thêm `php artisan db:seed`.
+
+### 5.4. Chạy toàn bộ hệ thống
+
+#### Cách 1: Chạy gộp bằng 1 lệnh (Khuyên dùng cho local)
+
+Lệnh sau (khai báo sẵn trong `composer.json`) sẽ khởi chạy đồng thời **Web Server**, **Queue Worker**, **Log Viewer (Pail)** và **Vite Dev Server**:
+
+```bash
+composer run dev
+```
+
+#### Cách 2: Chạy tách từng terminal
+
+1. **Web Server (Laravel):**
 
 ```bash
 php artisan serve
 ```
 
-Chạy queue worker trong terminal khác:
+2. **Frontend Dev Server (Vite):**
+
+```bash
+npm run dev
+```
+
+*(Hoặc build bản production bằng `npm run build` nếu không chạy Vite dev server).*
+
+3. **Queue Worker (xử lý job & thông báo nền):**
 
 ```bash
 php artisan queue:listen --tries=1 --timeout=0
+```
+
+4. **Scheduler (tùy chọn, cho các tác vụ định kỳ trong `routes/console.php` như `documents:purge-trash`, `documents:notify-expiring-trash`, `bounty:auto-refund`):**
+
+```bash
+php artisan schedule:work
 ```
 
 ## 6. Kiểm thử và kiểm tra
