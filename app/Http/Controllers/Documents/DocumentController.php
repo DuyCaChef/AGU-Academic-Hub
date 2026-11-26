@@ -1,0 +1,183 @@
+<?php
+
+namespace App\Http\Controllers\Documents;
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Documents\CheckDuplicateDocumentRequest;
+use App\Http\Requests\Documents\CreateDocumentVersionRequest;
+use App\Http\Requests\Documents\DocumentReasonRequest;
+use App\Http\Requests\Documents\StoreDocumentRequest;
+use App\Http\Requests\Documents\UpdateDocumentRequest;
+use App\Models\Khoa;
+use App\Models\TaiLieu;
+use App\Services\Documents\Actions\AuthorSoftDeleteDocumentAction;
+use App\Services\Documents\Actions\CreateDocumentVersionAction;
+use App\Services\Documents\Actions\DownloadDocumentAction;
+use App\Services\Documents\Actions\PreviewDocumentAction;
+use App\Services\Documents\Actions\SubmitRemovalRequestAction;
+use App\Services\Documents\Actions\UploadDocumentAction;
+use App\Services\Documents\Actions\UpvoteDocumentAction;
+use App\Services\Documents\Queries\CheckDuplicateDocumentQuery;
+use App\Services\Documents\Queries\GetDocumentDetailQuery;
+use App\Services\Documents\Repositories\DocumentRepository;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response as InertiaResponse;
+use Symfony\Component\HttpFoundation\Response;
+
+class DocumentController extends Controller
+{
+    public function __construct(
+        protected DocumentRepository $repository
+    ) {}
+
+    // Danh sách tài liệu công khai
+    public function index(Request $request): InertiaResponse
+    {
+        $faculties = Khoa::with('monHocs')->get();
+        $filters = $request->only(['search', 'category', 'sort', 'course_id']);
+        $documents = $this->repository->paginatePublicDocuments($filters, 12);
+
+        return Inertia::render('Documents/Index', [
+            'faculties' => $faculties,
+            'documents' => $documents,
+            'filters'   => $filters,
+        ]);
+    }
+
+    // Giao diện form tải tài liệu lên
+    public function create(): InertiaResponse
+    {
+        $faculties = Khoa::with('monHocs')->get();
+
+        return Inertia::render('Documents/Create', [
+            'faculties' => $faculties,
+        ]);
+    }
+
+    // API Kiểm tra trước mã băm SHA-256 (Lọc trùng Lớp 1)
+    public function checkDuplicate(CheckDuplicateDocumentRequest $request, CheckDuplicateDocumentQuery $query): JsonResponse
+    {
+        $data = $request->validated();
+
+        $result = $query->execute((int) $data['ma_mon_hoc'], $data['ma_bam_file']);
+
+        return response()->json($result, $result['is_duplicate'] ? 409 : 200);
+    }
+
+    // Tải lên tài liệu mới
+    public function store(StoreDocumentRequest $request, UploadDocumentAction $action): RedirectResponse
+    {
+        $data = $request->validated();
+
+        $document = $action->execute($data, $request->file('file'), $request->user());
+
+        return redirect()->route('documents.show', $document->getKey())->with(
+            'success',
+            'Tải tài liệu lên thành công.'
+        );
+    }
+
+    // Tạo phiên bản mới cho tài liệu
+    public function createVersion(CreateDocumentVersionRequest $request, int $id, CreateDocumentVersionAction $action): RedirectResponse
+    {
+        $data = $request->validated();
+
+        $version = $action->execute($id, $data, $request->file('file'), $request->user());
+
+        return redirect()->route('documents.show', $version->getKey())->with(
+            'success',
+            'Đã tạo phiên bản mới cho tài liệu thành công.'
+        );
+    }
+
+    // Xem chi tiết tài liệu (Kiểm tra quyền xem tài liệu chưa duyệt)
+    public function show(Request $request, int $id, GetDocumentDetailQuery $query): InertiaResponse
+    {
+        $document = $query->execute($id, $request->user());
+
+        return Inertia::render('Documents/Show', [
+            'document' => $document,
+        ]);
+    }
+
+    // Xem trước trực tuyến tài liệu PDF (Bảo vệ tài liệu chưa duyệt)
+    public function preview(Request $request, int $id, PreviewDocumentAction $action): Response
+    {
+        return $action->execute($id, $request->user());
+    }
+
+    // Tải file tài liệu về máy và tự động tăng lượt tải (Bảo vệ tài liệu chưa duyệt)
+    public function download(Request $request, int $id, DownloadDocumentAction $action): Response
+    {
+        return $action->execute($id, $request->user());
+    }
+
+    // Bình chọn / Thích tài liệu (Upvote) - Chặn tự like và chống spam like
+    public function upvote(Request $request, int $id, UpvoteDocumentAction $action): JsonResponse
+    {
+        try {
+            $result = $action->execute($id, $request->user());
+
+            return response()->json($result);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->validator->errors()->first('message') ?? 'Thao tác không hợp lệ.',
+            ], 422);
+        }
+    }
+
+    // Chỉnh sửa thông tin tài liệu
+    public function update(UpdateDocumentRequest $request, int $id): RedirectResponse
+    {
+        $document = TaiLieu::query()->findOrFail($id);
+
+        abort_unless(
+            $document->ma_nguoi_dang === $request->user()->getKey() || $request->user()->laQuanTriVien(),
+            403,
+            'Bạn không có quyền chỉnh sửa tài liệu này.'
+        );
+
+        $data = $request->validated();
+
+        $document->update($data);
+
+        return back()->with('success', 'Đã cập nhật thông tin tài liệu.');
+    }
+
+    // Tác giả tự xóa mềm tài liệu trong 24 giờ đầu và lượt tải = 0
+    public function destroy(DocumentReasonRequest $request, int $id, AuthorSoftDeleteDocumentAction $action): RedirectResponse
+    {
+        $data = $request->validated();
+
+        $action->execute($id, $data['reason'], $request->user());
+
+        return back()->with('success', 'Đã chuyển tài liệu vào thùng rác.');
+    }
+
+    // Gửi yêu cầu xin gỡ tài liệu đã thuộc quyền sở hữu cộng đồng
+    public function requestRemoval(DocumentReasonRequest $request, int $id, SubmitRemovalRequestAction $action): RedirectResponse
+    {
+        $data = $request->validated();
+
+        $action->execute($id, $data['reason'], $request->user());
+
+        return back()->with('success', 'Đã gửi yêu cầu gỡ tài liệu đến hàng đợi xét duyệt.');
+    }
+
+    // Danh sách tài liệu hợp lệ của người dùng hiện tại (phục vụ chọn nhanh khi đóng góp Bounty)
+    public function myDocuments(Request $request): JsonResponse
+    {
+        $documents = TaiLieu::query()
+            ->where('ma_nguoi_dang', $request->user()->getKey())
+            ->where('trang_thai', 'DA_DUYET')
+            ->with('monHoc:ma_mon_hoc,ten_mon_hoc,ma_hoc_phan')
+            ->latest('ma_tai_lieu')
+            ->get(['ma_tai_lieu', 'tieu_de', 'phan_loai', 'ma_mon_hoc', 'dinh_dang_tep', 'dung_luong_kb']);
+
+        return response()->json($documents);
+    }
+}

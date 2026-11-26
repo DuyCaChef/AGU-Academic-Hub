@@ -30,15 +30,26 @@
 
 | Phương thức | Endpoint                | Phân quyền    | Mô tả chức năng                                        |
 | :---------- | :---------------------- | :------------ | :----------------------------------------------------- |
-| POST        | `/auth/register`        | Public        | Đăng ký tài khoản sinh viên mới bằng Email trường      |
+| POST        | `/auth/register`        | Disabled      | Vô hiệu hóa đăng ký tự do đối với sinh viên đang học   |
 | POST        | `/auth/login`           | Public        | Đăng nhập hệ thống (nhận Bearer Token)                 |
 | POST        | `/auth/logout`          | Authenticated | Đăng xuất và hủy Token hiện tại                        |
 | POST        | `/auth/forgot-password` | Public        | Gửi email yêu cầu đặt lại mật khẩu                     |
 | POST        | `/auth/reset-password`  | Public        | Cập nhật mật khẩu mới qua Token xác thực               |
 | GET         | `/auth/me`              | Authenticated | Lấy thông tin tài khoản hiện tại kèm điểm uy tín       |
 | PUT         | `/auth/profile`         | Authenticated | Cập nhật thông tin cá nhân (Họ tên, avatar)            |
+
+> **Điều chỉnh nghiệp vụ:** Hai dòng KYC bên dưới chỉ áp dụng cho **cựu sinh viên**. Không có luồng nộp ảnh thẻ hoặc duyệt KYC thủ công cho sinh viên đang học.
 | POST        | `/auth/kyc-submit`      | Authenticated | Gửi ảnh thẻ SV / Minh chứng cựu sinh viên để duyệt KYC |
 | GET         | `/auth/kyc-status`      | Authenticated | Kiểm tra tiến độ duyệt KYC của tài khoản               |
+
+**Quy ước IAM/KYC bắt buộc:** Endpoint đăng ký tự do cho sinh viên đang học và endpoint nộp ảnh thẻ sinh viên không được sử dụng. Sinh viên đang học chỉ được đối soát từ `danh_sach_sinh_vien_raw` khi đăng nhập lần đầu bằng MSSV/email trường, sau đó bị bắt buộc đổi mật khẩu. Các endpoint KYC và hàng đợi KYC chỉ áp dụng cho cựu sinh viên; hồ sơ được lưu private và xem qua Signed URL.
+
+Các endpoint bổ sung cho luồng sinh viên đang học:
+
+| Phương thức | Endpoint | Phân quyền | Mô tả chức năng |
+| :---------- | :------- | :--------- | :-------------- |
+| POST | `/auth/first-login` | Student | Đối soát MSSV/email với dữ liệu raw và tự khởi tạo tài khoản |
+| GET/POST | `/auth/first-time-password` | Student | Hiển thị và xử lý đổi mật khẩu bắt buộc để kích hoạt tài khoản |
 
 #### B. Module 2: Danh mục Khoa & Môn học (Faculties & Courses)
 
@@ -98,7 +109,15 @@
 | PUT         | `/admin/reports/{id}/resolve`     | Mod / Admin   | Xử lý báo cáo: Duyệt xóa tài liệu / Bác bỏ báo cáo        |
 | POST        | `/documents/{id}/request-removal` | Uploader      | Tác giả gửi yêu cầu gỡ tài liệu đã thuộc sở hữu cộng đồng |
 
+Quy trình yêu cầu gỡ tài liệu cộng đồng:
+
+- Tác giả chỉ có thể gửi yêu cầu khi tài liệu đạt tối thiểu `DOCUMENT_COMMUNITY_OWNERSHIP_DOWNLOAD_THRESHOLD` (mặc định 10) lượt tải.
+- Moderator/Admin xem hàng đợi tại `/quan-tri/yeu-cau-go-tai-lieu`, cùng tài liệu, tác giả, lượt tải và lý do yêu cầu.
+- Khi duyệt, tài liệu được xóa mềm; khi từ chối, bắt buộc nhập lý do. Cả hai quyết định đều lưu người xử lý, thời điểm và gửi thông báo cho tác giả.
+
 #### G. Module 7: Quản trị Hệ thống & KYC (Admin Control Panel)
+
+Hàng đợi KYC chỉ nhận hồ sơ **cựu sinh viên**. Không có hồ sơ KYC, ảnh thẻ hoặc thao tác duyệt thủ công đối với sinh viên đang học.
 
 | Phương thức | Endpoint                        | Phân quyền  | Mô tả chức năng                                           |
 | :---------- | :------------------------------ | :---------- | :-------------------------------------------------------- |
@@ -111,3 +130,28 @@
 | POST        | `/admin/documents/{id}/restore` | Admin       | Khôi phục tài liệu đã bị xóa mềm                          |
 | GET         | `/admin/dashboard/stats`        | Admin       | Thống kê: Tổng tài nguyên, dung lượng lưu trữ, lượt tải   |
 
+#### H. Module 8: Dữ liệu sinh viên nạp trước (Pre-provisioned Student Roster)
+
+| Phương thức | Endpoint                         | Phân quyền | Mô tả chức năng |
+| :---------- | :------------------------------- | :--------- | :-------------- |
+| POST        | `/admin/students/import`         | Admin      | Nạp/cập nhật danh sách sinh viên hiện hành vào `danh_sach_sinh_vien_raw` |
+| GET         | `/admin/students/import/status` | Admin      | Theo dõi kết quả nạp dữ liệu và số bản ghi đã kích hoạt |
+
+Bảng raw là nguồn đối soát đăng nhập lần đầu, không phải hàng đợi KYC. Việc kích hoạt chính thức hoàn tất sau khi sinh viên đổi mật khẩu.
+## Phân quyền quản trị tài khoản
+
+Bảng `nguoi_dung` giữ `vai_tro = QUAN_TRI_VIEN` và thêm `cap_quan_tri`:
+
+- `THUONG`: Admin thường.
+- `TOI_CAO`: Super Admin.
+- Giá trị `NULL` cho các vai trò không phải Admin.
+
+Migration `2026_10_29_000003_add_admin_level_to_nguoi_dung_and_permission_audit.php` gán các Admin hiện có là Admin thường và nâng `admin@agu.edu.vn` thành Super Admin, đồng thời xóa Khoa của tài khoản quản trị.
+
+Bảng `lich_su_phan_quyen_nguoi_dung` lưu thêm `cap_quan_tri_cu` và `cap_quan_tri_moi`. Backend bắt buộc kiểm tra cấp của người thực hiện; kiểm tra trên giao diện chỉ nhằm phản ánh đúng khả năng thao tác.
+
+Các endpoint quản trị tài khoản:
+
+- Admin thường được xử lý Sinh viên/Cựu sinh viên.
+- Chỉ Super Admin được xử lý Kiểm duyệt viên và tài khoản Admin.
+- Không có endpoint xóa tài khoản quản trị; trạng thái được khóa mềm và mọi thay đổi được audit.

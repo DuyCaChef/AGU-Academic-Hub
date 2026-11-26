@@ -1,0 +1,58 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+class Khoa extends Model
+{
+    use HasFactory, SoftDeletes;
+
+    // Chỉ định chính xác tên bảng trong CSDL
+    protected $table = 'khoa';
+
+    // Chỉ định khóa chính (thay vì mặc định là 'id')
+    protected $primaryKey = 'ma_khoa';
+
+    const DELETED_AT = 'ngay_xoa_tam';
+
+    protected $fillable = [
+        'ky_hieu_khoa',
+        'ten_khoa',
+    ];
+
+    /**
+     * Luôn hiển thị ký hiệu Khoa ở dạng chữ in hoa, kể cả dữ liệu cũ.
+     */
+    public function getKyHieuKhoaAttribute(?string $value): ?string
+    {
+        return $value === null ? null : mb_strtoupper($value);
+    }
+
+    /**
+     * Mối quan hệ: Một Khoa có nhiều Chuyên ngành
+     */
+    public function chuyenNganhs(): HasMany
+    {
+        return $this->hasMany(ChuyenNganh::class, 'ma_khoa', 'ma_khoa');
+    }
+
+    /**
+     * Mối quan hệ: Một Khoa có nhiều Môn học
+     */
+    public function monHocs(): HasMany
+    {
+        return $this->hasMany(MonHoc::class, 'ma_khoa', 'ma_khoa');
+    }
+
+    /**
+     * Mối quan hệ: Một Khoa có nhiều Người dùng
+     */
+    public function nguoiDungs(): HasMany
+    {
+        return $this->hasMany(NguoiDung::class, 'ma_khoa', 'ma_khoa');
+    }
+}

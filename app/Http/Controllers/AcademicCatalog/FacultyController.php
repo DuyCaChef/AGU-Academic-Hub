@@ -1,0 +1,48 @@
+<?php
+
+namespace App\Http\Controllers\AcademicCatalog;
+
+use App\Http\Controllers\Controller;
+use App\Services\AcademicCatalog\Queries\GetPublicFacultiesQuery;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response;
+
+class FacultyController extends Controller
+{
+    public function __construct(
+        protected GetPublicFacultiesQuery $facultiesQuery
+    ) {}
+
+    // Hiển thị danh sách Khoa đào tạo của AGU
+    public function index(Request $request): Response
+    {
+        $faculties = $this->facultiesQuery->execute($request->user());
+
+        return Inertia::render('Faculties/Index', [
+            'faculties' => $faculties,
+        ]);
+    }
+
+    // Lấy danh sách môn học thuộc một khoa (dạng JSON cho Dynamic Dropdown)
+    public function layDanhSachMonHoc(int $id): JsonResponse
+    {
+        $courses = $this->facultiesQuery->getCoursesByFacultyId($id);
+
+        return response()->json([
+            'courses' => $courses,
+        ]);
+    }
+
+    // Lấy danh sách môn học thuộc một chuyên ngành (dạng JSON cho Dynamic Dropdown)
+    public function layDanhSachMonHocTheoChuyenNganh(int $id): JsonResponse
+    {
+        $courses = $this->facultiesQuery->getCoursesByMajorId($id);
+
+        return response()->json([
+            'courses' => $courses,
+        ]);
+    }
+}
+

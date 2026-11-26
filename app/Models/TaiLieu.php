@@ -1,0 +1,118 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+class TaiLieu extends Model
+{
+    use HasFactory, SoftDeletes;
+
+    protected $table = 'tai_lieu';
+
+    protected $primaryKey = 'ma_tai_lieu';
+
+    const DELETED_AT = 'ngay_xoa_tam';
+
+    protected $fillable = [
+        'ma_tai_lieu_goc',
+        'ma_mon_hoc',
+        'ma_nguoi_dang',
+        'tieu_de',
+        'mo_ta',
+        'duong_dan_tep',
+        'dinh_dang_tep',
+        'dung_luong_kb',
+        'ma_bam_file',
+        'chu_ky_noi_dung',
+        'phan_loai',
+        'phien_ban',
+        'luot_tai',
+        'luot_thich',
+        'trang_thai',
+        'so_bao_cao_hop_le',
+        'ly_do_trang_thai',
+        'tu_dong_chuyen_luc',
+        'ma_nguoi_xoa',
+        'ly_do_xoa',
+        'nguon_xoa',
+        'han_luu_thung_rac',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'dung_luong_kb' => 'integer',
+            'luot_tai' => 'integer',
+            'luot_thich' => 'integer',
+            'so_bao_cao_hop_le' => 'integer',
+            'tu_dong_chuyen_luc' => 'datetime',
+            'ngay_xoa_tam' => 'datetime',
+            'han_luu_thung_rac' => 'datetime',
+        ];
+    }
+
+    public function monHoc(): BelongsTo
+    {
+        return $this->belongsTo(MonHoc::class, 'ma_mon_hoc', 'ma_mon_hoc');
+    }
+
+    public function nguoiDang(): BelongsTo
+    {
+        return $this->belongsTo(NguoiDung::class, 'ma_nguoi_dang', 'ma_nguoi_dung');
+    }
+
+    public function taiLieuGoc(): BelongsTo
+    {
+        return $this->belongsTo(TaiLieu::class, 'ma_tai_lieu_goc', 'ma_tai_lieu');
+    }
+
+    public function phienBans(): HasMany
+    {
+        return $this->hasMany(TaiLieu::class, 'ma_tai_lieu_goc', 'ma_tai_lieu');
+    }
+
+    public function baoCaoViPhams(): HasMany
+    {
+        return $this->hasMany(BaoCaoViPham::class, 'ma_tai_lieu', 'ma_tai_lieu');
+    }
+
+    public function yeuCauGoBos(): HasMany
+    {
+        return $this->hasMany(YeuCauGoBoTaiLieu::class, 'ma_tai_lieu', 'ma_tai_lieu');
+    }
+
+    public function dapUngYeuCaus(): HasMany
+    {
+        return $this->hasMany(DapUngYeuCauTaiLieu::class, 'ma_tai_lieu', 'ma_tai_lieu');
+    }
+
+    public function nguoiXoa(): BelongsTo
+    {
+        return $this->belongsTo(NguoiDung::class, 'ma_nguoi_xoa', 'ma_nguoi_dung');
+    }
+
+    public function lichSuThungRacs(): HasMany
+    {
+        return $this->hasMany(LichSuThungRac::class, 'ma_tai_lieu', 'ma_tai_lieu');
+    }
+
+    public function binhChons(): HasMany
+    {
+        return $this->hasMany(BinhChonTaiLieu::class, 'ma_tai_lieu', 'ma_tai_lieu');
+    }
+
+    public function daBinhChonBoi(?NguoiDung $user): bool
+    {
+        if (!$user) {
+            return false;
+        }
+
+        $userId = $user->ma_nguoi_dung ?? $user->getKey();
+        return $this->binhChons()->where('ma_nguoi_dung', $userId)->exists();
+    }
+}

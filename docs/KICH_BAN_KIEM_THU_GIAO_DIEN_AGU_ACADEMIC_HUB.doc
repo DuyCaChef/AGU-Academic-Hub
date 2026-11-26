@@ -1,0 +1,599 @@
+﻿<html xmlns:o="urn:schemas-microsoft-com:office:office"
+      xmlns:w="urn:schemas-microsoft-com:office:word"
+      xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Kịch Bản Kiểm Thử Giao Diện - AGU Academic Hub</title>
+<!--[if gte mso 9]>
+<xml>
+ <w:WordDocument>
+  <w:View>Print</w:View>
+  <w:Zoom>100</w:Zoom>
+  <w:DoNotOptimizeForBrowser/>
+ </w:WordDocument>
+</xml>
+<![endif]-->
+<style>
+    @page {
+        size: A4 portrait;
+        margin: 1.8cm 1.5cm 1.8cm 1.5cm;
+        mso-header-margin: 1.0cm;
+        mso-footer-margin: 1.0cm;
+    }
+    body {
+        font-family: "Calibri", "Segoe UI", "Arial", sans-serif;
+        font-size: 10.5pt;
+        line-height: 1.45;
+        color: #1e293b;
+    }
+    .doc-header {
+        border-bottom: 3px solid #005BAA;
+        padding-bottom: 12px;
+        margin-bottom: 18px;
+    }
+    .org-name {
+        font-size: 10pt;
+        font-weight: bold;
+        color: #005BAA;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .doc-title {
+        font-size: 20pt;
+        font-weight: bold;
+        color: #0f172a;
+        margin: 6px 0 4px 0;
+    }
+    .doc-subtitle {
+        font-size: 11pt;
+        color: #475569;
+        margin: 0;
+    }
+    .meta-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 18px;
+        background-color: #f8fafc;
+    }
+    .meta-table td {
+        border: 1px solid #cbd5e1;
+        padding: 6px 10px;
+        font-size: 10pt;
+    }
+    .meta-label {
+        font-weight: bold;
+        color: #334155;
+        width: 22%;
+        background-color: #f1f5f9;
+    }
+    h1 {
+        font-size: 14pt;
+        font-weight: bold;
+        color: #ffffff;
+        background-color: #005BAA;
+        padding: 7px 12px;
+        margin-top: 22px;
+        margin-bottom: 10px;
+        page-break-after: avoid;
+    }
+    h2 {
+        font-size: 11.5pt;
+        font-weight: bold;
+        color: #005BAA;
+        border-left: 4px solid #FFC72C;
+        padding-left: 8px;
+        margin-top: 14px;
+        margin-bottom: 8px;
+        page-break-after: avoid;
+    }
+    p {
+        margin: 5px 0 8px 0;
+    }
+    ul, ol {
+        margin: 4px 0 8px 0;
+        padding-left: 20px;
+    }
+    li {
+        margin-bottom: 3px;
+    }
+    table.qa-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 14px;
+        font-size: 9.5pt;
+    }
+    table.qa-table th {
+        background-color: #e2e8f0;
+        color: #0f172a;
+        font-weight: bold;
+        border: 1px solid #94a3b8;
+        padding: 7px 6px;
+        text-align: left;
+        vertical-align: middle;
+    }
+    table.qa-table td {
+        border: 1px solid #cbd5e1;
+        padding: 6px 7px;
+        vertical-align: top;
+    }
+    table.qa-table tr:nth-child(even) td {
+        background-color: #f8fafc;
+    }
+    code {
+        font-family: "Consolas", "Courier New", monospace;
+        font-size: 9pt;
+        background-color: #f1f5f9;
+        color: #b91c1c;
+        padding: 1px 4px;
+    }
+    .note-box {
+        background-color: #fffbeb;
+        border: 1px solid #fcd34d;
+        border-left: 4px solid #f59e0b;
+        padding: 8px 12px;
+        margin: 10px 0 14px 0;
+        font-size: 9.5pt;
+        color: #78350f;
+    }
+    .info-box {
+        background-color: #eff6ff;
+        border: 1px solid #bfdbfe;
+        border-left: 4px solid #005BAA;
+        padding: 8px 12px;
+        margin: 10px 0 14px 0;
+        font-size: 9.5pt;
+        color: #1e3a8a;
+    }
+    .badge-role {
+        font-weight: bold;
+        color: #005BAA;
+    }
+    .check-cell {
+        text-align: left;
+        white-space: nowrap;
+        font-size: 9pt;
+    }
+    .cli-block {
+        font-family: "Consolas", "Courier New", monospace;
+        font-size: 9pt;
+        background-color: #0f172a;
+        color: #f8fafc;
+        padding: 8px 12px;
+        margin: 6px 0 12px 0;
+    }
+</style>
+</head>
+<body>
+
+<div class="doc-header">
+    <div class="org-name">Trường Đại học An Giang (AGU) &mdash; Nền tảng Chia sẻ Học liệu Số</div>
+    <div class="doc-title">KỊCH BẢN KIỂM THỬ TOÀN DIỆN TRÊN GIAO DIỆN (UI E2E TEST PLAN)</div>
+    <p class="doc-subtitle">Dự án: <strong>AGU Academic Hub</strong> &bull; Giai đoạn: Kiểm thử nghiệm thu toàn bộ luồng nghiệp vụ &amp; tính năng</p>
+</div>
+
+<table class="meta-table">
+    <tr>
+        <td class="meta-label">Phiên bản tài liệu</td>
+        <td>v1.0 (Hoàn thiện 100% phạm vi nghiệp vụ)</td>
+        <td class="meta-label">Ngày lập</td>
+        <td>25/11/2026</td>
+    </tr>
+    <tr>
+        <td class="meta-label">Người kiểm thử (Tester)</td>
+        <td>............................................................</td>
+        <td class="meta-label">Ngày thực hiện</td>
+        <td>....../....../2026</td>
+    </tr>
+    <tr>
+        <td class="meta-label">Môi trường kiểm thử</td>
+        <td colspan="3">Trình duyệt Web (Chrome / Edge), độ phân giải Desktop &amp; Mobile Responsive</td>
+    </tr>
+</table>
+
+<h1>PHẦN 0: CHUẨN BỊ MÔI TRƯỜNG &amp; TÀI KHOẢN KIỂM THỬ</h1>
+
+<div class="info-box">
+    <strong>Lưu ý thiết lập dữ liệu trước khi test:</strong> Đảm bảo CSDL đã chạy migration và seeder mới nhất (<code>php artisan migrate --seed</code>). Để kiểm thử các luồng tương tác chéo giữa 2 người dùng (như Upvote tài liệu, Đáp ứng Bounty, Báo cáo vi phạm đạt ngưỡng 3 lần), nên mở <strong>1 cửa sổ trình duyệt thường</strong> và <strong>1 cửa sổ Ẩn danh (Incognito)</strong> để đăng nhập song song 2 tài khoản.
+</div>
+
+<table class="qa-table">
+    <thead>
+        <tr>
+            <th style="width: 22%;">Vai trò hệ thống</th>
+            <th style="width: 28%;">Email / MSSV đăng nhập</th>
+            <th style="width: 16%;">Mật khẩu</th>
+            <th style="width: 34%;">Mục đích kiểm thử chính</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><span class="badge-role">Quản trị viên (Admin)</span></td>
+            <td><code>admin@agu.edu.vn</code></td>
+            <td><code>Admin@123456</code></td>
+            <td>Toàn quyền: Người dùng, SV thô, Danh mục, Lưu trữ, Cấu hình, Nhật ký, Khôi phục/Xóa vĩnh viễn thùng rác.</td>
+        </tr>
+        <tr>
+            <td><span class="badge-role">Kiểm duyệt viên (Mod)</span></td>
+            <td><code>kiemduyet@agu.edu.vn</code><br><i>(hoặc <code>mod@agu.edu.vn</code>)</i></td>
+            <td><code>Agu@123456</code><br><i>(hoặc <code>Mod@123456</code>)</i></td>
+            <td>Duyệt KYC, duyệt tài liệu, duyệt giải ngân Bounty, xử lý báo cáo vi phạm, duyệt đơn gỡ tài liệu, kiểm tra giới hạn quyền 403.</td>
+        </tr>
+        <tr>
+            <td><span class="badge-role">Sinh viên (Hoạt động)</span></td>
+            <td><code>sinhvien@agu.edu.vn</code><br><i>(hoặc <code>duy_tester@student.agu.edu.vn</code>)</i></td>
+            <td><code>Demo@123456</code><br><i>(hoặc <code>Duy@123456</code>)</i></td>
+            <td>Đăng tải/tải về tài liệu, Upvote, Đánh giá môn học, Tạo/Nghiệm thu Bounty, Ví điểm, Thông báo.</td>
+        </tr>
+        <tr>
+            <td><span class="badge-role">Sinh viên thô (Chưa kích hoạt)</span></td>
+            <td><code>dth215001@student.agu.edu.vn</code><br><i>(MSSV: <code>DTH215001</code>)</i></td>
+            <td><code>Agu@123456</code></td>
+            <td>Kiểm thử cơ chế tự đối soát dữ liệu sinh viên thô của nhà trường và bắt buộc đổi mật khẩu lần đầu.</td>
+        </tr>
+        <tr>
+            <td><span class="badge-role">Cựu sinh viên (Chờ KYC)</span></td>
+            <td><code>dangquocbao.alumni@gmail.com</code></td>
+            <td><code>Agu@123456</code></td>
+            <td>Kiểm thử chặn đăng nhập khi đang chờ duyệt KYC; sau khi Mod duyệt thành công thì đăng nhập bình thường.</td>
+        </tr>
+    </tbody>
+</table>
+
+<h1>TASK 1: XÁC THỰC, ĐỊNH DANH &amp; BẢO MẬT PHIÊN (IAM &amp; AUTH)</h1>
+
+<table class="qa-table">
+    <thead>
+        <tr>
+            <th style="width: 10%;">Mã TC</th>
+            <th style="width: 22%;">Chức năng &amp; URL</th>
+            <th style="width: 34%;">Các bước thao tác &amp; Trường hợp biên</th>
+            <th style="width: 22%;">Kết quả mong đợi</th>
+            <th style="width: 12%;">Kết quả</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>TC-01.1</strong></td>
+            <td>Chống Brute-force (Rate Limit)<br><code>/dang-nhap</code></td>
+            <td>1. Mở <code>/dang-nhap</code>.<br>2. Nhập email hợp lệ bất kỳ nhưng cố tình nhập <strong>sai mật khẩu liên tiếp 6 lần</strong>.</td>
+            <td>5 lần đầu báo sai thông tin. Từ lần thứ 6 bị khóa tạm thời và hiện thông báo số giây phải chờ.</td>
+            <td class="check-cell">&#9744; Đạt<br>&#9744; Lỗi</td>
+        </tr>
+        <tr>
+            <td><strong>TC-01.2</strong></td>
+            <td>Sinh viên thô &amp; Đổi mật khẩu lần đầu<br><code>/dang-nhap</code> &rarr; <code>/mat-khau-lan-dau</code></td>
+            <td>1. Đăng nhập bằng MSSV <code>DTH215001</code> / <code>Agu@123456</code>.<br>2. Khi bị chuyển tới <code>/mat-khau-lan-dau</code>, thử gõ trực tiếp URL <code>/trang-chu</code> hoặc <code>/mon-hoc</code>.<br>3. Nhập mật khẩu mới hợp lệ và lưu.</td>
+            <td>Tự động nhận diện từ bảng SV thô. Bắt buộc đổi mật khẩu mới cho truy cập <code>/trang-chu</code> (cố vượt link đều bị đẩy lại). Đổi xong nhận được thông báo.</td>
+            <td class="check-cell">&#9744; Đạt<br>&#9744; Lỗi</td>
+        </tr>
+        <tr>
+            <td><strong>TC-01.3</strong></td>
+            <td>Đăng ký Sinh viên<br><code>/dang-ky</code></td>
+            <td>1. Truy cập <code>/dang-ky</code>.<br>2. Thử nhập email cá nhân (VD: <code>test@gmail.com</code>) rồi bấm Đăng ký.<br>3. Nhập đúng định dạng email <code>@student.agu.edu.vn</code>.</td>
+            <td>Email không thuộc tên miền sinh viên AGU bị chặn với thông báo lỗi validation.</td>
+            <td class="check-cell">&#9744; Đạt<br>&#9744; Lỗi</td>
+        </tr>
+        <tr>
+            <td><strong>TC-01.4</strong></td>
+            <td>Đăng ký Cựu SV (e-KYC)<br><code>/cuu-sinh-vien/dang-ky</code></td>
+            <td>1. Điền thông tin cá nhân, chọn Khoa, năm tốt nghiệp.<br>2. <i>Biên:</i> Thử chọn tệp <code>.pdf</code> hoặc ảnh <code>&gt; 5MB</code>.<br>3. <i>Hợp lệ:</i> Kéo thả ảnh JPG/PNG <code>&lt; 5MB</code>, xem preview rồi gửi.<br>4. Thử đăng nhập ngay bằng tài khoản vừa tạo (hoặc <code>dangquocbao.alumni@gmail.com</code>).</td>
+            <td>File sai định dạng/quá dung lượng bị chặn ngay trên form. Nộp xong thử đăng nhập bị từ chối kèm hộp thông báo màu vàng <i>"Hồ sơ đang chờ duyệt"</i>.</td>
+            <td class="check-cell">&#9744; Đạt<br>&#9744; Lỗi</td>
+        </tr>
+        <tr>
+            <td><strong>TC-01.5</strong></td>
+            <td>Hồ sơ cá nhân &amp; Đăng xuất<br><code>/ho-so</code></td>
+            <td>1. Đăng nhập Sinh viên, mở menu góc phải &rarr; <strong>Hồ sơ cá nhân</strong>.<br>2. Kiểm tra các trường MSSV, Khoa, Điểm uy tín, Số dư ví.<br>3. Thử cập nhật thông tin cho phép / đổi mật khẩu.<br>4. Bấm <strong>Đăng xuất</strong>, sau đó bấm nút Back của trình duyệt hoặc vào lại <code>/trang-chu</code>.</td>
+            <td>Thông tin định danh học thuật ở chế độ chỉ đọc (khóa bảo vệ). Sau khi đăng xuất, phiên làm việc bị hủy hoàn toàn, vào lại <code>/trang-chu</code> bị đẩy về <code>/dang-nhap</code>.</td>
+            <td class="check-cell">&#9744; Đạt<br>&#9744; Lỗi</td>
+        </tr>
+    </tbody>
+</table>
+
+<h1>TASK 2: TRA CỨU HỌC THUẬT, KHOA &amp; PHÂN TRANG MÔN HỌC</h1>
+
+<table class="qa-table">
+    <thead>
+        <tr>
+            <th style="width: 10%;">Mã TC</th>
+            <th style="width: 22%;">Chức năng &amp; URL</th>
+            <th style="width: 34%;">Các bước thao tác &amp; Trường hợp biên</th>
+            <th style="width: 22%;">Kết quả mong đợi</th>
+            <th style="width: 12%;">Kết quả</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>TC-02.1</strong></td>
+            <td>Tìm kiếm toàn cục &amp; Lọc danh mục<br><code>/khoa</code>, <code>/mon-hoc</code></td>
+            <td>1. Trên thanh tìm kiếm Header, nhập <code>COS101</code> hoặc <code>Lập trình</code> rồi Enter.<br>2. Tại <code>/mon-hoc</code>, thử kết hợp lọc theo Khoa, Chuyên ngành và cây thư mục bên Sidebar trái.</td>
+            <td>Hiển thị đúng danh sách môn học khớp từ khóa/bộ lọc. Cây Khoa/Môn học bên Sidebar điều hướng chính xác.</td>
+            <td class="check-cell">&#9744; Đạt<br>&#9744; Lỗi</td>
+        </tr>
+        <tr>
+            <td><strong>TC-02.2</strong></td>
+            <td>Phân trang độc lập 3 Tab chi tiết môn học<br><code>/mon-hoc/COS101</code></td>
+            <td>1. Mở <code>/mon-hoc/COS101</code>.<br>2. Tại <strong>Tab Tài liệu</strong>: Lọc theo loại (Đề thi, Bài giảng...), sắp xếp. Nếu có &ge; 2 trang, bấm sang <strong>Trang 2</strong>.<br>3. Khi đang ở trang 2 của Tab Tài liệu, bấm chuyển sang <strong>Tab Đánh giá</strong> hoặc <strong>Tab Yêu cầu tài liệu</strong>.</td>
+            <td>URL tại trang 2 Tab Tài liệu là <code>?doc_page=2</code>. Khi chuyển sang Tab Đánh giá/Yêu cầu, trang tự động reset về <strong>Trang 1</strong> (không bị nhảy sang trang 2 chéo tab), tham số <code>doc_page</code> được dọn sạch.</td>
+            <td class="check-cell">&#9744; Đạt<br>&#9744; Lỗi</td>
+        </tr>
+    </tbody>
+</table>
+
+<h1>TASK 3: VÒNG ĐỜI TÀI LIỆU &amp; AN NINH TỆP TIN</h1>
+
+<table class="qa-table">
+    <thead>
+        <tr>
+            <th style="width: 10%;">Mã TC</th>
+            <th style="width: 22%;">Chức năng &amp; URL</th>
+            <th style="width: 34%;">Các bước thao tác &amp; Trường hợp biên</th>
+            <th style="width: 22%;">Kết quả mong đợi</th>
+            <th style="width: 12%;">Kết quả</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>TC-03.1</strong></td>
+            <td>An ninh tệp tin 5 lớp khi Upload<br><code>/tai-lieu/dang-tai</code></td>
+            <td>1. Thử upload file rỗng <strong>0 bytes</strong>.<br>2. Thử upload file <code>.php</code>, <code>.exe</code>, <code>.sh</code>, <code>.bat</code>.<br>3. Đổi tên một file <code>.php</code> chứa <code>&lt;?php</code> thành đuôi <code>.pdf</code> rồi upload.<br>4. Thử upload file vượt quá <code>50MB</code>.</td>
+            <td>Hệ thống chặn 100% các file nguy hiểm, file rỗng và file giả mạo chữ ký <code>%PDF-</code>/OpenXML; trả về thông báo lỗi bảo mật, không tạo bản ghi rác trong CSDL.</td>
+            <td class="check-cell">&#9744; Đạt<br>&#9744; Lỗi</td>
+        </tr>
+        <tr>
+            <td><strong>TC-03.2</strong></td>
+            <td>Upload chuẩn &amp; Cộng điểm thưởng<br><code>/tai-lieu/dang-tai</code></td>
+            <td>1. Chọn Khoa CNTT &rarr; Môn <code>COS101</code>.<br>2. Chọn 1 file PDF hợp lệ, chọn phân loại (VD: Bài giảng) &rarr; Bấm <strong>Đăng tải tài liệu</strong>.<br>3. Kiểm tra <code>/vi-diem</code> và biểu tượng chuông thông báo.</td>
+            <td>Đăng tải thành công. Ví điểm khả dụng tăng chính xác <strong>+10 điểm</strong>. Chuông thông báo nhận được 1 thông báo chúc mừng.</td>
+            <td class="check-cell">&#9744; Đạt<br>&#9744; Lỗi</td>
+        </tr>
+        <tr>
+            <td><strong>TC-03.3</strong></td>
+            <td>Lọc trùng Lớp 1 (SHA-256) &amp; Lớp 2 (SimHash)<br><code>/tai-lieu/dang-tai</code></td>
+            <td>1. Đổi tên file PDF vừa upload ở TC-03.2 trên máy tính, vào lại form và chọn <strong>cùng môn COS101</strong>.<br>2. Chọn chính file đó nhưng đổi sang <strong>môn khác (COS201)</strong>.<br>3. Tạo 1 file TXT/DOCX/PDF copy &gt; 90% nội dung file cũ (sửa tiêu đề/vài chữ) rồi upload vào <code>COS101</code>.</td>
+            <td>- Cùng môn + trùng SHA-256: Giao diện AJAX báo đỏ trùng lặp ngay khi chọn file, chặn upload.<br>- Khác môn: Cho phép upload.<br>- Tương đồng &gt; 85% cùng môn: Bộ máy SimHash nhận diện và gắn cờ cảnh báo tương đồng.</td>
+            <td class="check-cell">&#9744; Đạt<br>&#9744; Lỗi</td>
+        </tr>
+        <tr>
+            <td><strong>TC-03.4</strong></td>
+            <td>Xem chi tiết, Preview PDF, Tải về, Upvote &amp; Báo cáo<br><code>/tai-lieu/{id}</code></td>
+            <td>1. <strong>Bằng tài khoản Tác giả:</strong> Kiểm tra nút <strong>Thích</strong> và nút <strong>Báo cáo</strong>.<br>2. <strong>Bằng tài khoản khác:</strong> Xem khung preview PDF (Mở rộng/Mở tab mới); với file DOCX/PPTX kiểm tra thông báo tải về.<br>3. Bấm <strong>Tải tài liệu về máy</strong>, bấm <strong>Thích</strong>/bỏ thích, bấm <strong>Sao chép link</strong> &amp; <strong>Mã SHA-256</strong>.<br>4. Bấm <strong>Báo cáo tài liệu vi phạm</strong> &rarr; Nhập lý do &rarr; Gửi.</td>
+            <td>- Tác giả không tự Thích được (nút khóa) và không thấy nút Báo cáo.<br>- Tài khoản khác tải file thành công, lượt tải tăng +1 (đạt &ge; 10 lượt tải/thích hiện khiên <i>"Sở hữu cộng đồng"</i>).<br>- Gửi báo cáo thành công tới hàng đợi Mod.</td>
+            <td class="check-cell">&#9744; Đạt<br>&#9744; Lỗi</td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="note-box">
+    <strong>Ghi chú cho QA về UI tác giả:</strong> Trên giao diện chi tiết tài liệu hiện tại (<code>Documents/Show.jsx</code>) chưa đặt các nút kích hoạt trực tiếp cho tác giả tự xóa mềm (<code>DELETE /tai-lieu/{id}</code>), nộp đơn xin gỡ (<code>POST /tai-lieu/{id}/yeu-cau-go-bo</code>) hoặc tải phiên bản mới (<code>POST /tai-lieu/{id}/tao-phien-ban</code>). Tuy nhiên màn hình tiếp nhận &amp; xét duyệt đơn xin gỡ của Kiểm duyệt viên tại <code>/quan-tri/yeu-cau-go-tai-lieu</code> đã hoàn chỉnh (kiểm thử ở Task 6).
+</div>
+
+<h1>TASK 4: SĂN HỌC LIỆU, VÍ ĐIỂM &amp; HẬU KIỂM BOUNTY</h1>
+
+<table class="qa-table">
+    <thead>
+        <tr>
+            <th style="width: 10%;">Mã TC</th>
+            <th style="width: 22%;">Chức năng &amp; URL</th>
+            <th style="width: 34%;">Các bước thao tác &amp; Trường hợp biên</th>
+            <th style="width: 22%;">Kết quả mong đợi</th>
+            <th style="width: 12%;">Kết quả</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>TC-04.1</strong></td>
+            <td>Tạo Bounty &amp; Đóng băng điểm ví<br><code>/yeu-cau-tai-lieu</code> &amp; <code>/vi-diem</code></td>
+            <td>1. <strong>Người A</strong> xem số dư khả dụng tại <code>/vi-diem</code> (VD: 100 điểm).<br>2. Bấm tạo yêu cầu mới. <i>Biên:</i> Nhập điểm thưởng <code>&gt; 100</code>.<br>3. Nhập hợp lệ <strong>30 điểm</strong> thưởng &rarr; Lưu &rarr; Mở lại <code>/vi-diem</code>.</td>
+            <td>Nhập quá số dư bị chặn. Tạo thành công: Khả dụng còn <strong>70</strong>, Tạm giữ tăng lên <strong>30</strong>, bảng lịch sử ghi nhận biến động <code>TAM_GIU</code>.</td>
+            <td class="check-cell">&#9744; Đạt<br>&#9744; Lỗi</td>
+        </tr>
+        <tr>
+            <td><strong>TC-04.2</strong></td>
+            <td>Đáp ứng &amp; Nghiệm thu/Từ chối<br><code>/yeu-cau-tai-lieu/{id}</code></td>
+            <td>1. Dùng tài khoản A tự bấm đóng góp cho yêu cầu của mình.<br>2. Dùng <strong>Người B</strong> mở yêu cầu, bấm <strong>Đóng góp tài liệu</strong> (chọn tài liệu sẵn hoặc upload mới).<br>3. <strong>Người A</strong> thử bấm <strong>Từ chối</strong> (nhập lý do) với 1 bài nộp thử, rồi bấm <strong>Xác nhận tài liệu chính xác</strong> với bài nộp đạt chuẩn.</td>
+            <td>- Tự đáp ứng bị chặn.<br>- Người B nộp xong, Người A nhận thông báo.<br>- Khi Người A xác nhận nghiệm thu, hiện pháo hoa chúc mừng, trạng thái chuyển sang <i>Chờ Ban kiểm duyệt giải ngân</i>.</td>
+            <td class="check-cell">&#9744; Đạt<br>&#9744; Lỗi</td>
+        </tr>
+        <tr>
+            <td><strong>TC-04.3</strong></td>
+            <td>Hủy yêu cầu &amp; Hoàn cọc<br><code>/yeu-cau-tai-lieu/{id}</code></td>
+            <td>1. Người A tạo 1 yêu cầu khác đóng băng 20 điểm.<br>2. Vào chi tiết yêu cầu đó, bấm nút <strong>Hủy yêu cầu</strong> và xác nhận.</td>
+            <td>Yêu cầu bị hủy; vào <code>/vi-diem</code> kiểm tra thấy 20 điểm tạm giữ được hoàn 100% về điểm khả dụng.</td>
+            <td class="check-cell">&#9744; Đạt<br>&#9744; Lỗi</td>
+        </tr>
+        <tr>
+            <td><strong>TC-04.4</strong></td>
+            <td>Yêu cầu chỉnh sửa sau Bounty<br><code>/yeu-cau-tai-lieu/{id}</code></td>
+            <td>1. Trên 1 Bounty đã <strong>Hoàn thành</strong> (sau khi Mod duyệt ở Task 6), <strong>Người A</strong> bấm <strong>Yêu cầu chỉnh sửa / bổ sung</strong>, nhập nội dung cần sửa.<br>2. <strong>Người B</strong> vào lại yêu cầu: Thử nộp tài liệu thay thế (hoặc Từ chối chỉnh sửa).<br>3. Người A bấm <strong>Xác nhận hoàn thành</strong> chỉnh sửa.</td>
+            <td>Luồng trao đổi và nộp file thay thế cập nhật đúng trạng thái. Điểm đã giải ngân trước đó không bị trừ lại của Người B.</td>
+            <td class="check-cell">&#9744; Đạt<br>&#9744; Lỗi</td>
+        </tr>
+    </tbody>
+</table>
+
+<h1>TASK 5: ĐÁNH GIÁ MÔN HỌC &amp; HỆ THỐNG THÔNG BÁO</h1>
+
+<table class="qa-table">
+    <thead>
+        <tr>
+            <th style="width: 10%;">Mã TC</th>
+            <th style="width: 22%;">Chức năng &amp; URL</th>
+            <th style="width: 34%;">Các bước thao tác &amp; Trường hợp biên</th>
+            <th style="width: 22%;">Kết quả mong đợi</th>
+            <th style="width: 12%;">Kết quả</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>TC-05.1</strong></td>
+            <td>Viết đánh giá, Lọc từ tục, Anti-XSS &amp; Chống Spam<br><code>/mon-hoc/COS101</code> (Tab Đánh giá)</td>
+            <td>1. Mở form viết đánh giá:<br>- Nhập từ ngữ thô tục/nhạy cảm &rarr; Gửi.<br>- Nhập payload <code>&lt;script&gt;alert('XSS')&lt;/script&gt;</code>.<br>- Nhập đánh giá chuẩn cho học kỳ <code>2026-1</code> &rarr; Gửi.<br>2. Thử viết thêm 1 đánh giá nữa cho <strong>cùng môn + cùng học kỳ</strong>.<br>3. Đăng nhập Admin/Mod thử mở quyền viết review.</td>
+            <td>- Bộ lọc từ tục chặn lại.<br>- Payload XSS bị vô hiệu hóa thành text thuần, không bật alert.<br>- Chống spam 1 đánh giá/môn/học kỳ hoạt động.<br>- Admin/Mod bị chặn tự viết review.</td>
+            <td class="check-cell">&#9744; Đạt<br>&#9744; Lỗi</td>
+        </tr>
+        <tr>
+            <td><strong>TC-05.2</strong></td>
+            <td>Vote &amp; Tự động ẩn khi &ge; 3 báo cáo<br><code>/mon-hoc/COS101</code></td>
+            <td>1. Người A thử tự bấm Upvote bài đánh giá của mình.<br>2. Người B bấm Upvote/Downvote bài của A.<br>3. Dùng <strong>3 tài khoản khác nhau</strong> gửi báo cáo vi phạm cho cùng 1 bài đánh giá đó.</td>
+            <td>- Tự vote bị chặn.<br>- Khi đạt mốc <strong>3 báo cáo vi phạm</strong>, bài đánh giá tự động bị ẩn khỏi danh sách công khai và tác giả nhận thông báo.</td>
+            <td class="check-cell">&#9744; Đạt<br>&#9744; Lỗi</td>
+        </tr>
+        <tr>
+            <td><strong>TC-05.3</strong></td>
+            <td>Trung tâm Thông báo<br>Header &amp; <code>/thong-bao</code></td>
+            <td>1. Click vào biểu tượng chuông trên Header khi có badge đỏ.<br>2. Bấm vào 1 thông báo chưa đọc.<br>3. Vào <code>/thong-bao</code>, bấm <strong>Đánh dấu đã đọc tất cả</strong> và thử <strong>Xóa</strong> 1 thông báo.</td>
+            <td>Số đếm chưa đọc giảm chính xác, click thông báo điều hướng đúng trang đích. Đọc tất cả &amp; Xóa hoạt động chuẩn xác.</td>
+            <td class="check-cell">&#9744; Đạt<br>&#9744; Lỗi</td>
+        </tr>
+    </tbody>
+</table>
+
+<h1>TASK 6: PHÂN HỆ KIỂM DUYỆT VIÊN (MODERATOR) &amp; PHÂN QUYỀN RBAC</h1>
+<p><i>Thực hiện bằng tài khoản Moderator (<code>kiemduyet@agu.edu.vn</code> / <code>Agu@123456</code>).</i></p>
+
+<table class="qa-table">
+    <thead>
+        <tr>
+            <th style="width: 10%;">Mã TC</th>
+            <th style="width: 22%;">Chức năng &amp; URL</th>
+            <th style="width: 34%;">Các bước thao tác &amp; Trường hợp biên</th>
+            <th style="width: 22%;">Kết quả mong đợi</th>
+            <th style="width: 12%;">Kết quả</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>TC-06.1</strong></td>
+            <td>Ma trận phân quyền RBAC<br><code>/quan-tri/*</code></td>
+            <td>1. Kiểm tra Sidebar của Mod.<br>2. Cố tình gõ trực tiếp URL: <code>/quan-tri/nguoi-dung</code>, <code>/quan-tri/danh-muc</code>, <code>/quan-tri/cau-hinh</code>, <code>/quan-tri/nhat-ky-kiem-toan</code>.<br>3. Thử thao tác Khôi phục / Xóa vĩnh viễn trong <code>/quan-tri/tai-lieu/da-xoa</code>.</td>
+            <td>Các menu của Super Admin bị ẩn. Truy cập trực tiếp URL hoặc thao tác thùng rác cấp cao đều bị chặn trả về <strong>403 Forbidden</strong>.</td>
+            <td class="check-cell">&#9744; Đạt<br>&#9744; Lỗi</td>
+        </tr>
+        <tr>
+            <td><strong>TC-06.2</strong></td>
+            <td>Hàng đợi duyệt KYC<br><code>/quan-tri/duyet-kyc</code></td>
+            <td>1. Bấm xem ảnh minh chứng hồ sơ Cựu SV.<br>2. Thử từ chối 1 hồ sơ nhưng <strong>bỏ trống lý do</strong>.<br>3. Phê duyệt 1 hồ sơ (VD: <code>dangquocbao.alumni@gmail.com</code>) và test checkbox <strong>Duyệt hàng loạt</strong>.<br>4. Thử đăng nhập lại bằng tài khoản Cựu SV vừa duyệt.</td>
+            <td>Ảnh minh chứng hiển thị qua Signed URL. Từ chối bắt buộc có lý do. Sau khi duyệt, Cựu SV đăng nhập thành công và nhận thông báo KYC.</td>
+            <td class="check-cell">&#9744; Đạt<br>&#9744; Lỗi</td>
+        </tr>
+        <tr>
+            <td><strong>TC-06.3</strong></td>
+            <td>Duyệt Tài liệu &amp; Giải ngân Bounty<br><code>/quan-tri/tai-lieu/cho-kiem-tra</code><br><code>/quan-tri/yeu-cau-tai-lieu/cho-giai-ngan</code></td>
+            <td>1. Mở hàng đợi kiểm tra tài liệu, xem chi tiết file, thử Duyệt / Từ chối / Duyệt hàng loạt.<br>2. Mở hàng đợi giải ngân Bounty đã được Người A nghiệm thu ở TC-04.2 &rarr; Bấm <strong>Phê duyệt giải ngân</strong>.<br>3. Kiểm tra lại ví điểm của Người A và Người B.</td>
+            <td>Tài liệu được duyệt hiển thị công khai. Sau khi giải ngân Bounty: Tạm giữ của Người A về 0, khả dụng của Người B tăng đúng +30 điểm, cả 2 nhận thông báo.</td>
+            <td class="check-cell">&#9744; Đạt<br>&#9744; Lỗi</td>
+        </tr>
+        <tr>
+            <td><strong>TC-06.4</strong></td>
+            <td>Xử lý Báo cáo vi phạm &amp; Đơn gỡ tài liệu<br><code>/quan-tri/bao-cao-danh-gia</code><br><code>/quan-tri/yeu-cau-go-tai-lieu</code></td>
+            <td>1. Mở hàng đợi báo cáo vi phạm đánh giá/tài liệu: thử Bác bỏ, Ẩn/Xóa nội dung, Phạt vi phạm; test <strong>Bác bỏ hàng loạt</strong> &amp; <strong>Lưu trữ hàng loạt</strong>.<br>2. Kiểm tra hàng đợi yêu cầu gỡ tài liệu: thử Duyệt gỡ (chuyển vào thùng rác) hoặc Từ chối (nhập lý do).</td>
+            <td>Các báo cáo và đơn xin gỡ được xử lý trơn tru, không phát sinh lỗi null dữ liệu nếu đánh giá gốc bị gỡ (nhờ FK snapshot).</td>
+            <td class="check-cell">&#9744; Đạt<br>&#9744; Lỗi</td>
+        </tr>
+    </tbody>
+</table>
+
+<h1>TASK 7: PHÂN HỆ QUẢN TRỊ VIÊN TỐI CAO (SUPER ADMIN)</h1>
+<p><i>Thực hiện bằng tài khoản Admin (<code>admin@agu.edu.vn</code> / <code>Admin@123456</code>).</i></p>
+
+<table class="qa-table">
+    <thead>
+        <tr>
+            <th style="width: 10%;">Mã TC</th>
+            <th style="width: 22%;">Chức năng &amp; URL</th>
+            <th style="width: 34%;">Các bước thao tác &amp; Trường hợp biên</th>
+            <th style="width: 22%;">Kết quả mong đợi</th>
+            <th style="width: 12%;">Kết quả</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>TC-07.1</strong></td>
+            <td>Quản lý Người dùng<br><code>/quan-tri/nguoi-dung</code></td>
+            <td>1. Tìm kiếm, lọc danh sách người dùng.<br>2. Mở chi tiết 1 Sinh viên: thử <strong>Khóa tài khoản</strong> (sau đó test đăng nhập thử tài khoản vừa khóa), rồi Mở khóa lại.<br>3. <i>Biên:</i> Thử tự khóa chính tài khoản Admin đang đăng nhập.<br>4. Test cập nhật phân quyền &amp; ghi nhận vi phạm.</td>
+            <td>Tài khoản bị khóa không thể đăng nhập. Hệ thống chặn Admin tự khóa chính mình. Mọi thay đổi được ghi nhật ký kiểm toán.</td>
+            <td class="check-cell">&#9744; Đạt<br>&#9744; Lỗi</td>
+        </tr>
+        <tr>
+            <td><strong>TC-07.2</strong></td>
+            <td>Quản lý Danh sách SV Thô<br><code>/quan-tri/sinh-vien-raw</code></td>
+            <td>1. Nạp danh sách sinh viên từ file CSV hoặc thêm thủ công.<br>2. Chỉnh sửa thông tin SV chưa kích hoạt.<br>3. Xóa 1 bản ghi SV thô chưa kích hoạt.</td>
+            <td>Dữ liệu được import, cập nhật và xóa chính xác, đồng bộ cho luồng đăng nhập lần đầu.</td>
+            <td class="check-cell">&#9744; Đạt<br>&#9744; Lỗi</td>
+        </tr>
+        <tr>
+            <td><strong>TC-07.3</strong></td>
+            <td>Quản lý Danh mục Học thuật<br><code>/quan-tri/danh-muc</code></td>
+            <td>1. Tạo mới / Sửa / Bật tắt trạng thái Khoa, Chuyên ngành, Môn học.<br>2. <i>Biên:</i> Thử tắt/vô hiệu hóa môn học đang có tài liệu học tập (VD: <code>COS101</code>).</td>
+            <td>Thêm/Sửa danh mục thành công. Vô hiệu hóa môn đang có tài liệu bị chặn/cảnh báo để bảo toàn toàn vẹn dữ liệu.</td>
+            <td class="check-cell">&#9744; Đạt<br>&#9744; Lỗi</td>
+        </tr>
+        <tr>
+            <td><strong>TC-07.4</strong></td>
+            <td>Thùng rác (Khôi phục &amp; Xóa vĩnh viễn)<br><code>/quan-tri/tai-lieu/da-xoa</code></td>
+            <td>1. Với tài liệu bị xóa do vi phạm: Thử bấm <strong>Khôi phục</strong> khi chưa tick ô xác nhận vi phạm.<br>2. Tick xác nhận và bấm Khôi phục.<br>3. Thử bấm <strong>Xóa vĩnh viễn</strong> 1 tài liệu rác khác.</td>
+            <td>Bắt buộc tick xác nhận mới cho khôi phục tài liệu từng vi phạm. Xóa vĩnh viễn xóa cả bản ghi DB lẫn file vật lý trên ổ đĩa.</td>
+            <td class="check-cell">&#9744; Đạt<br>&#9744; Lỗi</td>
+        </tr>
+        <tr>
+            <td><strong>TC-07.5</strong></td>
+            <td>Lưu trữ, Cấu hình &amp; Nhật ký Kiểm toán<br><code>/quan-tri/luu-tru</code><br><code>/quan-tri/cau-hinh</code><br><code>/quan-tri/nhat-ky-kiem-toan</code></td>
+            <td>1. Vào <code>/quan-tri/luu-tru</code> xem thống kê dung lượng, test nút <strong>Dọn dẹp thùng rác quá hạn</strong>.<br>2. Vào <code>/quan-tri/cau-hinh</code> thay đổi 1 tham số vận hành và Lưu.<br>3. Vào <code>/quan-tri/nhat-ky-kiem-toan</code> kiểm tra log vừa phát sinh.</td>
+            <td>Lưu cấu hình thành công. Nhật ký kiểm toán ghi nhận đầy đủ: Đăng nhập Admin, Khóa tài khoản, Thay đổi cấu hình kèm dữ liệu cũ/mới.</td>
+            <td class="check-cell">&#9744; Đạt<br>&#9744; Lỗi</td>
+        </tr>
+    </tbody>
+</table>
+
+<h1>TASK 8: KIỂM TRA TÁC VỤ TỰ ĐỘNG (CRON JOB / CLI)</h1>
+<p>Tác vụ tự động chạy nền lúc 02:00 hàng ngày được kiểm thử nhanh qua Terminal (không ghi đè dữ liệu thật khi dùng cờ <code>--dry-run</code>):</p>
+
+<div class="cli-block">
+# 1. Chạy thử kiểm tra các yêu cầu Bounty quá hạn 30 ngày cần hoàn cọc:<br>
+php artisan bounty:auto-refund --dry-run<br><br>
+# 2. Kiểm tra danh sách lịch trình Cron đã đăng ký trong hệ thống:<br>
+php artisan schedule:list
+</div>
+
+<table class="qa-table">
+    <thead>
+        <tr>
+            <th style="width: 12%;">Mã TC</th>
+            <th style="width: 30%;">Tác vụ kiểm tra</th>
+            <th style="width: 46%;">Kết quả mong đợi</th>
+            <th style="width: 12%;">Kết quả</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>TC-08.1</strong></td>
+            <td>Lệnh <code>bounty:auto-refund --dry-run</code></td>
+            <td>Liệt kê chính xác các yêu cầu Bounty trạng thái <code>MO</code> quá 30 ngày chưa có bài nộp chờ duyệt và số điểm sẽ hoàn trả (hoặc thông báo 0 yêu cầu nếu không có dữ liệu quá hạn).</td>
+            <td class="check-cell">&#9744; Đạt<br>&#9744; Lỗi</td>
+        </tr>
+        <tr>
+            <td><strong>TC-08.2</strong></td>
+            <td>Lệnh <code>schedule:list</code></td>
+            <td>Hiển thị đủ 3 lịch trình tự động: <code>documents:purge-trash</code>, <code>documents:notify-expiring-trash</code> và <code>bounty:auto-refund</code> (02:00 hàng ngày).</td>
+            <td class="check-cell">&#9744; Đạt<br>&#9744; Lỗi</td>
+        </tr>
+    </tbody>
+</table>
+
+<h2>KẾT LUẬN NGHIỆM THU CỦA NHÓM KIỂM THỬ</h2>
+<table class="meta-table">
+    <tr>
+        <td class="meta-label">Tổng số Task đạt</td>
+        <td>......... / 23 Test Cases</td>
+        <td class="meta-label">Đánh giá chung</td>
+        <td>&#9744; Đạt nghiệm thu &nbsp;&nbsp;&nbsp; &#9744; Cần sửa lỗi bổ sung</td>
+    </tr>
+    <tr>
+        <td class="meta-label">Ghi chú / Lỗi phát sinh (nếu có)</td>
+        <td colspan="3" style="height: 60px;"></td>
+    </tr>
+</table>
+
+</body>
+</html>
