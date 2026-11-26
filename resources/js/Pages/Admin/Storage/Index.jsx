@@ -169,46 +169,54 @@ export default function StorageIndex({
 
             <div className="space-y-6">
                 {/* 1. HEADER & THAO TÁC NHANH */}
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs">
-                    <div>
-                        <div className="flex items-center gap-2">
-                            <span className="inline-flex items-center gap-1 rounded-md bg-blue-50 px-2 py-0.5 text-xs font-semibold text-[#005baa]">
-                                <HardDrive className="h-3.5 w-3.5" /> AGU Storage Ops
-                            </span>
-                            <span className="text-xs text-slate-400">•</span>
-                            <span className="text-xs text-slate-500">Giám sát tài nguyên máy chủ</span>
+                <div className="flex flex-col gap-4 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs lg:flex-row lg:items-center lg:justify-between">
+                    <div className="flex items-start gap-4">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#005baa] to-blue-700 text-white shadow-xs">
+                            <HardDrive className="h-6 w-6" />
                         </div>
-                        <h1 className="mt-1.5 text-2xl font-bold tracking-tight text-slate-900">
-                            Theo dõi & Quản lý dung lượng lưu trữ
-                        </h1>
-                        <p className="mt-1 text-sm text-slate-500">
-                            Theo dõi chi tiết mức sử dụng file, phân loại theo Khoa/Môn, phát hiện file bất thường và dọn dẹp dung lượng thừa.
-                        </p>
+                        <div>
+                            <div className="flex flex-wrap items-center gap-2">
+                                <span className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-[11px] font-bold text-[#005baa]">
+                                    AGU Storage Ops
+                                </span>
+                                <span className="text-xs text-slate-400">•</span>
+                                <span className="text-xs font-medium text-slate-500">Giám sát tài nguyên máy chủ</span>
+                            </div>
+                            <h1 className="mt-1.5 text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+                                Theo dõi & Quản lý dung lượng lưu trữ
+                            </h1>
+                            <p className="mt-1 text-xs leading-relaxed text-slate-500 sm:text-sm">
+                                Theo dõi chi tiết mức sử dụng tệp, phân loại theo Khoa/Môn, phát hiện tệp bất thường và dọn dẹp dung lượng thừa.
+                            </p>
+                        </div>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2.5">
+                    <div className="flex flex-wrap items-center gap-2.5 shrink-0">
                         {cachedAt && (
-                            <span className="text-[11px] text-slate-400 bg-slate-50 border border-slate-200 px-2.5 py-1.5 rounded-xl">
-                                Đệm lúc: {new Date(cachedAt).toLocaleTimeString('vi-VN')}
+                            <span className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-[11px] font-medium text-slate-500">
+                                <Calendar className="h-3.5 w-3.5 text-slate-400" />
+                                Đệm lúc {new Date(cachedAt).toLocaleTimeString('vi-VN')}
                             </span>
                         )}
 
                         <button
+                            type="button"
                             onClick={handleRefresh}
-                            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+                            className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-2xs transition hover:border-blue-200 hover:bg-blue-50/50 hover:text-[#005baa]"
                             title="Xóa cache và nạp lại số liệu mới nhất"
                         >
-                            <RefreshCw className="h-3.5 w-3.5 text-slate-500" />
+                            <RefreshCw className="h-3.5 w-3.5" />
                             <span>Làm mới cache</span>
                         </button>
 
                         <button
+                            type="button"
                             onClick={() => setShowPurgeModal(true)}
                             disabled={trashStats?.da_het_han?.so_luong === 0}
                             className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-semibold shadow-xs transition ${
                                 trashStats?.da_het_han?.so_luong > 0
-                                    ? 'bg-rose-600 text-white hover:bg-rose-700'
-                                    : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                                    ? 'cursor-pointer bg-rose-600 text-white hover:bg-rose-700'
+                                    : 'cursor-not-allowed border border-slate-200 bg-slate-100 text-slate-400'
                             }`}
                         >
                             <Trash2 className="h-3.5 w-3.5" />
@@ -260,124 +268,159 @@ export default function StorageIndex({
                 {/* 3. TỔNG QUAN CHỈ SỐ LƯU TRỮ CHÍNH (KPI CARDS) */}
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     {/* Card 1: Tổng dung lượng sử dụng */}
-                    <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs flex flex-col justify-between">
-                        <div>
-                            <div className="flex items-center justify-between gap-2">
-                                <span className="text-xs font-medium text-slate-500">1. Tổng dung lượng file đang dùng</span>
-                                <span className={`inline-flex px-2 py-0.5 rounded text-[11px] font-bold ${statusTheme.badge}`}>
-                                    {totalStats.ty_le_su_dung_phan_tram}%
-                                </span>
-                            </div>
-                            <div className="mt-2 flex items-baseline gap-2">
-                                <span className="text-2xl font-bold tracking-tight text-slate-900">
-                                    {totalStats.tong_dung_luong_dinh_dang}
-                                </span>
-                                <span className="text-xs text-slate-400">/ {totalStats.han_muc_dinh_dang}</span>
+                    <div className="flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs">
+                        <div className="h-1 w-full bg-gradient-to-r from-[#005baa] to-sky-500" />
+                        <div className="flex flex-1 flex-col justify-between p-5">
+                            <div>
+                                <div className="flex items-center justify-between gap-2">
+                                    <div className="flex items-center gap-2">
+                                        <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-blue-100 bg-blue-50 text-[#005baa]">
+                                            <HardDrive className="h-4 w-4" />
+                                        </span>
+                                        <span className="text-xs font-semibold text-slate-600">Dung lượng đang dùng</span>
+                                    </div>
+                                    <span className={`inline-flex rounded-full border px-2 py-0.5 font-mono text-[11px] font-bold ${statusTheme.badge}`}>
+                                        {totalStats.ty_le_su_dung_phan_tram}%
+                                    </span>
+                                </div>
+                                <div className="mt-3 flex items-baseline gap-2">
+                                    <span className="text-2xl font-extrabold tracking-tight text-slate-900">
+                                        {totalStats.tong_dung_luong_dinh_dang}
+                                    </span>
+                                    <span className="text-xs font-medium text-slate-400">/ {totalStats.han_muc_dinh_dang}</span>
+                                </div>
+
+                                {/* Thanh tiến trình hạn mức */}
+                                <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-slate-100">
+                                    <div
+                                        className={`h-full rounded-full transition-all duration-500 ${statusTheme.bar}`}
+                                        style={{ width: `${Math.min(100, Math.max(3, totalStats.ty_le_su_dung_phan_tram))}%` }}
+                                    />
+                                </div>
                             </div>
 
-                            {/* Thanh tiến trình hạn mức */}
-                            <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-slate-100">
-                                <div
-                                    className={`h-full transition-all duration-500 ${statusTheme.bar}`}
-                                    style={{ width: `${Math.min(100, Math.max(3, totalStats.ty_le_su_dung_phan_tram))}%` }}
-                                />
+                            <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 text-xs text-slate-500">
+                                <span>Còn trống khả dụng:</span>
+                                <span className="font-mono font-bold text-slate-800">{totalStats.dung_luong_con_lai_dinh_dang}</span>
                             </div>
-                        </div>
-
-                        <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                            <span>Còn trống:</span>
-                            <span className="font-semibold text-slate-700">{totalStats.dung_luong_con_lai_dinh_dang}</span>
                         </div>
                     </div>
 
                     {/* Card 2: Dung lượng có thể giải phóng */}
-                    <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs flex flex-col justify-between">
-                        <div>
-                            <div className="flex items-center justify-between gap-2">
-                                <span className="text-xs font-medium text-slate-500">10. Có thể giải phóng ngay</span>
-                                <span className="inline-flex px-2 py-0.5 rounded text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                                    {reclaimable?.giai_phong_ngay?.ty_le_phan_tram ?? 0}% tổng
-                                </span>
+                    <div className="flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs">
+                        <div className="h-1 w-full bg-gradient-to-r from-amber-400 to-orange-500" />
+                        <div className="flex flex-1 flex-col justify-between p-5">
+                            <div>
+                                <div className="flex items-center justify-between gap-2">
+                                    <div className="flex items-center gap-2">
+                                        <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-amber-200/70 bg-amber-50 text-amber-600">
+                                            <Sparkles className="h-4 w-4" />
+                                        </span>
+                                        <span className="text-xs font-semibold text-slate-600">Có thể giải phóng</span>
+                                    </div>
+                                    <span className="inline-flex rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 font-mono text-[11px] font-bold text-amber-700">
+                                        {reclaimable?.giai_phong_ngay?.ty_le_phan_tram ?? 0}% tổng
+                                    </span>
+                                </div>
+                                <div className="mt-3 flex items-baseline gap-2">
+                                    <span className="text-2xl font-extrabold tracking-tight text-amber-600">
+                                        {reclaimable?.giai_phong_ngay?.dung_luong_dinh_dang ?? '0 KB'}
+                                    </span>
+                                </div>
+                                <p className="mt-2 text-xs leading-relaxed text-slate-500">
+                                    Gồm <strong className="text-slate-700">{reclaimable?.giai_phong_ngay?.so_file_thung_rac_het_han ?? 0}</strong> file hết hạn và{' '}
+                                    <strong className="text-slate-700">{reclaimable?.giai_phong_ngay?.so_file_trung_lap ?? 0}</strong> file trùng lặp.
+                                </p>
                             </div>
-                            <div className="mt-2 flex items-baseline gap-2">
-                                <span className="text-2xl font-bold tracking-tight text-amber-600">
-                                    {reclaimable?.giai_phong_ngay?.dung_luong_dinh_dang ?? '0 KB'}
-                                </span>
-                            </div>
-                            <p className="mt-2 text-xs text-slate-500 leading-relaxed">
-                                Gồm {reclaimable?.giai_phong_ngay?.so_file_thung_rac_het_han ?? 0} file hết hạn và{' '}
-                                {reclaimable?.giai_phong_ngay?.so_file_trung_lap ?? 0} file thừa trùng lặp.
-                            </p>
-                        </div>
 
-                        <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                            <span className="text-slate-500">Tối đa cả thùng rác:</span>
-                            <span className="font-semibold text-slate-700">
-                                {reclaimable?.giai_phong_toi_da?.dung_luong_dinh_dang ?? '0 KB'}
-                            </span>
+                            <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 text-xs">
+                                <span className="text-slate-500">Tối đa cả thùng rác:</span>
+                                <span className="font-mono font-bold text-slate-800">
+                                    {reclaimable?.giai_phong_toi_da?.dung_luong_dinh_dang ?? '0 KB'}
+                                </span>
+                            </div>
                         </div>
                     </div>
 
                     {/* Card 3: Minh chứng Alumni KYC (Private) */}
-                    <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs flex flex-col justify-between">
-                        <div>
-                            <div className="flex items-center justify-between gap-2">
-                                <span className="text-xs font-medium text-slate-500">7. Khu vực Private Alumni KYC</span>
-                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-600">
-                                    <Lock className="h-3 w-3 text-slate-400" /> Private
-                                </span>
+                    <div className="flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs">
+                        <div className="h-1 w-full bg-gradient-to-r from-sky-500 to-indigo-500" />
+                        <div className="flex flex-1 flex-col justify-between p-5">
+                            <div>
+                                <div className="flex items-center justify-between gap-2">
+                                    <div className="flex items-center gap-2">
+                                        <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-sky-200/70 bg-sky-50 text-sky-600">
+                                            <Lock className="h-4 w-4" />
+                                        </span>
+                                        <span className="text-xs font-semibold text-slate-600">Khu vực Alumni KYC</span>
+                                    </div>
+                                    <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">
+                                        Private
+                                    </span>
+                                </div>
+                                <div className="mt-3 flex items-baseline gap-2">
+                                    <span className="text-2xl font-extrabold tracking-tight text-slate-900">
+                                        {kycStats?.tong_dung_luong_dinh_dang ?? '0 KB'}
+                                    </span>
+                                    <span className="text-xs font-medium text-slate-400">({kycStats?.tong_so_tep ?? 0} hồ sơ)</span>
+                                </div>
+                                <p className="mt-2 text-xs text-slate-500">
+                                    Phân vùng:{' '}
+                                    <span className="rounded-md bg-sky-50 px-2 py-0.5 font-semibold text-sky-700 border border-sky-100">
+                                        Private Storage
+                                    </span>
+                                </p>
                             </div>
-                            <div className="mt-2 flex items-baseline gap-2">
-                                <span className="text-2xl font-bold tracking-tight text-slate-900">
-                                    {kycStats?.tong_dung_luong_dinh_dang ?? '0 KB'}
-                                </span>
-                                <span className="text-xs text-slate-400">({kycStats?.tong_so_tep ?? 0} hồ sơ)</span>
-                            </div>
-                            <p className="mt-2 text-xs text-slate-500">
-                                Phân vùng: <span className="text-sky-700 font-semibold bg-sky-50 px-1.5 py-0.5 rounded">Private Storage (Bảo mật)</span>
-                            </p>
-                        </div>
 
-                        <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                            <span className="text-slate-500">Trung bình / file:</span>
-                            <span className="font-semibold text-slate-700">{kycStats?.kich_thuoc_trung_binh_dinh_dang ?? '0 KB'}</span>
+                            <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 text-xs">
+                                <span className="text-slate-500">Trung bình / file:</span>
+                                <span className="font-mono font-bold text-slate-800">{kycStats?.kich_thuoc_trung_binh_dinh_dang ?? '0 KB'}</span>
+                            </div>
                         </div>
                     </div>
 
                     {/* Card 4: Thùng rác tài liệu (Xóa mềm) */}
-                    <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs flex flex-col justify-between">
-                        <div>
-                            <div className="flex items-center justify-between gap-2">
-                                <span className="text-xs font-medium text-slate-500">6. Tài liệu đã xóa mềm</span>
-                                <span className="inline-flex px-2 py-0.5 rounded text-[11px] font-semibold bg-rose-50 text-rose-700">
-                                    {trashStats?.tong_so_tai_lieu ?? 0} file
-                                </span>
+                    <div className="flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs">
+                        <div className="h-1 w-full bg-gradient-to-r from-rose-500 to-pink-500" />
+                        <div className="flex flex-1 flex-col justify-between p-5">
+                            <div>
+                                <div className="flex items-center justify-between gap-2">
+                                    <div className="flex items-center gap-2">
+                                        <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-rose-200/70 bg-rose-50 text-rose-600">
+                                            <Trash2 className="h-4 w-4" />
+                                        </span>
+                                        <span className="text-xs font-semibold text-slate-600">Tài liệu đã xóa mềm</span>
+                                    </div>
+                                    <span className="inline-flex rounded-full border border-rose-200 bg-rose-50 px-2 py-0.5 font-mono text-[11px] font-bold text-rose-700">
+                                        {trashStats?.tong_so_tai_lieu ?? 0} file
+                                    </span>
+                                </div>
+                                <div className="mt-3 flex items-baseline gap-2">
+                                    <span className="text-2xl font-extrabold tracking-tight text-slate-900">
+                                        {trashStats?.tong_dung_luong_dinh_dang ?? '0 KB'}
+                                    </span>
+                                </div>
+                                <div className="mt-2 flex items-center gap-2 text-xs text-slate-500">
+                                    <span className="inline-flex items-center gap-1 font-medium text-rose-600">
+                                        <AlertCircle className="h-3.5 w-3.5" />
+                                        {trashStats?.da_het_han?.so_luong ?? 0} hết hạn
+                                    </span>
+                                    <span>•</span>
+                                    <span>{trashStats?.trong_an_han?.so_luong ?? 0} trong ân hạn</span>
+                                </div>
                             </div>
-                            <div className="mt-2 flex items-baseline gap-2">
-                                <span className="text-2xl font-bold tracking-tight text-slate-900">
-                                    {trashStats?.tong_dung_luong_dinh_dang ?? '0 KB'}
-                                </span>
-                            </div>
-                            <div className="mt-2 flex items-center gap-2 text-xs text-slate-500">
-                                <span className="inline-flex items-center gap-1 text-rose-600 font-medium">
-                                    <AlertCircle className="h-3 w-3" />
-                                    {trashStats?.da_het_han?.so_luong ?? 0} hết hạn
-                                </span>
-                                <span>•</span>
-                                <span>{trashStats?.trong_an_han?.so_luong ?? 0} trong ân hạn</span>
-                            </div>
-                        </div>
 
-                        <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                            <span className="text-slate-500">Thời hạn lưu thùng rác:</span>
-                            <span className="font-semibold text-slate-700">{trashStats?.thoi_han_luu_ngay ?? 60} ngày</span>
+                            <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 text-xs">
+                                <span className="text-slate-500">Thời hạn lưu thùng rác:</span>
+                                <span className="font-mono font-bold text-slate-800">{trashStats?.thoi_han_luu_ngay ?? 60} ngày</span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                {/* 4. TAB NAVIGATION */}
-                <div className="border-b border-slate-200">
-                    <nav className="-mb-px flex space-x-2 overflow-x-auto pb-1" aria-label="Tabs">
+                {/* 4. TAB NAVIGATION (Segmented Pill Bar, không thanh cuộn ngang thô) */}
+                <div className="rounded-2xl border border-slate-200/80 bg-white p-1.5 shadow-xs">
+                    <nav className="flex flex-wrap gap-1.5" aria-label="Tabs">
                         {[
                             { id: 'tong_quan', label: 'Tổng quan & Tăng trưởng', icon: TrendingUp },
                             { id: 'khoa_mon_hoc', label: 'Theo Khoa & Môn học', icon: Building2 },
@@ -401,17 +444,18 @@ export default function StorageIndex({
                             return (
                                 <button
                                     key={tab.id}
+                                    type="button"
                                     onClick={() => setActiveTab(tab.id)}
-                                    className={`whitespace-nowrap flex items-center gap-2 py-3 px-4 border-b-2 font-semibold text-sm transition ${
+                                    className={`inline-flex cursor-pointer items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-semibold transition-all ${
                                         isActive
-                                            ? 'border-[#005baa] text-[#005baa]'
-                                            : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                                            ? 'bg-[#005baa] text-white shadow-xs'
+                                            : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                                     }`}
                                 >
-                                    <Icon className={`h-4 w-4 ${isActive ? 'text-[#005baa]' : 'text-slate-400'}`} />
+                                    <Icon className={`h-4 w-4 ${isActive ? 'text-white' : 'text-slate-400'}`} />
                                     <span>{tab.label}</span>
                                     {tab.badge && (
-                                        <span className="h-2 w-2 rounded-full bg-rose-500 shrink-0" />
+                                        <span className={`h-2 w-2 shrink-0 rounded-full ${isActive ? 'bg-[#FFC72C]' : 'bg-rose-500'}`} />
                                     )}
                                 </button>
                             );
@@ -419,17 +463,17 @@ export default function StorageIndex({
                     </nav>
                 </div>
 
-                {/* 5. TAB 1: TỔNG QUAN & TỐC ĐỘ TĂNG DUNG LƯỢNG THEO THỜI GIAN (12) */}
+                {/* 5. TAB 1: TỔNG QUAN & TỐC ĐỘ TĂNG DUNG LƯỢNG THEO THỜI GIAN */}
                 {activeTab === 'tong_quan' && (
                     <div className="space-y-6">
                         {/* Biểu đồ & Tốc độ tăng trưởng theo thời gian */}
                         <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs">
-                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-5 border-b border-slate-100">
+                            <div className="flex flex-col gap-3 border-b border-slate-100 pb-5 sm:flex-row sm:items-center sm:justify-between">
                                 <div>
                                     <div className="flex items-center gap-2">
                                         <TrendingUp className="h-5 w-5 text-[#005baa]" />
                                         <h2 className="text-base font-bold text-slate-900">
-                                            12. Thống kê tốc độ tăng dung lượng theo thời gian
+                                            Thống kê tốc độ tăng dung lượng theo thời gian
                                         </h2>
                                     </div>
                                     <p className="mt-1 text-xs text-slate-500">
@@ -617,7 +661,7 @@ export default function StorageIndex({
                                 <div>
                                     <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
                                         <Building2 className="h-4 w-4 text-[#005baa]" />
-                                        2. Dung lượng theo Khoa
+                                        Dung lượng theo Khoa
                                     </h3>
                                     <p className="text-xs text-slate-500 mt-0.5">
                                         Tổng hợp lưu trữ của tất cả môn học trực thuộc từng Khoa / Bộ môn.
@@ -685,7 +729,7 @@ export default function StorageIndex({
                                 <div>
                                     <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
                                         <GraduationCap className="h-4 w-4 text-[#005baa]" />
-                                        3. Dung lượng theo Môn học (Top chiếm dụng lớn nhất)
+                                        Dung lượng theo Môn học (Top chiếm dụng lớn nhất)
                                     </h3>
                                     <p className="text-xs text-slate-500 mt-0.5">
                                         Môn học có tổng tài nguyên file nạp lên nhiều nhất trên hệ thống.
@@ -1299,7 +1343,7 @@ export default function StorageIndex({
 
             {/* MODAL XÁC NHẬN DỌN DẸP THÙNG RÁC */}
             {showPurgeModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
+                <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
                     <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl border border-slate-200">
                         <div className="flex items-center gap-3">
                             <span className="p-3 rounded-xl bg-rose-100 text-rose-600">

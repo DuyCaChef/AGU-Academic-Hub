@@ -309,13 +309,13 @@ export default function ReviewReportsIndex({ reports, filters = {}, reasons = []
                     {/* Search box */}
                     <div className="lg:col-span-2">
                         <div className="relative">
-                            <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                            <Search className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                             <input
                                 type="text"
                                 value={query.search}
                                 onChange={(e) => setQuery({ ...query, search: e.target.value })}
                                 placeholder="Tìm mã môn, tên môn, giảng viên, tài liệu..."
-                                className="w-full rounded-lg border border-slate-200 py-2 pl-9 pr-3 text-sm focus:border-[#005baa] focus:ring-1 focus:ring-[#005baa]"
+                                className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50/60 pl-10 pr-3 text-xs font-medium text-slate-800 placeholder:text-slate-400 focus:border-[#005baa] focus:bg-white focus:ring-1 focus:ring-[#005baa]"
                             />
                         </div>
                     </div>
@@ -324,7 +324,7 @@ export default function ReviewReportsIndex({ reports, filters = {}, reasons = []
                     <select
                         value={query.status}
                         onChange={(e) => setQuery({ ...query, status: e.target.value })}
-                        className="rounded-lg border border-slate-200 text-sm focus:border-[#005baa] focus:ring-1 focus:ring-[#005baa]"
+                        className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs font-medium text-slate-700 focus:border-[#005baa] focus:ring-1 focus:ring-[#005baa]"
                     >
                         <option value="">Mọi trạng thái</option>
                         {Object.entries(statusLabels).map(([value, label]) => (
@@ -336,7 +336,7 @@ export default function ReviewReportsIndex({ reports, filters = {}, reasons = []
                     <select
                         value={query.reason}
                         onChange={(e) => setQuery({ ...query, reason: e.target.value })}
-                        className="rounded-lg border border-slate-200 text-sm focus:border-[#005baa] focus:ring-1 focus:ring-[#005baa]"
+                        className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs font-medium text-slate-700 focus:border-[#005baa] focus:ring-1 focus:ring-[#005baa]"
                     >
                         <option value="">Mọi lý do</option>
                         {reasons.map((reason) => (
@@ -351,7 +351,7 @@ export default function ReviewReportsIndex({ reports, filters = {}, reasons = []
                         type="date"
                         value={query.from}
                         onChange={(e) => setQuery({ ...query, from: e.target.value })}
-                        className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:border-[#005baa] focus:ring-1 focus:ring-[#005baa]"
+                        className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs font-medium text-slate-700 focus:border-[#005baa] focus:ring-1 focus:ring-[#005baa]"
                         aria-label="Từ ngày"
                     />
 
@@ -359,16 +359,16 @@ export default function ReviewReportsIndex({ reports, filters = {}, reasons = []
                     <div className="flex items-center gap-2">
                         <button
                             type="submit"
-                            className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-[#005baa] px-3 py-2 text-sm font-semibold text-white shadow-xs transition hover:bg-[#004b8d]"
+                            className="inline-flex h-10 flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#005baa] px-3 text-xs font-semibold text-white shadow-xs transition hover:bg-[#004b8d] cursor-pointer"
                         >
-                            <Search className="h-4 w-4" />
+                            <Search className="h-3.5 w-3.5" />
                             <span>Lọc</span>
                         </button>
                         <button
                             type="button"
                             onClick={resetFilters}
                             title="Xóa bộ lọc"
-                            className="rounded-lg border border-slate-200 p-2 text-slate-500 hover:bg-slate-50 hover:text-slate-700"
+                            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 hover:text-slate-700 cursor-pointer"
                         >
                             <RotateCcw className="h-4 w-4" />
                         </button>
@@ -430,22 +430,21 @@ export default function ReviewReportsIndex({ reports, filters = {}, reasons = []
                     ) : (
                         <div className="overflow-x-auto">
                             <table className="w-full text-left text-sm text-slate-600">
-                                <thead className="border-b border-slate-200/80 bg-slate-50/75 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                <thead className="border-b border-slate-200/80 bg-slate-50/90 text-[11px] font-bold uppercase tracking-wider text-slate-500">
                                     <tr>
-                                        <th className="px-4 py-4 w-10 text-center">
+                                        <th className="w-11 py-3.5 pl-4 pr-2 text-center">
                                             <input
                                                 type="checkbox"
-                                                className="rounded border-slate-300 text-amber-600 focus:ring-amber-500 w-4 h-4 cursor-pointer"
+                                                className="h-4 w-4 cursor-pointer rounded border-slate-300 text-amber-600 focus:ring-amber-500"
                                                 checked={items.length > 0 && selectedReports.length === items.length}
                                                 onChange={handleSelectAll}
                                             />
                                         </th>
-                                        <th className="px-6 py-4">Phân loại & Mục tiêu</th>
-                                        <th className="px-6 py-4">Nội dung bị phản ánh</th>
-                                        <th className="px-6 py-4">Lý do vi phạm</th>
-                                        <th className="px-6 py-4">Người báo cáo</th>
-                                        <th className="px-6 py-4">Trạng thái</th>
-                                        <th className="px-6 py-4 text-right">Thao tác</th>
+                                        <th className="min-w-[220px] px-4 py-3.5 whitespace-nowrap">Phân loại & Mục tiêu</th>
+                                        <th className="min-w-[280px] px-4 py-3.5 whitespace-nowrap">Lý do & Nội dung phản ánh</th>
+                                        <th className="px-4 py-3.5 whitespace-nowrap">Người báo cáo</th>
+                                        <th className="px-4 py-3.5 whitespace-nowrap">Trạng thái</th>
+                                        <th className="py-3.5 pl-4 pr-5 text-right whitespace-nowrap">Thao tác</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
@@ -454,35 +453,43 @@ export default function ReviewReportsIndex({ reports, filters = {}, reasons = []
                                         const isLecturer = report.loai_doi_tuong === 'GIANG_VIEN';
                                         const isDocument = report.loai_doi_tuong === 'TAI_LIEU';
                                         const isSelected = isReportSelected(report);
+                                        const fullContent = (report.noi_dung_chinh || '').trim();
+                                        const detailNote = (report.chi_tiet || '').trim();
+                                        const hasDistinctDetail = Boolean(detailNote && detailNote !== fullContent);
+                                        const isLong = fullContent.length > 120;
+                                        const isExpanded = !!expandedReviews[report.unique_id || report.ma_bao_cao];
 
                                         return (
-                                            <tr key={report.unique_id || report.ma_bao_cao} className={`hover:bg-slate-50/50 transition-colors ${isSelected ? 'bg-amber-50/30' : ''}`}>
-                                                <td className="px-4 py-4 text-center align-top">
+                                            <tr
+                                                key={report.unique_id || report.ma_bao_cao}
+                                                className={`transition-colors hover:bg-blue-50/25 ${isSelected ? 'bg-amber-50/40' : ''}`}
+                                            >
+                                                <td className="py-4 pl-4 pr-2 text-center align-top">
                                                     <input
                                                         type="checkbox"
-                                                        className="rounded border-slate-300 text-amber-600 focus:ring-amber-500 w-4 h-4 cursor-pointer"
+                                                        className="mt-1 h-4 w-4 cursor-pointer rounded border-slate-300 text-amber-600 focus:ring-amber-500"
                                                         checked={isSelected}
                                                         onChange={() => handleToggleSelect(report)}
                                                     />
                                                 </td>
+
                                                 {/* Cột 1: Phân loại & Mục tiêu phản ánh */}
-                                                <td className="px-6 py-4 align-top">
-                                                    <div className="space-y-1.5">
-                                                        {/* Distinct Type Badge */}
+                                                <td className="px-4 py-4 align-top">
+                                                    <div className="space-y-2">
                                                         {isCourse && (
-                                                            <span className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-xs font-bold text-indigo-700">
+                                                            <span className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-0.5 text-[11px] font-bold text-indigo-700">
                                                                 <BookOpen className="h-3.5 w-3.5" />
                                                                 <span>Đánh giá Môn học</span>
                                                             </span>
                                                         )}
                                                         {isLecturer && (
-                                                            <span className="inline-flex items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-800">
+                                                            <span className="inline-flex items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-[11px] font-bold text-amber-800">
                                                                 <GraduationCap className="h-3.5 w-3.5" />
                                                                 <span>Đánh giá Giảng viên</span>
                                                             </span>
                                                         )}
                                                         {isDocument && (
-                                                            <span className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700">
+                                                            <span className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-[11px] font-bold text-[#005baa]">
                                                                 <FileText className="h-3.5 w-3.5" />
                                                                 <span>Tài liệu học thuật</span>
                                                             </span>
@@ -491,173 +498,170 @@ export default function ReviewReportsIndex({ reports, filters = {}, reasons = []
                                                         {/* Target Info */}
                                                         {isLecturer ? (
                                                             <div>
-                                                                <div className="font-bold text-slate-900 text-sm flex items-center gap-1">
-                                                                    <User className="h-3.5 w-3.5 text-amber-700 shrink-0" />
+                                                                <div className="flex items-center gap-1.5 text-sm font-bold text-slate-900">
+                                                                    <User className="h-3.5 w-3.5 shrink-0 text-amber-700" />
                                                                     <span>{report.ten_giang_vien || 'Giảng viên phụ trách'}</span>
                                                                 </div>
-                                                                <div className="text-xs text-slate-500 mt-0.5">
-                                                                    Môn: <span className="font-semibold">{report.ma_mon_hoc}</span> - {report.ten_mon_hoc}
+                                                                <div className="mt-0.5 text-xs text-slate-500">
+                                                                    Môn: <span className="font-mono font-semibold text-slate-700">{report.ma_mon_hoc}</span> - {report.ten_mon_hoc}
                                                                 </div>
                                                             </div>
                                                         ) : isDocument ? (
                                                             <div>
-                                                                <div className="font-semibold text-slate-900 text-sm line-clamp-1" title={report.ten_mon_hoc}>
+                                                                <div className="line-clamp-2 text-sm font-bold leading-snug text-slate-900" title={report.ten_mon_hoc}>
                                                                     {report.ten_mon_hoc}
                                                                 </div>
-                                                                <div className="text-xs text-slate-500 mt-0.5">
-                                                                    Mã: <span className="font-mono font-medium">{report.ma_mon_hoc}</span>
+                                                                <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
+                                                                    <span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono font-semibold text-slate-700">
+                                                                        Mã: {report.ma_mon_hoc}
+                                                                    </span>
+                                                                    <span className="font-mono uppercase text-slate-600">
+                                                                        {report.loai_tep || 'TÀI LIỆU'}
+                                                                    </span>
+                                                                    {report.dung_luong && (
+                                                                        <span>{(report.dung_luong / 1024).toFixed(1)} KB</span>
+                                                                    )}
                                                                 </div>
                                                             </div>
                                                         ) : (
                                                             <div>
-                                                                <div className="font-bold text-slate-900 text-sm">
+                                                                <div className="font-mono text-sm font-bold text-slate-900">
                                                                     {report.ma_mon_hoc}
                                                                 </div>
-                                                                <div className="text-xs text-slate-500 line-clamp-1">
+                                                                <div className="line-clamp-2 text-xs text-slate-500">
                                                                     {report.ten_mon_hoc}
                                                                 </div>
                                                             </div>
                                                         )}
 
-                                                        {/* External View Link */}
                                                         {report.url_xem_ngoai && (
                                                             <a
                                                                 href={report.url_xem_ngoai}
                                                                 target="_blank"
                                                                 rel="noreferrer"
-                                                                className="inline-flex items-center gap-1 text-[11px] font-medium text-brand-primary hover:underline pt-0.5"
+                                                                className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#005baa] hover:underline"
                                                             >
                                                                 <span>Xem trực tiếp</span>
-                                                                <ExternalLink size={10} />
+                                                                <ExternalLink size={11} />
                                                             </a>
                                                         )}
                                                     </div>
                                                 </td>
 
-                                                {/* Cột 2: Nội dung bị phản ánh (Kèm xem thêm/thu gọn) */}
-                                                <td className="px-6 py-4 max-w-sm align-top">
-                                                    {(() => {
-                                                        const fullContent = report.noi_dung_chinh || '';
-                                                        const isLong = fullContent.length > 80;
-                                                        const isExpanded = !!expandedReviews[report.unique_id || report.ma_bao_cao];
+                                                {/* Cột 2: Lý do vi phạm & Nội dung phản ánh */}
+                                                <td className="max-w-md px-4 py-4 align-top">
+                                                    <div className="space-y-2">
+                                                        <div className="flex flex-wrap items-center gap-2">
+                                                            <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${reasonStyles[report.ly_do] || 'border-slate-200 bg-slate-50 text-slate-700'}`}>
+                                                                <AlertCircle className="h-3 w-3 shrink-0" />
+                                                                {reasonLabels[report.ly_do] || report.ly_do}
+                                                            </span>
+                                                            {!isDocument && (
+                                                                <span className="text-[11px] text-slate-400">
+                                                                    HK: <strong className="text-slate-600">{report.hoc_ky || '—'}</strong> • Khó: <strong className="text-slate-600">{report.diem_do_kho || 0}/5</strong>
+                                                                </span>
+                                                            )}
+                                                            {!isDocument && report.an_danh && (
+                                                                <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-600">
+                                                                    Ẩn danh
+                                                                </span>
+                                                            )}
+                                                        </div>
 
-                                                        return (
-                                                            <>
-                                                                <div className="text-xs italic text-slate-800 bg-slate-50/80 p-2.5 rounded-xl border border-slate-200/80 leading-relaxed break-words">
-                                                                    "{fullContent ? (
-                                                                        isLong && !isExpanded ? (
-                                                                            <>
-                                                                                <span>{fullContent.slice(0, 80).trim()}...</span>{' '}
-                                                                                <button
-                                                                                    type="button"
-                                                                                    onClick={() => toggleExpand(report.unique_id || report.ma_bao_cao)}
-                                                                                    className="not-italic inline-flex items-center text-[#005baa] hover:text-[#00437d] font-semibold hover:underline cursor-pointer ml-1"
-                                                                                >
-                                                                                    (xem thêm)
-                                                                                </button>
-                                                                            </>
-                                                                        ) : (
-                                                                            <>
-                                                                                <span>{fullContent}</span>
-                                                                                {isLong && (
-                                                                                    <button
-                                                                                        type="button"
-                                                                                        onClick={() => toggleExpand(report.unique_id || report.ma_bao_cao)}
-                                                                                        className="not-italic inline-flex items-center text-slate-500 hover:text-slate-700 font-semibold hover:underline cursor-pointer ml-1.5"
-                                                                                    >
-                                                                                        (thu gọn)
-                                                                                    </button>
-                                                                                )}
-                                                                            </>
-                                                                        )
-                                                                    ) : (
-                                                                        <span className="text-slate-400 not-italic">Không có nội dung mô tả</span>
-                                                                    )}"
-                                                                </div>
-
-                                                                {/* Contextual metadata */}
-                                                                {isDocument ? (
-                                                                    <div className="mt-1.5 flex items-center gap-2 text-[11px] text-slate-400">
-                                                                        <span>Loại: <strong className="text-slate-600 font-mono uppercase">{report.loai_tep || 'TÀI LIỆU'}</strong></span>
-                                                                        {report.dung_luong && (
-                                                                            <>
-                                                                                <span>•</span>
-                                                                                <span>Dung lượng: <strong className="text-slate-600">{(report.dung_luong / 1024).toFixed(1)} KB</strong></span>
-                                                                            </>
-                                                                        )}
-                                                                    </div>
+                                                        <div className="rounded-xl border border-slate-200/80 bg-slate-50/80 p-3 text-xs leading-relaxed text-slate-700 break-words">
+                                                            {fullContent ? (
+                                                                isLong && !isExpanded ? (
+                                                                    <>
+                                                                        <span>"{fullContent.slice(0, 120).trim()}..."</span>{' '}
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => toggleExpand(report.unique_id || report.ma_bao_cao)}
+                                                                            className="ml-1 inline-flex cursor-pointer font-semibold text-[#005baa] hover:underline"
+                                                                        >
+                                                                            Xem thêm
+                                                                        </button>
+                                                                    </>
                                                                 ) : (
-                                                                    <div className="mt-1.5 flex items-center gap-2 text-[11px] text-slate-400">
-                                                                        <span>Học kỳ: <strong className="text-slate-600">{report.hoc_ky || '—'}</strong></span>
-                                                                        <span>•</span>
-                                                                        <span>Độ khó: <strong className="text-slate-600">{report.diem_do_kho || 0}/5</strong></span>
-                                                                        {report.an_danh && (
-                                                                            <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-600 font-medium">Ẩn danh</span>
+                                                                    <>
+                                                                        <span>"{fullContent}"</span>
+                                                                        {isLong && (
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => toggleExpand(report.unique_id || report.ma_bao_cao)}
+                                                                                className="ml-1.5 inline-flex cursor-pointer font-semibold text-slate-500 hover:text-slate-700 hover:underline"
+                                                                            >
+                                                                                Thu gọn
+                                                                            </button>
                                                                         )}
-                                                                    </div>
-                                                                )}
-                                                            </>
-                                                        );
-                                                    })()}
+                                                                    </>
+                                                                )
+                                                            ) : (
+                                                                <span className="italic text-slate-400">Không có nội dung mô tả</span>
+                                                            )}
+                                                        </div>
+
+                                                        {hasDistinctDetail && (
+                                                            <p className="text-xs italic text-slate-500 break-words" title={detailNote}>
+                                                                Ghi chú: {detailNote.length > 90 ? `${detailNote.slice(0, 90)}...` : detailNote}
+                                                            </p>
+                                                        )}
+                                                    </div>
                                                 </td>
 
-                                                {/* Cột 3: Lý do vi phạm & Phản ánh */}
-                                                <td className="px-6 py-4 align-top">
-                                                    <span className={`inline-block rounded-full border px-2.5 py-0.5 text-xs font-semibold ${reasonStyles[report.ly_do] || 'border-slate-200 bg-slate-50 text-slate-700'}`}>
-                                                        {reasonLabels[report.ly_do] || report.ly_do}
-                                                    </span>
-                                                    {report.chi_tiet && (
-                                                        <p className="mt-1.5 text-xs text-slate-500 italic break-words max-w-xs" title={report.chi_tiet}>
-                                                            {report.chi_tiet.length > 70 ? `${report.chi_tiet.slice(0, 70)}...` : report.chi_tiet}
-                                                        </p>
-                                                    )}
-                                                </td>
-
-                                                {/* Cột 4: Người báo cáo */}
-                                                <td className="px-6 py-4 text-xs align-top">
-                                                    <div className="font-medium text-slate-800">
+                                                {/* Cột 3: Người báo cáo */}
+                                                <td className="px-4 py-4 text-xs align-top whitespace-nowrap">
+                                                    <div className="font-semibold text-slate-800">
                                                         {report.nguoi_bao_cao?.ho_ten || 'Thành viên Hub'}
                                                     </div>
                                                     {report.nguoi_bao_cao?.mssv && (
-                                                        <div className="text-[11px] font-mono text-slate-500">
+                                                        <div className="mt-0.5 font-mono text-[11px] text-[#005baa]">
                                                             {report.nguoi_bao_cao.mssv}
                                                         </div>
                                                     )}
-                                                    <div className="mt-1 text-[11px] text-slate-400 flex items-center gap-1">
+                                                    <div className="mt-1.5 flex items-center gap-1 text-[11px] text-slate-400">
                                                         <Clock size={11} />
                                                         <span>{formatDate(report.created_at)}</span>
                                                     </div>
                                                 </td>
 
-                                                {/* Cột 5: Trạng thái & Ghi chú xử lý */}
-                                                <td className="px-6 py-4 text-xs align-top">
-                                                    <span className={`inline-block rounded-full border px-2.5 py-0.5 font-medium ${statusStyles[report.trang_thai] || 'border-slate-200 bg-slate-50 text-slate-600'}`}>
+                                                {/* Cột 4: Trạng thái & Ghi chú xử lý */}
+                                                <td className="px-4 py-4 text-xs align-top">
+                                                    <span className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-1 text-[11px] font-semibold ${statusStyles[report.trang_thai] || 'border-slate-200 bg-slate-50 text-slate-600'}`}>
+                                                        <span
+                                                            className={`h-1.5 w-1.5 rounded-full ${
+                                                                report.trang_thai === 'DA_XU_LY'
+                                                                    ? 'bg-emerald-500'
+                                                                    : report.trang_thai === 'BAC_BO'
+                                                                    ? 'bg-slate-400'
+                                                                    : 'bg-amber-500'
+                                                            }`}
+                                                        />
                                                         {statusLabels[report.trang_thai] || report.trang_thai}
                                                     </span>
                                                     {report.nguoi_xu_ly && (
-                                                        <div className="mt-1 text-[11px] text-slate-400">
+                                                        <div className="mt-1.5 text-[11px] text-slate-400 whitespace-nowrap">
                                                             bởi {report.nguoi_xu_ly?.ho_ten}
                                                         </div>
                                                     )}
                                                     {report.ghi_chu_xu_ly && (
                                                         <div
-                                                            className="mt-1.5 max-w-[220px] rounded-lg border border-slate-200 bg-slate-50 p-2 text-[11px] text-slate-700 break-words"
+                                                            className="mt-1.5 max-w-[200px] rounded-lg border border-slate-200 bg-slate-50 p-2 text-[11px] text-slate-700 break-words"
                                                             title={report.ghi_chu_xu_ly}
                                                         >
-                                                            <div className="font-bold text-[10px] uppercase text-slate-500">Ghi chú xử lý:</div>
-                                                            <div className="italic mt-0.5 line-clamp-2">
+                                                            <div className="text-[10px] font-bold uppercase text-slate-500">Ghi chú xử lý:</div>
+                                                            <div className="mt-0.5 line-clamp-2 italic">
                                                                 "{report.ghi_chu_xu_ly}"
                                                             </div>
                                                         </div>
                                                     )}
                                                 </td>
 
-                                                {/* Cột 6: Thao tác */}
-                                                <td className="px-6 py-4 text-right align-top">
-                                                    <div className="inline-flex items-center gap-2">
+                                                {/* Cột 5: Thao tác */}
+                                                <td className="py-4 pl-4 pr-5 text-right align-top whitespace-nowrap">
+                                                    <div className="inline-flex items-center gap-1.5">
                                                         <Link
                                                             href={report.url_chi_tiet}
-                                                            className="inline-flex items-center gap-1 rounded-lg bg-brand-primary/10 px-2.5 py-1.5 text-xs font-semibold text-brand-primary hover:bg-brand-primary hover:text-white transition-colors"
+                                                            className="inline-flex items-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50/80 px-3 py-1.5 text-xs font-semibold text-[#005baa] transition-all hover:border-[#005baa] hover:bg-[#005baa] hover:text-white shadow-2xs"
                                                         >
                                                             <Eye className="h-3.5 w-3.5" />
                                                             <span>Xem & Xử lý</span>
@@ -669,7 +673,7 @@ export default function ReviewReportsIndex({ reports, filters = {}, reasons = []
                                                                 onClick={() => archiveReport(report)}
                                                                 title="Lưu trữ báo cáo khỏi hàng đợi"
                                                                 aria-label={`Lưu trữ báo cáo #${report.ma_bao_cao}`}
-                                                                className="rounded-lg p-1.5 text-slate-400 transition hover:bg-rose-50 hover:text-rose-600 focus:outline-none focus:ring-2 focus:ring-rose-200"
+                                                                className="rounded-xl p-1.5 text-slate-400 transition hover:bg-rose-50 hover:text-rose-600 focus:outline-none focus:ring-2 focus:ring-rose-200"
                                                             >
                                                                 <Trash2 className="h-4 w-4" />
                                                             </button>
